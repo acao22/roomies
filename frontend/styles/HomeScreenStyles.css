@@ -1,0 +1,23 @@
+.container {
+    flex: 1;
+    justifyContent: 'center';
+    alignItems: 'center';
+}
+
+.pistachioText {
+    color: #CDE764;
+    fontSize: 40px;
+    fontStyle: 'normal';
+    fontWeight: 600;
+    lineHeight: normal;
+    textAlign: 'center';
+}
+
+.nutshellText {
+    textAlign: 'center';
+    color: #000;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
