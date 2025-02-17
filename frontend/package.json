@@ -12,8 +12,10 @@
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
+    "babel-preset-expo": "^12.0.8",
     "expo": "^52.0.27",
     "expo-status-bar": "~1.11.1",
+    "nativewind": "^4.1.23",
     "react": "18.2.0",
     "react-native": "0.73.4",
     "react-native-gesture-handler": "~2.20.2",
@@ -26,7 +28,10 @@
     "redux": "^5.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "tailwindcss": "^4.0.6"
   },
   "private": true
 }
