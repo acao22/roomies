@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const LeaderboardScreen = () => {
+const ProfileScreen = () => {
     return (
         <View className="flex-1 justify-center items-center">
-            <Text className="text-xl font-bold">leadergyattboard</Text>
+            <Text className="text-xl font-bold">profile</Text>
         </View>
     );
 };
 
-export default LeaderboardScreen;
+export default ProfileScreen;
