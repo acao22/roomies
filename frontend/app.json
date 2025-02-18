@@ -1,5 +1,8 @@
 {
   "expo": {
+    "web": {
+      "bundler": "metro"
+    },
     "name": "frontend",
     "slug": "frontend",
     "version": "1.0.0",

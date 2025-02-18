@@ -6,6 +6,8 @@ import HomeScreen from './screens/HomeScreen';
 import TaskScreen from './screens/TaskScreen';
 import LeaderboardScreen from './screens/LeaderboardScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import "./global.css"
+
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
