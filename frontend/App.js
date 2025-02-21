@@ -1,16 +1,24 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
-
-import HomeScreen from './screens/HomeScreen';
-import TaskScreen from './screens/TaskScreen';
-import LeaderboardScreen from './screens/LeaderboardScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import ProfileDrawer from './screens/ProfileDrawer';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
+import HomeScreen from "./screens/HomeScreen";
+import TaskScreen from "./screens/TaskScreen";
+import LeaderboardScreen from "./screens/LeaderboardScreen";
+import SettingsScreen from "./screens/SettingsScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import ProfileDrawer from "./screens/ProfileDrawer";
+import { Platform, UIManager } from "react-native";
 import "./global.css";
+
+// for layout animation
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createNativeStackNavigator();
@@ -37,7 +45,10 @@ function TaskStackScreen() {
 function LeaderboardStackScreen() {
   return (
     <LeaderboardStack.Navigator screenOptions={{ headerShown: false }}>
-      <LeaderboardStack.Screen name="Leaderboard" component={LeaderboardScreen} />
+      <LeaderboardStack.Screen
+        name="Leaderboard"
+        component={LeaderboardScreen}
+      />
       <LeaderboardStack.Screen name="Settings" component={SettingsScreen} />
     </LeaderboardStack.Navigator>
   );
@@ -60,21 +71,21 @@ export default function App() {
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
             // icons
-            if (route.name === 'HomePage') {
-              iconName = focused ? 'home' : 'home-outline';
-            } else if (route.name === 'TaskPage') {
-              iconName = focused ? 'checkmark-done' : 'checkmark-done-outline';
-            } else if (route.name === 'LeaderboardPage') {
-              iconName = focused ? 'trophy' : 'trophy-outline';
-            } else if (route.name === 'ProfilePage') {
-              iconName = focused ? 'person' : 'person-outline';
+            if (route.name === "HomePage") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route.name === "TaskPage") {
+              iconName = focused ? "checkmark-done" : "checkmark-done-outline";
+            } else if (route.name === "LeaderboardPage") {
+              iconName = focused ? "trophy" : "trophy-outline";
+            } else if (route.name === "ProfilePage") {
+              iconName = focused ? "person" : "person-outline";
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#FF8C83',
-          tabBarInactiveTintColor: '#748c94',
-          tabBarShowLabel: false, 
+          tabBarActiveTintColor: "#FF8C83",
+          tabBarInactiveTintColor: "#748c94",
+          tabBarShowLabel: false,
           headerShown: false,
           tabBarStyle: {
             paddingBottom: 10,

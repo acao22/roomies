@@ -1,5 +1,11 @@
 import React from "react";
-import { SafeAreaView, View, Text, ScrollView, TouchableOpacity } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -15,12 +21,15 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-    {/* hamburger menu */}
-    <View className="flex-row justify-start px-4 mt-2">
-      <TouchableOpacity onPress={() => navigation.openDrawer()}>
-        <Ionicons name="menu" size={30} color="gray" />
-      </TouchableOpacity>
-    </View>
+      {/* hamburger menu */}
+      <View className="flex-row justify-start px-4 mt-2">
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Ionicons name="menu" size={24} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Calendar")}
+        ></TouchableOpacity>
+      </View>
 
       {/* pfp + name + rating */}
       <View className="items-center mt-4">
@@ -40,7 +49,9 @@ const ProfileScreen = () => {
         </View>
 
         {/* user name */}
-        <Text className="text-lg font-bold text-[#00B8B6] mt-3">first last</Text>
+        <Text className="text-lg font-bold text-[#00B8B6] mt-3">
+          first last
+        </Text>
         {/* rating + star */}
         <View className="flex-row items-center mt-1">
           <Text className="text-base text-[#BFBFBF] mr-1">201,885</Text>
@@ -60,7 +71,9 @@ const ProfileScreen = () => {
               className="flex-row items-center px-4 py-3 border-b border-gray-200"
             >
               {/* colored circle for each roomie */}
-              <View className={`w-12 h-12 rounded-full mr-3 items-center justify-center ${roomie.bgClass}`}>
+              <View
+                className={`w-12 h-12 rounded-full mr-3 items-center justify-center ${roomie.bgClass}`}
+              >
                 <Ionicons name="person" size={24} color="white" />
               </View>
               <Text className="text-xl text-gray-800">{roomie.name}</Text>
