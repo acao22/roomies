@@ -9,6 +9,7 @@ import LeaderboardScreen from "./screens/LeaderboardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
+import SignUpScreen from "./screens/SignUpScreen";
 import { Platform, UIManager } from "react-native";
 import "./global.css";
 
@@ -25,6 +26,7 @@ const HomeStack = createNativeStackNavigator();
 const TaskStack = createNativeStackNavigator();
 const LeaderboardStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
+const SignUpStack = createNativeStackNavigator();
 
 function HomeStackScreen() {
   return (
@@ -63,6 +65,14 @@ function ProfileStackScreen() {
   );
 }
 
+function SignUpStackScreen() {
+  return (
+    <SignUpStack.Navigator screenOptions={{ headerShown: false }}>
+      <SignUpStack.Screen name="SignUp" component={SignUpScreen} />
+    </SignUpStack.Navigator>
+  );
+}
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -78,6 +88,8 @@ export default function App() {
             } else if (route.name === "LeaderboardPage") {
               iconName = focused ? "trophy" : "trophy-outline";
             } else if (route.name === "ProfilePage") {
+              iconName = focused ? "person" : "person-outline";
+            } else if (route.name === "SignUpPage") {
               iconName = focused ? "person" : "person-outline";
             }
 
@@ -97,6 +109,7 @@ export default function App() {
         <Tab.Screen name="TaskPage" component={TaskStackScreen} />
         <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
         <Tab.Screen name="ProfilePage" component={ProfileStackScreen} />
+        <Tab.Screen name="SignUpPage" component={SignUpStackScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
