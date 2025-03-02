@@ -1,139 +1,103 @@
 import React from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 
-const MEMBERS = [
-  { id: 1, avatar: require("../images/avatar1.png") },
-  { id: 2, avatar: require("../images/avatar2.png") },
-  { id: 3, avatar: require("../images/avatar3.png") },
-  { id: 4, avatar: require("../images/avatar4.png") },
-  { id: 5, avatar: require("../images/avatar1.png") },
-  { id: 6, avatar: require("../images/avatar2.png") },
-  { id: 7, avatar: require("../images/avatar3.png") },
-  { id: 8, avatar: require("../images/avatar4.png") },
+const avatars = [
+  require("../images/avatar1.png"),
+  require("../images/avatar2.png"),
+  require("../images/avatar3.png"),
+  require("../images/avatar4.png"),
 ];
 
-// export default function GroupScreen() {
-//   return (
-//     <SafeAreaView className="flex-1 bg-[#F5A58C]">
-//       {/* Peach background section with group images and text */}
-//       <View className="items-center pt-6">
-//         {/* Wrapper to position center icon + 4 avatars */}
-//         <View className="relative w-44 h-44 items-center justify-center">
-//           {/* 4 avatars */}
-//           <Image
-//             source={require("../images/avatar1.png")}
-//             className="absolute w-10 h-10 rounded-full -top-2 left-2"
-//           />
-//           <Image
-//             source={require("../images/avatar2.png")}
-//             className="absolute w-10 h-10 rounded-full -top-2 right-2"
-//           />
-//           <Image
-//             source={require("../images/avatar3.png")}
-//             className="absolute w-10 h-10 rounded-full -bottom-2 left-2"
-//           />
-//           <Image
-//             source={require("../images/avatar4.png")}
-//             className="absolute w-10 h-10 rounded-full -bottom-2 right-2"
-//           />
+const feedItems = [
+  {
+    id: "1",
+    userName: "Angie",
+    taskName: "trash",
+    timeAgo: "7 min ago",
+    message: "yay! i just took out the trash.",
+    image: require("../images/task1.png"),
+  },
+  {
+    id: "2",
+    userName: "Luna",
+    taskName: "recycling",
+    timeAgo: "34 min ago",
+    message: "skibidi",
+    image: require("../images/task2.png"),
+  },
+  {
+    id: "3",
+    userName: "Katherine",
+    taskName: "poop",
+    timeAgo: "24 years ago",
+    message: "i just pooped",
+    image: require("../images/task1.png"),
+  },
+];
 
-//           {/* Center circle with icon */}
-//           <View className="w-20 h-20 bg-white rounded-full items-center justify-center">
-//             <Image
-//               source={require("../images/avatar1.png")}
-//               className="w-8 h-8"
-//             />
-//           </View>
-//         </View>
-
-//         {/* Group name and edit group text */}
-//         <Text className="mt-4 text-5xl text-[#FEF9E5] font-bold">
-//           group name
-//         </Text>
-//         <Text className="mb-2 text-base text-lg text-[#FEF9E5]">
-//           edit group
-//         </Text>
-//       </View>
-
-//       {/* Cream background area */}
-//       <View className="flex-1 bg-[#FFFCE8] px-4 pt-4">
-//         <Text className="m-4 font-bold text-4xl text-[#788ABF]">my feed</Text>
-//         {/* ... rest of your feed layout ... */}
-//       </View>
-//     </SafeAreaView>
-//   );
-// }
-
-export default function GroupScreen() {
-  // Radius controls how far the avatars appear from the center icon.
-  const RADIUS = 110;
-
+export default function GroupFeedScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-[#F5A58C]">
-      {/* -- top section w/ group info -- */}
-      <View className="items-center pt-6">
-        {/* top container for the center icon + ring of avatars
-         */}
-        <View className="relative w-80 h-80 items-center justify-center">
-          {MEMBERS.map((member, index) => {
-            // Angle for each member in the circle (in radians).
-            const angle = (2 * Math.PI * index) / MEMBERS.length;
+    <View className="flex-1 bg-[#FEF9E5]">
+      <ScrollView>
+        <View className="bg-[#F5A58C] w-full h-48 absolute top-0 z-0" />
 
-            // X/Y offsets to "push" each avatar onto a circle around center.
-            const x = RADIUS * Math.cos(angle);
-            const y = RADIUS * Math.sin(angle);
-
-            return (
-              <View
-                key={member.id}
-                // absolute positioning + transform for ring placement
-                className="absolute"
-                style={{ transform: [{ translateX: x }, { translateY: y }] }}
-              >
-                {/* 
-                  Semi‐transparent circle behind the avatar
-                  (e.g. 60% opacity white).
-                */}
-                <View className="bg-[rgba(255,255,255,0.6)] w-18 h-18 rounded-full items-center justify-center">
-                  <Image
-                    source={member.avatar}
-                    className="w-20 h-20 rounded-full"
-                  />
-                </View>
-              </View>
-            );
-          })}
-
-          {/* Center circle with “group icon” or placeholder */}
-          <View className="w-30 h-30 bg-white rounded-full items-center justify-center">
-            <Image
-              source={require("../images/image-icon.png")}
-              className="p-8 w-30 h-30"
-            />
-          </View>
+        {/* avatars Row , need to fix this spacing later */}
+        <View className="flex-row justify-between px-24 mt-40">
+          {avatars.map((avatar, index) => (
+            <View
+              key={index}
+              className="rounded-full overflow-hidden h-16 w-16 bg-[#FEF9E5] shadow-md"
+            >
+              <Image source={avatar} className="h-16 w-16" resizeMode="cover" />
+            </View>
+          ))}
         </View>
+        {/* group name ection */}
+        <View className="mt-4 items-center">
+          <Text className="text-4xl font-bold text-[#788ABF]">group name</Text>
+          <TouchableOpacity>
+            <Text className="text-sm text-[#9CABD8]">edit group</Text>
+          </TouchableOpacity>
+        </View>
+        {/* feed List */}
+        <View className="mt-6 px-4">
+          {feedItems.map((item) => (
+            <View
+              key={item.id}
+              className="bg-[#9CABD8] rounded-2xl p-4 mb-6 shadow-sm"
+            >
+              {/* user & task info */}
+              <Text className="text-[#FEF9E5] font-bold text-lg">
+                {item.userName} completed “{item.taskName}”!
+              </Text>
 
-        {/* Group name / edit group text */}
-        <Text className="text-5xl text-[#FEF9E5] font-bold">group name</Text>
-        <Text className="mb-2 text-base text-lg text-[#FEF9E5]">
-          edit group
-        </Text>
-      </View>
+              {/* image if input */}
+              <View className="mt-3 rounded-xl overflow-hidden">
+                <Image
+                  source={item.image}
+                  className="w-full h-48"
+                  resizeMode="cover"
+                />
+              </View>
 
-      {/* -- Main feed area -- */}
-      <View className="flex-1 bg-[#FFFCE8] px-4 pt-4">
-        <Text className="m-4 font-bold text-4xl text-[#788ABF]">my feed</Text>
-        {/* ...Your feed content... */}
-      </View>
-    </SafeAreaView>
+              {/* msg & time */}
+              <View className="flex-row items-center space-x-2 mt-3">
+                <Image
+                  source={avatars[0]}
+                  className="h-10 w-10 rounded-full bg-gray-300"
+                />
+                <Text className="mx-2 text-[#FEF9E5] text-lg">
+                  {item.message}
+                </Text>
+              </View>
+
+              <Text className="text-[#FEF9E5] font-bold text-xs mt-1">
+                {item.timeAgo}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
