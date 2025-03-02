@@ -7,9 +7,11 @@ module.exports = {
         colors: {
             'blueText': '#6cd9d5',
             'orangeText': '#ffb95c',
-            'redText': '#ff8c83'
+            'redText': '#ff8c83',
+            'bg': '#FEF9E5',
 
-        }
+
+        },
     },
   },
   plugins: [],
