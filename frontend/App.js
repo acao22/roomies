@@ -12,6 +12,8 @@ import ProfileDrawer from "./screens/ProfileDrawer";
 import SignUpScreen from "./screens/SignUpScreen";
 import { Platform, UIManager } from "react-native";
 import "./global.css";
+import { useFonts } from "expo-font";
+import { View, Text } from "react-native";
 
 // for layout animation
 if (
@@ -74,6 +76,10 @@ function SignUpStackScreen() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"), // Ensure the path is correct
+  });
+
   return (
     <NavigationContainer>
       <Tab.Navigator

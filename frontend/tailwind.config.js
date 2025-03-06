@@ -5,10 +5,24 @@ module.exports = {
   theme: {
     extend: {
         colors: {
-            'blueText': '#6cd9d5',
-            'orangeText': '#ffb95c',
-            'redText': '#ff8c83'
+            'custom-blue': {
+              '100': '#9CABD8',
+              '200': '#788ABF',
+            },
+            'custom-orange': '#ffb95c',
+            'custom-red': '#ff8c83',
+            'custom-yellow': '#FFD49B',
+            'custom-tan': '#FEF9E5',
+            'custom-teal': '#B2E8DD',
+            'custom-gray': '#D9D9D9',
+            'custom-pink': { 
+					  '100': '#F5D2C8', 
+					  '200': '#F5A58C', 
+				    },
 
+        },
+        fontFamily: {
+          'spaceGrotesk': ["Space Grotesk", "sans-serif"],
         }
     },
   },
