@@ -5,8 +5,8 @@ const LoginScreen = () => {
   return (
     <View className="flex-1">
       <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">
-        <Text className="text-5xl font-bold text-custom-pink-200 font-spaceGrotesk">hey, roomie!</Text>
-        <Text className="text-base text-custom-blue-200 font-spaceGrotesk mt-[6px]">sign up to start creating your room</Text>
+        <Text className="text-5xl font-bold text-custom-pink-200 font-spaceGrotesk">log in</Text>
+        <Text className="text-base text-custom-blue-200 font-spaceGrotesk mt-[6px]">welcome back!</Text>
       </View>
 
       <View className="justify-center items-center flex-col pt-[45px]">
