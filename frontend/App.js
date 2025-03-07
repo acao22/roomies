@@ -12,6 +12,8 @@ import LandingScreen from "./screens/LandingScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
 import { Platform, UIManager, TouchableOpacity, View } from "react-native";
 import "./global.css";
+import { useFonts } from "expo-font";
+import { View, Text } from "react-native";
 
 // for layout animation
 if (
@@ -118,6 +120,10 @@ function LandingScreenWrapper({ navigation }) {
   );
 }
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"), // Ensure the path is correct
+  });
+
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{headerShown: false}}>

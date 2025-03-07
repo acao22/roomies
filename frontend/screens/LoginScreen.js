@@ -11,33 +11,17 @@ const SignUpScreen = () => {
 
       <View className="justify-center items-center flex-col pt-[45px]">
       <TextInput
-          placeholder="first name"
-          placeholderTextColor="#788ABF"  // Matching placeholder color
-          className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
-        />
-      </View>
-
-      <View className="justify-center items-center flex-col pt-[16px]">
-      <TextInput
-          placeholder="last name"
-          placeholderTextColor="#788ABF"  // Matching placeholder color
-          className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
-        />
-      </View>
-
-      <View className="justify-center items-center flex-col pt-[16px]">
-      <TextInput
           placeholder="username"
-          placeholderTextColor="#FEF9E5"  // Matching placeholder color
-          className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+          placeholderTextColor="#788ABF"  // Matching placeholder color
+          className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
         />
       </View>
 
       <View className="justify-center items-center flex-col pt-[16px]">
       <TextInput
           placeholder="password"
-          placeholderTextColor="#FEF9E5"  // Matching placeholder color
-          className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+          placeholderTextColor="#788ABF"  // Matching placeholder color
+          className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
         />
       </View>
 
