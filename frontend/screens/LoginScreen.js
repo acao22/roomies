@@ -1,7 +1,19 @@
 import React from "react";
 import { View, Text, TextInput } from "react-native";
 
-const LoginScreen = () => {
+import { loginUser } from "../firebase/authFunctions";
+
+const handleLogin = async () => {
+  try {
+    await loginUser(email, password);
+    Alert.alert("Login successful");
+  } catch (error) {
+    Alert.alert("Error", error.message);
+  }
+};
+
+
+const SignUpScreen = () => {
   return (
     <View className="flex-1">
       <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">
