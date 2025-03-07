@@ -1,12 +1,15 @@
 import React, {useState} from "react";
-import { View, Text, TextInput, ImageBackground } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
+const gridImage = require('../assets/grid.png');
+
+
 import { registerUser } from "../firebase/authFunctions";
 
 const gridImage = require('../assets/grid.png');
 
 const SignUpScreen = () => {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleRegister = async () => {
     try {
@@ -47,6 +50,10 @@ const SignUpScreen = () => {
           placeholder="email"
           placeholderTextColor="#FEF9E5"  // Matching placeholder color
           className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
       </View>
 
@@ -55,17 +62,22 @@ const SignUpScreen = () => {
           placeholder="password"
           placeholderTextColor="#FEF9E5"  // Matching placeholder color
           className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
       </View>
 
       <View className="justify-center items-center flex-col pt-[16px]">
-      <TextInput
-          placeholder="create account"
-          placeholderTextColor="#000000"  // Matching placeholder color
-          className="w-5/6 h-[56px] bg-custom-teal text-black py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
-          style={{ textAlign: "center", textAlignVertical: "center", fontWeight: "bold" }}
-        />
-      </View>
+          <TouchableOpacity
+            onPress={handleRegister}
+            className="w-5/6 h-[56px] bg-custom-teal justify-center items-center rounded-3xl"
+          >
+            <Text className="text-black font-spaceGrotesk text-2xl font-bold">
+              Create Account
+            </Text>
+          </TouchableOpacity>
+        </View>
     </View>
     </ImageBackground>
   );
