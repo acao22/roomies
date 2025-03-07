@@ -1,9 +1,8 @@
 import React, {useState} from "react";
 import { View, Text, TextInput, ImageBackground } from "react-native";
-const gridImage = require('../assets/grid.png');
-
-
 import { registerUser } from "../firebase/authFunctions";
+
+const gridImage = require('../assets/grid.png');
 
 const SignUpScreen = () => {
 //   const [email, setEmail] = useState("");

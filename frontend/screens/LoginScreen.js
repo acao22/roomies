@@ -1,7 +1,10 @@
 import React from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, ImageBackground } from "react-native";
 
 import { loginUser } from "../firebase/authFunctions";
+
+const gridImage = require('../assets/grid.png');
+
 
 const handleLogin = async () => {
   try {
@@ -15,6 +18,8 @@ const handleLogin = async () => {
 
 const LoginScreen = () => {
   return (
+    <ImageBackground source={gridImage} className="flex-1 bg-bg bg-custom-tan">
+    
     <View className="flex-1">
       <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">
         <Text className="text-5xl font-bold text-custom-pink-200 font-spaceGrotesk">log in</Text>
@@ -39,13 +44,14 @@ const LoginScreen = () => {
 
       <View className="justify-center items-center flex-col pt-[16px]">
       <TextInput
-          placeholder="create account"
+          placeholder="login"
           placeholderTextColor="#000000"  // Matching placeholder color
           className="w-5/6 h-[56px] bg-custom-teal text-black py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
           style={{ textAlign: "center", textAlignVertical: "center", fontWeight: "bold" }}
         />
       </View>
     </View>
+    </ImageBackground>
   );
 };
 
