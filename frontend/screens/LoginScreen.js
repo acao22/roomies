@@ -13,7 +13,7 @@ const handleLogin = async () => {
 };
 
 
-const SignUpScreen = () => {
+const LoginScreen = () => {
   return (
     <View className="flex-1">
       <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">
