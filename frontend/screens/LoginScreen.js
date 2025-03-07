@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
 
 import { loginUser } from "../firebase/authFunctions";
 
@@ -23,7 +23,7 @@ const LoginScreen = () => {
 
       <View className="justify-center items-center flex-col pt-[45px]">
       <TextInput
-          placeholder="username"
+          placeholder="email"
           placeholderTextColor="#788ABF"  // Matching placeholder color
           className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
         />
