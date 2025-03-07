@@ -8,7 +8,7 @@ import TaskScreen from "./screens/TaskScreen";
 import LeaderboardScreen from "./screens/LeaderboardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-import LandingScreen from "./screens/LandingScreen"
+import LandingScreen from "./screens/LandingScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
 import { Platform, UIManager, TouchableOpacity, View } from "react-native";
 import "./global.css";
@@ -30,7 +30,10 @@ const LandingStack = createNativeStackNavigator();
 
 function HomeStackScreen({ navigation }) {
   return (
-    <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.replace("Landing")}>
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Landing")}
+    >
       <HomeStack.Navigator screenOptions={{ headerShown: false }}>
         <HomeStack.Screen name="Home" component={HomeScreen} />
       </HomeStack.Navigator>
@@ -70,45 +73,46 @@ function ProfileStackScreen() {
 function MainTabs() {
   return (
     <Tab.Navigator
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        let iconName;
-        // icons
-        if (route.name === "HomePage") {
-          iconName = focused ? "home" : "home-outline";
-        } else if (route.name === "TaskPage") {
-          iconName = focused ? "checkmark-done" : "checkmark-done-outline";
-        } else if (route.name === "LeaderboardPage") {
-          iconName = focused ? "trophy" : "trophy-outline";
-        } else if (route.name === "ProfilePage") {
-          iconName = focused ? "person" : "person-outline";
-        }
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          // icons
+          if (route.name === "HomePage") {
+            iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "TaskPage") {
+            iconName = focused ? "checkmark-done" : "checkmark-done-outline";
+          } else if (route.name === "LeaderboardPage") {
+            iconName = focused ? "trophy" : "trophy-outline";
+          } else if (route.name === "ProfilePage") {
+            iconName = focused ? "person" : "person-outline";
+          }
 
-        return <Ionicons name={iconName} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: "#FF8C83",
-      tabBarInactiveTintColor: "#748c94",
-      tabBarShowLabel: false,
-      headerShown: false,
-      tabBarStyle: {
-        paddingBottom: 10,
-        paddingTop: 10,
-      },
-    })}
-  >
-    <Tab.Screen name="HomePage" component={HomeStackScreen} />
-    <Tab.Screen name="TaskPage" component={TaskStackScreen} />
-    <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
-    <Tab.Screen name="ProfilePage" component={ProfileStackScreen} />
-  </Tab.Navigator>
-
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "#FF8C83",
+        tabBarInactiveTintColor: "#748c94",
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarStyle: {
+          paddingBottom: 10,
+          paddingTop: 10,
+        },
+      })}
+    >
+      <Tab.Screen name="HomePage" component={HomeStackScreen} />
+      <Tab.Screen name="TaskPage" component={TaskStackScreen} />
+      <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
+      <Tab.Screen name="ProfilePage" component={ProfileStackScreen} />
+    </Tab.Navigator>
   );
-
 }
 
 function LandingScreenWrapper({ navigation }) {
   return (
-    <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.replace("Main")}>
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Main")}
+    >
       <LandingScreen />
     </TouchableOpacity>
   );
