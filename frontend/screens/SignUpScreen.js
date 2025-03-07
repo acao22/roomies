@@ -4,32 +4,32 @@ import { View, Text, TextInput, ImageBackground } from "react-native";
 const gridImage = require('../assets/grid.png');
 
 
-import { registerUser, loginUser } from "../firebase_auth/authFunctions";
+// import { registerUser, loginUser } from "../firebase/authFunctions";
 
 const SignUpScreen = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
 
-  const handleRegister = async () => {
-    try {
-      await registerUser(email, password);
-      Alert.alert("Registration successful");
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    }
-  };
+//   const handleRegister = async () => {
+//     try {
+//       await registerUser(email, password);
+//       Alert.alert("Registration successful");
+//     } catch (error) {
+//       Alert.alert("Error", error.message);
+//     }
+//   };
 
-  const handleLogin = async () => {
-    try {
-      await loginUser(email, password);
-      Alert.alert("Login successful");
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    }
-  };
+//   const handleLogin = async () => {
+//     try {
+//       await loginUser(email, password);
+//       Alert.alert("Login successful");
+//     } catch (error) {
+//       Alert.alert("Error", error.message);
+//     }
+//   };
 
   return (
-    <ImageBackground source={gridImage} className="flex-1 bg-bg">
+    <ImageBackground source={gridImage} className="flex-1 bg-bg bg-custom-tan">
     
     <View className="flex-1">
       <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">

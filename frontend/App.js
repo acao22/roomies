@@ -123,7 +123,25 @@ function LandingScreenWrapper({ navigation }) {
 
 function SignupScreenWrapper({ navigation }) {
   return (
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Landing")}
+    >
       <SignUpScreen />
+    </TouchableOpacity>
+      
+  );
+}
+
+function LoginScreenWrapper({ navigation }) {
+  return (
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Landing")}
+    >
+      <SignUpScreen />
+    </TouchableOpacity>
+      
   );
 }
 
@@ -138,6 +156,7 @@ export default function App() {
       <RootStack.Navigator screenOptions={{headerShown: false}}>
           <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
           <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
+          <RootStack.Screen name="Login" component={SignupScreenWrapper} />
           <RootStack.Screen name="Main" component={MainTabs} />
         </RootStack.Navigator>
     </NavigationContainer>
