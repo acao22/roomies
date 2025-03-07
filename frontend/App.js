@@ -14,6 +14,7 @@ import { Platform, UIManager, TouchableOpacity, View } from "react-native";
 import "./global.css";
 import { useFonts } from "expo-font";
 import SignUpScreen from "./screens/SignUpScreen";
+import LoginScreen from "./screens/LoginScreen";
 
 
 // for layout animation
@@ -139,7 +140,7 @@ function LoginScreenWrapper({ navigation }) {
       style={{ flex: 1 }}
       onPress={() => navigation.replace("Landing")}
     >
-      <SignUpScreen />
+      <LoginScreen />
     </TouchableOpacity>
       
   );
@@ -156,7 +157,7 @@ export default function App() {
       <RootStack.Navigator screenOptions={{headerShown: false}}>
           <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
           <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
-          <RootStack.Screen name="Login" component={SignupScreenWrapper} />
+          <RootStack.Screen name="Login" component={LoginScreenWrapper} />
           <RootStack.Screen name="Main" component={MainTabs} />
         </RootStack.Navigator>
     </NavigationContainer>
