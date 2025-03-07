@@ -12,6 +12,9 @@ import LandingScreen from "./screens/LandingScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
 import { Platform, UIManager, TouchableOpacity, View } from "react-native";
 import "./global.css";
+import { useFonts } from "expo-font";
+import SignUpScreen from "./screens/SignUpScreen";
+
 
 // for layout animation
 if (
@@ -117,13 +120,45 @@ function LandingScreenWrapper({ navigation }) {
     </TouchableOpacity>
   );
 }
+
+function SignupScreenWrapper({ navigation }) {
+  return (
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Landing")}
+    >
+      <SignUpScreen />
+    </TouchableOpacity>
+      
+  );
+}
+
+function LoginScreenWrapper({ navigation }) {
+  return (
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Landing")}
+    >
+      <SignUpScreen />
+    </TouchableOpacity>
+      
+  );
+}
+
+
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"), // Ensure the path is correct
+  });
+
   return (
     <NavigationContainer>
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
-        <RootStack.Screen name="Main" component={MainTabs} />
-      </RootStack.Navigator>
+      <RootStack.Navigator screenOptions={{headerShown: false}}>
+          <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
+          <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
+          <RootStack.Screen name="Login" component={SignupScreenWrapper} />
+          <RootStack.Screen name="Main" component={MainTabs} />
+        </RootStack.Navigator>
     </NavigationContainer>
   );
 }

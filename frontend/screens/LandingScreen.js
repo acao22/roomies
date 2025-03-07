@@ -13,7 +13,7 @@ const LandingScreen = ({ }) => {
   const navigation = useNavigation();
 
   return (
-    <ImageBackground source={gridImage} className="flex-1 bg-bg">
+    <ImageBackground source={gridImage} className="bg-custom-tan flex-1 bg-bg">
       <View className="absolute right-20 top-52">
         <Image source={face1} className="w-52 h-52 -ml-12 -mb-8" />
         <Image source={face2} className="w-52 h-52 -mt-20 -mb-20 -ml-36" />
@@ -21,17 +21,17 @@ const LandingScreen = ({ }) => {
       </View>
       <View className="flex-1 justify-end pb-40 items-center bg-transparent">
         <View className="flex-row">
-          <Text className="font-bold text-blueText text-7xl">roomies</Text>
+          <Text className="font-bold text-custom-blue-200 text-7xl font-spaceGrotesk">roomies</Text>
         </View>
         <TouchableOpacity
-          className="bg-red-500 items-center p-4 rounded-full mt-10 w-40"
-          onPress={() => navigation.replace('Main')}
+          className="bg-custom-red items-center p-3 rounded-full mt-10 w-44"
+          onPress={() => navigation.replace('Signup')}
           >
-            <Text className=" text-white font-bold">Sign up</Text>
+            <Text className=" text-white font-bold font-spaceGrotesk text-2xl">sign up</Text>
 
           </TouchableOpacity>
-        <Text className="text-2xl mt-4">already have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.replace('Main')}>
+        <Text className="text-2xl mt-4 font-spaceGrotesk">already have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.replace('Login')}>
           <Text className="underline text-2xl">log in</Text>
         </TouchableOpacity>
         <StatusBar style="auto" />
