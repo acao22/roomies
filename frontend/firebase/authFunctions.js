@@ -1,28 +1,43 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebaseConfig";
+import { auth } from "./firebaseConfig"; // Import initialized Firebase Auth
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
-// create new user
-export const registerUser = async (email, password) => {
+// 🔹 Sign Up (Create User & Send to Backend)
+export const registerUser = async (email, password, displayName) => {
   try {
+    // Create user in Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("User registered:", user);
-    return user;
+
+    // Send user info to backend
+    const response = await fetch("http://localhost:5000/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, displayName }),
+    });
+
+    return await response.json();
   } catch (error) {
-    console.error("Registration Error:", error.message);
+    console.error("Signup error:", error);
     throw error;
   }
 };
 
-// login
+// 🔹 Login (Get Firebase ID Token & Send to Backend)
 export const loginUser = async (email, password) => {
   try {
+    // Sign in user in frontend (password verification must happen on frontend)
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("User logged in:", user);
-    return user;
+    const idToken = await userCredential.user.getIdToken();
+
+    // Send ID Token to backend for verification
+    const response = await fetch("http://localhost:5000/verify-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    return await response.json();
   } catch (error) {
-    console.error("Login Error:", error.message);
+    console.error("Login error:", error);
     throw error;
   }
 };
