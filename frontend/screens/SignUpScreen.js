@@ -1,8 +1,14 @@
 import React from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, ImageBackground } from "react-native";
+
+const gridImage = require('../assets/grid.png');
+
+
 
 const SignUpScreen = () => {
   return (
+    <ImageBackground source={gridImage} className="flex-1 bg-bg">
+    
     <View className="flex-1">
       <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">
         <Text className="text-5xl font-bold text-custom-pink-200 font-spaceGrotesk">hey, roomie!</Text>
@@ -27,7 +33,7 @@ const SignUpScreen = () => {
 
       <View className="justify-center items-center flex-col pt-[16px]">
       <TextInput
-          placeholder="username"
+          placeholder="email"
           placeholderTextColor="#FEF9E5"  // Matching placeholder color
           className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
         />
@@ -50,6 +56,7 @@ const SignUpScreen = () => {
         />
       </View>
     </View>
+    </ImageBackground>
   );
 };
 

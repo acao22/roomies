@@ -25,7 +25,7 @@ const LandingScreen = ({ }) => {
         </View>
         <TouchableOpacity
           className="bg-red-500 items-center p-4 rounded-full mt-10 w-40"
-          onPress={() => navigation.replace('Main')}
+          onPress={() => navigation.replace('Signup')}
           >
             <Text className=" text-white font-bold">Sign up</Text>
 
