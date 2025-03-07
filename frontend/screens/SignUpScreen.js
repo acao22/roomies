@@ -1,20 +1,25 @@
 import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
-const gridImage = require('../assets/grid.png');
-
 
 import { registerUser } from "../firebase/authFunctions";
+import { useNavigation } from "@react-navigation/native";
 
 const gridImage = require('../assets/grid.png');
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigation = useNavigation();
 
   const handleRegister = async () => {
     try {
       await registerUser(email, password);
-      Alert.alert("Registration successful");
+      Alert.alert("Registration successful", "", [
+        {
+          text: "OK",
+          onPress: () => navigation.replace('Main'),
+        }
+      ]);
     } catch (error) {
       Alert.alert("Error", error.message);
     }

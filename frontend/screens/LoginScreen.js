@@ -2,20 +2,32 @@ import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
 
 import { loginUser } from "../firebase/authFunctions";
+import { useNavigation } from "@react-navigation/native";
 
 
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigation = useNavigation();
 
-const gridImage = require('../assets/grid.png');
+  const gridImage = require('../assets/grid.png');
 
 
   const handleLogin = async () => {
     try {
-      await loginUser(email, password);
-      Alert.alert("Login successful");
+      const userCredential = await loginUser(email, password);
+      if (userCredential) {
+        Alert.alert("Login successful", "", [
+          {
+            text: "OK",
+            onPress: () => navigation.replace('Main'),
+          }
+        ]);
+
+      } else {
+        Alert.alert("Error", "Unexpected error ocurred.");
+      }
     } catch (error) {
       Alert.alert("Error", error.message);
     }

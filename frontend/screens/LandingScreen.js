@@ -4,7 +4,7 @@ import face1 from '../assets/face1.png';
 import face2 from '../assets/face2.png';
 import face3 from '../assets/face3.png';
 import { useNavigation } from "@react-navigation/native";
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 
 
@@ -13,20 +13,10 @@ const gridImage = require('../assets/grid.png');
 const LandingScreen = ({ }) => {
   // hooks must be called within component
   const navigation = useNavigation();
-  const [refreshKey, setRefreshKey] = useState(0);
-
-    // Listen for navigation focus
-    useEffect(() => {
-      const unsubscribe = navigation.addListener("focus", () => {
-        setRefreshKey((prevKey) => prevKey + 1); // Change state to force re-render
-      });
-  
-      return unsubscribe; // Cleanup on unmount
-    }, [navigation]);
 
 
   return (
-    <ImageBackground key={refreshKey} source={gridImage} className="bg-custom-tan flex-1 bg-bg">
+    <ImageBackground source={gridImage} className="bg-custom-tan flex-1 bg-bg">
       <View className="absolute right-20 top-52">
         <Image source={face1} className="w-52 h-52 -ml-12 -mb-8" />
         <Image source={face2} className="w-52 h-52 -mt-20 -mb-20 -ml-36" />
