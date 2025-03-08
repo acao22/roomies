@@ -16,7 +16,6 @@ import { useFonts } from "expo-font";
 import SignUpScreen from "./screens/SignUpScreen";
 import LoginScreen from "./screens/LoginScreen";
 
-
 // for layout animation
 if (
   Platform.OS === "android" &&
@@ -32,16 +31,11 @@ const TaskStack = createNativeStackNavigator();
 const LeaderboardStack = createNativeStackNavigator();
 const LandingStack = createNativeStackNavigator();
 
-function HomeStackScreen({ navigation }) {
+function HomeStackScreen() {
   return (
-    <TouchableOpacity
-      style={{ flex: 1 }}
-      onPress={() => navigation.replace("Landing")}
-    >
-      <HomeStack.Navigator screenOptions={{ headerShown: false }}>
-        <HomeStack.Screen name="Home" component={HomeScreen} />
-      </HomeStack.Navigator>
-    </TouchableOpacity>
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="Home" component={HomeScreen} />
+    </HomeStack.Navigator>
   );
 }
 
@@ -111,15 +105,8 @@ function MainTabs() {
   );
 }
 
-function LandingScreenWrapper({ navigation }) {
-  return (
-    <TouchableOpacity
-      style={{ flex: 1 }}
-      onPress={() => navigation.replace("Main")}
-    >
-      <LandingScreen />
-    </TouchableOpacity>
-  );
+function LandingScreenWrapper() {
+  return <LandingScreen />;
 }
 
 function SignupScreenWrapper({ navigation }) {
@@ -130,7 +117,6 @@ function SignupScreenWrapper({ navigation }) {
     >
       <SignUpScreen />
     </TouchableOpacity>
-      
   );
 }
 
@@ -142,24 +128,22 @@ function LoginScreenWrapper({ navigation }) {
     >
       <LoginScreen />
     </TouchableOpacity>
-      
   );
 }
 
-
 export default function App() {
   const [fontsLoaded] = useFonts({
-    SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"), // Ensure the path is correct
+    SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"),
   });
 
   return (
     <NavigationContainer>
-      <RootStack.Navigator screenOptions={{headerShown: false}}>
-          <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
-          <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
-          <RootStack.Screen name="Login" component={LoginScreenWrapper} />
-          <RootStack.Screen name="Main" component={MainTabs} />
-        </RootStack.Navigator>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
+        <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
+        <RootStack.Screen name="Login" component={LoginScreenWrapper} />
+        <RootStack.Screen name="Main" component={MainTabs} />
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const avatars = [
   require("../images/avatar1.png"),
@@ -36,12 +37,22 @@ const feedItems = [
 ];
 
 export default function GroupFeedScreen() {
+  const navigation = useNavigation();
+
   return (
     <View className="flex-1 bg-[#FEF9E5]">
       <ScrollView>
         <View className="bg-[#F5A58C] w-full h-48 absolute top-0 z-0" />
 
-        {/* avatars Row , need to fix this spacing later */}
+        {/* temp button for landing page for testing */}
+        <TouchableOpacity
+          className="bg-[#9CABD8]  p-3 rounded-full mx-4 mt-14 absolute z-10"
+          onPress={() => navigation.replace("Landing")}
+        >
+          <Text className="text-white font-bold text-lg">Landing Page</Text>
+        </TouchableOpacity>
+
+        {/* avatars row, need to fix this spacing later */}
         <View className="flex-row justify-between px-24 mt-40">
           {avatars.map((avatar, index) => (
             <View
@@ -52,14 +63,14 @@ export default function GroupFeedScreen() {
             </View>
           ))}
         </View>
-        {/* group name ection */}
+        {/* group name section */}
         <View className="mt-4 items-center">
           <Text className="text-4xl font-bold text-[#788ABF]">group name</Text>
           <TouchableOpacity>
             <Text className="text-sm text-[#9CABD8]">edit group</Text>
           </TouchableOpacity>
         </View>
-        {/* feed List */}
+        {/* feed list */}
         <View className="mt-6 px-4">
           {feedItems.map((item) => (
             <View
