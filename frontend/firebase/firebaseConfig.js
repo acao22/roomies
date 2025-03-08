@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 //require('dotenv').config();
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 const {
   firebaseApiKey,
