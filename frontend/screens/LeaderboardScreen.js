@@ -8,7 +8,6 @@ import {
   Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 
 const LeaderBoardScreen = () => {
   const navigation = useNavigation();
@@ -25,9 +24,9 @@ const LeaderBoardScreen = () => {
   const [first, second, third] = sortedRoomies;
 
   return (
-    <View className="mt-6 px-4 bg-bg">
+    <View className="mt-6 px-4 bg-custom-tan flex-1">
       {/* Header */}
-      <View className="items-center mt-4 pb-3">
+      <View className="items-center mt-4 pb-3 bg-custom-tan">
         <Text className="mt-10 text-custom-red text-5xl font-bold font-spaceGrotesk">leaderboard</Text>
       </View>
       {/* Podium */}

@@ -16,9 +16,11 @@ module.exports = {
             'custom-teal': '#B2E8DD',
             'custom-gray': '#D9D9D9',
             'custom-pink': { 
-					  '100': '#F5D2C8', 
-					  '200': '#F5A58C', 
-				    },
+              '100': '#F5D2C8', 
+              '200': '#F5A58C', 
+				      },
+            'custom-black': '#1E1E1E',
+
 
         },
         fontFamily: {
