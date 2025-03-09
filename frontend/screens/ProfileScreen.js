@@ -29,14 +29,14 @@ const ProfileScreen = () => {
     <SafeAreaView className="flex-1 bg-custom-tan">
       <ScrollView>
 
-      <View className="bg-custom-yellow w-full h-52 absolute top-0 z-0">
+      <View className="bg-custom-yellow w-full h-56 absolute top-0 z-0">
         <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, [username]</Text>
         <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">Day 365 of rooming</Text>
       </View>
 
       
       {/* pfp + name + rating */}
-      <View className="items-center mt-36">
+      <View className="items-center mt-40">
         {/* avatar circle */}
         <View className="relative">
           <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
@@ -65,10 +65,10 @@ const ProfileScreen = () => {
       {/* roomies list */}
       <View className="mt-6 px-6">
         <View className="flex-row flex-1 justify-between items-center">
-          <Text className="p-4 text-2xl font-semibold text-custom-black mb-2">
+          <Text className="p-4 text-2xl font-bold text-custom-black mb-2 font-spaceGrotesk">
             My homes
           </Text>
-          <Text className="right-0 text-custom-blue-100">
+          <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
             Edit
           </Text>
         </View>
@@ -124,14 +124,7 @@ const ProfileScreen = () => {
           </View>
 
         </View>
-        <View className="items-end mt-2">
-          <TouchableOpacity
-            onPress={() => console.log("leave pressed")}
-            className="px-4 py-2 bg-gray-200 rounded-full"
-          >
-            <Text className="text-sm text-gray-700">leave</Text>
-          </TouchableOpacity>
-        </View>
+
       </View>
       </ScrollView>
     </SafeAreaView>
