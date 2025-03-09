@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import face1 from '../assets/face1.png';
 import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
+import history from '../assets/history.png';
 
 
 
@@ -26,13 +27,16 @@ const ProfileScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
+      <ScrollView>
+
       <View className="bg-custom-yellow w-full h-52 absolute top-0 z-0">
         <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, [username]</Text>
+        <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">Day 365 of rooming</Text>
       </View>
 
       
       {/* pfp + name + rating */}
-      <View className="items-center mt-20">
+      <View className="items-center mt-36">
         {/* avatar circle */}
         <View className="relative">
           <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
@@ -49,7 +53,7 @@ const ProfileScreen = () => {
         </View>
 
         {/* user name */}
-        <Text className="text-lg font-bold text-[#00B8B6] mt-3">
+        <Text className="text-lg font-bold text-custom-black mt-3">
           first last
         </Text>
         {/* rating + star */}
@@ -59,11 +63,16 @@ const ProfileScreen = () => {
       </View>
 
       {/* roomies list */}
-      <View className="mt-6 px-4">
-        <Text className="p-4 text-2xl font-semibold text-custom-black mb-2">
-          My homes
-        </Text>
-        <View className="bg-custom-blue-100 rounded-xl p-8 w-full items-center justify-center">
+      <View className="mt-6 px-6">
+        <View className="flex-row flex-1 justify-between items-center">
+          <Text className="p-4 text-2xl font-semibold text-custom-black mb-2">
+            My homes
+          </Text>
+          <Text className="right-0 text-custom-blue-100">
+            Edit
+          </Text>
+        </View>
+        <View className="bg-custom-blue-100 rounded-xl p-6 w-full items-center justify-center">
           <Image source={home} className="w-50 h-50" />
           <Text className="font-bold font-spaceGrotesk text-custom-black text-xl mt-3">Group name</Text>
         </View>
@@ -89,20 +98,31 @@ const ProfileScreen = () => {
         /*}
 
         {/* leave btn */}
-        <Text className="p-4 text-2xl font-semibold text-custom-black mb-2">
+        <Text className="p-4 text-2xl font-bold text-custom-black mb-2 mt-10 font-spaceGrotesk">
           Settings
         </Text>
-        <View className="bg-custom-red rounded-xl p-8 w-full items-center justify-center">
-          <Text className="text-white font-bold font-spaceGrotesk">Notifications</Text>
-        </View>
-        <View className="bg-custom-red rounded-xl p-8 w-full items-center justify-center">
-          <Text className="text-white font-bold font-spaceGrotesk">Password</Text>
-        </View>
-        <View className="bg-custom-red rounded-xl p-8 w-full items-center justify-center">
-          <Text className="text-white font-bold font-spaceGrotesk">Display</Text>
-        </View>
-        <View className="bg-custom-red rounded-xl p-8 w-full items-center justify-center">
-          <Text className="text-white font-bold font-spaceGrotesk">Archived</Text>
+        <View className="mb-6">
+          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+            <Text className="text-white font-bold font-spaceGrotesk text-2xl">Notifications</Text>
+            <Ionicons name="notifications" size={32} color="white" />
+
+          </View>
+          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+            <Text className="text-white font-bold font-spaceGrotesk text-2xl">Password</Text>
+            <Ionicons name="pencil" size={32} color="white" />
+
+          </View>
+          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+            <Text className="text-white font-bold font-spaceGrotesk text-2xl">Display</Text>
+            <Ionicons name="moon" size={32} color="white" />
+
+          </View>
+          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+            <Text className="text-white font-bold font-spaceGrotesk text-2xl">Archived</Text>
+            <Image source={history} className="w-10 h-10" style={{tintColor: 'white'}} />
+
+          </View>
+
         </View>
         <View className="items-end mt-2">
           <TouchableOpacity
@@ -113,6 +133,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
