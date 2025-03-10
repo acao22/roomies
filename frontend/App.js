@@ -72,29 +72,62 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ color, size }) => {
           let iconName;
           // icons
           if (route.name === "HomePage") {
-            iconName = focused ? "home" : "home-outline";
+            iconName = "home";
           } else if (route.name === "TaskPage") {
-            iconName = focused ? "checkmark-done" : "checkmark-done-outline";
+            iconName = "checkmark-done";
           } else if (route.name === "LeaderboardPage") {
-            iconName = focused ? "trophy" : "trophy-outline";
+            iconName = "trophy";
           } else if (route.name === "ProfilePage") {
-            iconName = focused ? "person" : "person-outline";
+            iconName = "person";
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Ionicons name={iconName} size={size+4} color={"#ffffff"} />;
         },
-        tabBarActiveTintColor: "#FF8C83",
-        tabBarInactiveTintColor: "#748c94",
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: {
-          paddingBottom: 10,
-          paddingTop: 10,
+          backgroundColor: "#9CABD8",
+          position: "absolute",
+          height: 51,
+          paddingBottom: 5,
         },
+        tabBarItemStyle: {
+            flex: 1, // Ensures equal space for all tabs
+            alignItems: "center",
+            justifyContent: "center",
+            width: 65,
+        },
+        tabBarButton: (props) => {
+          const isSelected = props.accessibilityState?.selected;
+          return (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                width: 65, // Keep width the same for all tabs
+              }}
+            >
+              <TouchableOpacity
+                {...props}
+                style={{
+                  alignItems: "center",
+                  justifyContent: "top",
+                  width: 65, // Ensure active and inactive states have the same width
+                  height: isSelected ? 95 : 51, // Change height only for pop effect
+                  backgroundColor: isSelected ? "#788ABF" : "transparent",
+                  borderRadius: 14,
+                  top: isSelected ? -10 : 0, // Moves up when active
+                  paddingTop: 8,
+                }}
+              />
+            </View>
+          );
+        },
+        
       })}
     >
       <Tab.Screen name="HomePage" component={HomeStackScreen} />
