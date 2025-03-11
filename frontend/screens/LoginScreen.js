@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Alert } from "react-native";
 
-import { loginUser } from "../firebase/authFunctions";
+import { loginUser } from "../api/users.api.js";
 import { useNavigation } from "@react-navigation/native";
 
 
