@@ -15,6 +15,7 @@ import "./global.css";
 import { useFonts } from "expo-font";
 import SignUpScreen from "./screens/SignUpScreen";
 import LoginScreen from "./screens/LoginScreen";
+import AvatarCreation from "./screens/AvatarCreation";
 
 // for layout animation
 if (
@@ -109,6 +110,10 @@ function LandingScreenWrapper() {
   return <LandingScreen />;
 }
 
+function AvatarCreationWrapper () {
+    return <AvatarCreation />
+}
+
 function SignupScreenWrapper({ navigation }) {
   return (
     <TouchableOpacity
@@ -143,6 +148,7 @@ export default function App() {
         <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
         <RootStack.Screen name="Login" component={LoginScreenWrapper} />
         <RootStack.Screen name="Main" component={MainTabs} />
+        <RootStack.Screen name="AvatarCreation" component={AvatarCreationWrapper} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

@@ -41,7 +41,10 @@ const ProfileScreen = () => {
 
           {/* pencil edit icon w/ absolute overlate */}
           <TouchableOpacity
-            onPress={() => console.log("edit profile picture")}
+            onPress={() => {
+              console.log("edit profile picture / go to AvatarCreation");
+              navigation.navigate("AvatarCreation")
+            }}
             className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#6CD8D5] items-center justify-center"
           >
             <Ionicons name="pencil" size={16} color="#FFFFFF" />
