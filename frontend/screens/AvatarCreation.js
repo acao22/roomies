@@ -4,7 +4,6 @@ import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
 const AvatarCreation = () => {
   const [isToggled, setIsToggled] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isHairChosen, setIsHairChosen] = useState(false);
   const [selectedHair, setSelectedHair] = useState(null);
   const imagesPerPage = 6; 
 
@@ -25,10 +24,29 @@ const AvatarCreation = () => {
     { id: "14", name: "male #5", image: require("../../frontend/assets/dark_hair/hair-m5-dark.png") },
   ];
 
+  const light_hair = [
+    { id: "1", name: "female #1", image: require("../../frontend/assets/light_hair/hair-f1-light.png") },
+    { id: "2", name: "female #2", image: require("../../frontend/assets/light_hair/hair-f2-light.png") },
+    { id: "3", name: "female #3", image: require("../../frontend/assets/light_hair/hair-f3-light.png") },
+    { id: "4", name: "female #4", image: require("../../frontend/assets/light_hair/hair-f4-light.png") },
+    { id: "5", name: "female #5", image: require("../../frontend/assets/light_hair/hair-f5-light.png") },
+    { id: "6", name: "female #6", image: require("../../frontend/assets/light_hair/hair-f6-light.png") },
+    { id: "7", name: "female #7", image: require("../../frontend/assets/light_hair/hair-f7-light.png") },
+    { id: "8", name: "female #8", image: require("../../frontend/assets/light_hair/hair-f8-light.png") },
+    { id: "9", name: "female #9", image: require("../../frontend/assets/light_hair/hair-f9-light.png") },
+    { id: "10", name: "male #1", image: require("../../frontend/assets/light_hair/hair-m1-light.png") },
+    { id: "11", name: "male #2", image: require("../../frontend/assets/light_hair/hair-m2-light.png") },
+    { id: "12", name: "male #3", image: require("../../frontend/assets/light_hair/hair-m3-light.png") },
+    { id: "13", name: "male #4", image: require("../../frontend/assets/light_hair/hair-m4-light.png") },
+    { id: "14", name: "male #5", image: require("../../frontend/assets/light_hair/hair-m5-light.png") },
+  ];
+
   // Calculate which images to display
   const startIndex = currentPage * imagesPerPage;
   const endIndex = startIndex + imagesPerPage;
-  const displayedImages = dark_hair.slice(startIndex, endIndex);
+  const displayedImages = isToggled
+  ? light_hair.slice(startIndex, endIndex)
+  : dark_hair.slice(startIndex, endIndex);
 
   // Pagination functions
   const nextPage = () => {
