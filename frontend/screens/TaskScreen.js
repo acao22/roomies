@@ -1,124 +1,208 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Animated,
+  Easing,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import CalendarScreen from "./CalendarScreen";
+import {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+
+// helper function for formatting due dates prettily
+const formatDueDate = (dateStr) => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const dueDate = new Date(dateStr);
+  const options = { weekday: "long", month: "short", day: "numeric" };
+
+  if (
+    dueDate.getFullYear() === tomorrow.getFullYear() &&
+    dueDate.getMonth() === tomorrow.getMonth() &&
+    dueDate.getDate() === tomorrow.getDate()
+  ) {
+    return "Due tomorrow";
+  }
+
+  return `Due ${dueDate.toLocaleDateString("en-US", options)}`;
+};
 
 const initialTasks = [
   {
     id: "1",
-    title: "Take out trash",
-    description: "take out the trash from the kitchen",
+    title: "Vacuum",
+    assignedTo: ["Luna"],
     status: "open",
-    assignedTo: "angie",
-    dueDate: "2025-02-20",
-    pointValue: 10,
-    recurring: "weekly",
-    groupId: "group123",
+    dueDate: "2025-03-14",
   },
   {
     id: "2",
-    title: "Wash dishes",
-    description: "clean the dinner dishes!",
+    title: "Dishes",
+    assignedTo: ["Andrew", "Luna"],
     status: "open",
-    assignedTo: "luna",
-    dueDate: "2025-02-25",
-    pointValue: 5,
-    recurring: "daily",
-    groupId: "group123",
+    dueDate: "2025-03-12",
   },
   {
     id: "3",
-    title: "Vacuum living room",
-    description: "skibidi",
+    title: "Clean",
+    assignedTo: ["Everyone"],
     status: "open",
-    assignedTo: "kat",
-    dueDate: "2025-02-19",
-    pointValue: 15,
-    recurring: "weekly",
-    groupId: "group123",
+    dueDate: "2025-03-12",
+  },
+  {
+    id: "4",
+    title: "Hello",
+    assignedTo: ["Andrew"],
+    status: "completed",
+    dueDate: "2025-03-10",
+  },
+  {
+    id: "5",
+    title: "Bye",
+    assignedTo: ["Andrew"],
+    status: "completed",
+    dueDate: "2025-03-09",
+  },
+  {
+    id: "6",
+    title: "Yeah",
+    assignedTo: ["Andrew"],
+    status: "completed",
+    dueDate: "2025-03-08",
   },
 ];
 
 export default function TaskScreen() {
   const [tasks, setTasks] = useState(initialTasks);
-
-  const isTaskPastDue = (dueDateStr) => {
-    if (!dueDateStr) return false;
-    const dueDate = new Date(dueDateStr);
-    const now = new Date();
-    return dueDate < now;
-  };
+  const [activeTab, setActiveTab] = useState("tasks");
 
   const toggleTaskCompletion = (taskId) => {
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          status: task.status === "completed" ? "open" : "completed",
-        };
-      }
-      return task;
-    });
-
-    updatedTasks.sort((a, b) => {
-      if (a.status === "completed" && b.status !== "completed") return 1;
-      if (b.status === "completed" && a.status !== "completed") return -1;
-      return 0;
-    });
-
-    setTasks(updatedTasks);
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              status: task.status === "completed" ? "open" : "completed",
+            }
+          : task
+      )
+    );
   };
 
-  const renderTaskItem = ({ item }) => {
-    const pastDue = isTaskPastDue(item.dueDate) && item.status !== "completed";
-    const completed = item.status === "completed";
+  const renderTaskItem = ({ item, index }) => {
+    const isCompleted = item.status === "completed";
+    const backgroundColor = isCompleted
+      ? "bg-custom-pink-200"
+      : index % 2 === 0
+      ? "bg-custom-yellow"
+      : "bg-custom-blue-100";
+    const textColor = isCompleted
+      ? "text-custom-tan line-through"
+      : "text-white";
 
     return (
       <View
-        className={`flex-row items-center ${
-          completed ? "bg-[#C8F2F1]" : "bg-[#f2f2f2]"
-        } rounded-xl mb-3 p-3`}
+        className={`flex-row items-center ${backgroundColor} rounded-xl p-4 mb-3`}
       >
-        <TouchableOpacity
-          className="mr-2.5"
-          onPress={() => toggleTaskCompletion(item.id)}
-        >
+        <TouchableOpacity onPress={() => toggleTaskCompletion(item.id)}>
           <Ionicons
-            name={completed ? "checkmark-circle" : "ellipse-outline"}
-            size={24}
-            color={completed ? "#00B8B6" : "#999"}
+            name={isCompleted ? "checkmark-circle" : "square-outline"}
+            size={32}
+            color={"#FEF9E5"}
+            className="mr-3"
           />
         </TouchableOpacity>
         <View className="flex-1">
-          <Text
-            className={`text-base font-semibold ${
-              completed ? "line-through text-gray-400" : "text-gray-800"
-            }`}
-          >
+          <Text className={`text-lg font-semibold ${textColor}`}>
             {item.title}
           </Text>
-          <Text className="text-gray-600">{item.description}</Text>
-          <Text className="mt-1 text-gray-500">
-            Assigned to: {item.assignedTo} • {item.pointValue} points
-          </Text>
-          {pastDue ? (
-            <Text className="mt-1 text-[#FF8C83] font-bold">past Due</Text>
-          ) : (
-            <Text className="mt-1 text-gray-600">Due: {item.dueDate}</Text>
-          )}
+          <Text className="text-custom-tan">{formatDueDate(item.dueDate)}</Text>
+          <Text className="text-custom-tan">{item.assignedTo.join(" & ")}</Text>
         </View>
       </View>
     );
   };
 
   return (
-    <View className="flex-1 bg-white pt-12 px-4">
-      <Text className="text-2xl font-bold mb-4 text-gray-800">Tasks</Text>
-      <FlatList
-        data={tasks}
-        renderItem={renderTaskItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+    <View className="flex-1 bg-custom-tan">
+      {/* TABS */}
+      <View className="flex-row mt-16 ml-5">
+        {/* tasks tab */}
+        <TouchableOpacity
+          onPress={() => setActiveTab("tasks")}
+          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-pink-200"
+        >
+          <Text className="text-2xl font-bold mb-2 text-white">tasks</Text>
+        </TouchableOpacity>
+
+        {/* calendar tab */}
+        <TouchableOpacity
+          onPress={() => setActiveTab("calendar")}
+          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-yellow"
+        >
+          <Text className="text-2xl font-bold mb-2 text-white">calendar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* CORal border */}
+      <Animated.View className="flex-1 items-center -mt-4 z-10">
+        <View
+          className={`w-[92%] flex-1 border-[20px] ${
+            activeTab === "tasks"
+              ? "border-custom-pink-200"
+              : "border-custom-yellow"
+          } rounded-t-3xl bg-custom-tan`}
+        >
+          <View className="flex-1 p-4">
+            {activeTab === "tasks" ? (
+              <FlatList
+                data={[
+                  "upcoming",
+                  ...tasks.filter((t) => t.status === "open"),
+                  "completed",
+                  ...tasks.filter((t) => t.status === "completed"),
+                ]}
+                renderItem={({ item, index }) =>
+                  item === "upcoming" ? (
+                    <View className="flex-row justify-between items-center my-4 mx-1">
+                      <Text className="text-2xl font-bold text-custom-blue-200">
+                        upcoming
+                      </Text>
+                      <TouchableOpacity>
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={24}
+                          color="#5E6AA6"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ) : item === "completed" ? (
+                    <Text className="text-2xl font-bold text-custom-blue-200 my-4 mx-1">
+                      completed
+                    </Text>
+                  ) : (
+                    renderTaskItem({ item, index })
+                  )
+                }
+                keyExtractor={(item, index) =>
+                  typeof item === "string" ? item : item.id
+                }
+                contentContainerStyle={{ paddingBottom: 15 }}
+              />
+            ) : (
+              <CalendarScreen />
+            )}
+          </View>
+        </View>
+      </Animated.View>
     </View>
   );
 }

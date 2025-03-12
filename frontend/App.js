@@ -16,6 +16,8 @@ import { useFonts } from "expo-font";
 import SignUpScreen from "./screens/SignUpScreen";
 import LoginScreen from "./screens/LoginScreen";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // for verifying user, user session management
 import { verifyUserSession } from "./api/users.api.js";
