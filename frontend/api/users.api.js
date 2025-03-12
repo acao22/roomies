@@ -37,7 +37,10 @@ export const registerUser = async (email, password, displayName = "roomie") => {
   
       console.log("Signup response:", response.data);
 
-      // store Firebase ID token for session management
+      // store firebase id token for session management
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // get firebase id token
       const idToken = await userCredential.user.getIdToken();
       await AsyncStorage.setItem("idToken", idToken);
 
@@ -50,13 +53,12 @@ export const registerUser = async (email, password, displayName = "roomie") => {
 
 export const loginUser = async (email, password) => {
     try {
-      // ✅ Correctly call `signInWithEmailAndPassword`
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
   
-      // ✅ Get Firebase ID token
+      // get firebase id token
       const idToken = await userCredential.user.getIdToken();
 
-      // ✅ Store Firebase ID token for session management
+      // store firebase id token for session management
       await AsyncStorage.setItem("idToken", idToken);
   
       return { uid: userCredential.user.uid, idToken };

@@ -6,20 +6,24 @@ import { useNavigation } from "@react-navigation/native";
 
 const gridImage = require('../assets/grid.png');
 
-const SignUpScreen = () => {
+const SignUpScreen = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
   const handleRegister = async () => {
     try {
-      await registerUser(email, password);
-      Alert.alert("Registration successful", "", [
-        {
-          text: "OK",
-          onPress: () => navigation.replace('Main'),
-        }
-      ]);
+      const userCredential = await registerUser(email, password);
+      if (userCredential) {
+        setUser(userCredential);
+        Alert.alert("Registration successful", "", [
+          {
+            text: "OK",
+          }
+        ]);
+      } else {
+        Alert.alert("Error", "Unexpected error occurred.");
+      }
     } catch (error) {
       Alert.alert("Error", error.message);
     }

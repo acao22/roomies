@@ -232,7 +232,9 @@ export default function App() {
         ) : (
           <>
             <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
-            <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
+            <RootStack.Screen name="Signup">
+              {() => <SignUpScreen setUser={setUser} />}
+            </RootStack.Screen>
             <RootStack.Screen name="Login">
               {() => <LoginScreen setUser={setUser} />}
             </RootStack.Screen>
