@@ -3,26 +3,26 @@ import admin from "firebase-admin";
 
 // verifying the user's session
 export const verify = async (req, res) => {
-    const { customToken } = req.body;
-  
-    if (!customToken) {
-      return res.status(401).json({ error: "No token provided" });
+    const { idToken } = req.body; // id token, not custom token
+
+    if (!idToken) {
+        return res.status(401).json({ error: "No token provided" });
     }
-  
+
     try {
-      // verify Firebase custom token
-      const decodedToken = await auth.verifyIdToken(customToken);
-  
-      res.status(200).json({
-        uid: decodedToken.uid,
-        email: decodedToken.email,
-        message: "Token is valid",
-      });
+        // verify firebase token
+        const decodedToken = await auth.verifyIdToken(idToken);
+
+        res.status(200).json({
+            uid: decodedToken.uid,
+            email: decodedToken.email,
+            message: "Token is valid",
+        });
     } catch (error) {
-      console.error("Token verification failed:", error);
-      res.status(401).json({ error: "Invalid or expired token" });
+        console.error("Token verification failed:", error);
+        res.status(401).json({ error: "Invalid or expired token" });
     }
-  };
+};
 
 // USER SIGNUP (both firebase and our own db)
 export const registerUser = async (req, res) => {

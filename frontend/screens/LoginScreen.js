@@ -6,7 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 
 
 
-const LoginScreen = () => {
+const LoginScreen = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
@@ -18,15 +18,14 @@ const LoginScreen = () => {
     try {
       const userCredential = await loginUser(email, password);
       if (userCredential) {
+        setUser(userCredential);
         Alert.alert("Login successful", "", [
           {
             text: "OK",
-            onPress: () => navigation.replace('Main'),
           }
         ]);
-
       } else {
-        Alert.alert("Error", "Unexpected error ocurred.");
+        Alert.alert("Error", "Unexpected error occurred.");
       }
     } catch (error) {
       Alert.alert("Error", error.message);

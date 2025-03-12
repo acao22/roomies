@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth, initializeAuth, getReactNativePersistence, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,6 +14,7 @@ import {
   FIREBASE_MEASUREMENT_ID 
 } from "@env";
 
+// ✅ Ensure Firebase is initialized only once
 const firebaseConfig = {
   apiKey: FIREBASE_API_KEY,
   authDomain: FIREBASE_AUTH_DOMAIN,
@@ -25,13 +26,17 @@ const firebaseConfig = {
   measurementId: FIREBASE_MEASUREMENT_ID,
 };
 
+// ✅ Initialize Firebase App if not already initialized
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-export const auth = initializeAuth(app, {
+// Initialize Firebase Authentication with AsyncStorage persistence
+const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
 
-// Initialize Firebase
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export default app;
+// ✅ Initialize Firestore & Storage
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+export { app, auth, db, storage };

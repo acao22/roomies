@@ -45,12 +45,12 @@ export default function GroupFeedScreen() {
         <View className="bg-[#F5A58C] w-full h-48 absolute top-0 z-0" />
 
         {/* temp button for landing page for testing */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="bg-[#9CABD8]  p-3 rounded-full mx-4 mt-14 absolute z-10"
           onPress={() => navigation.replace("Landing")}
         >
           <Text className="text-white font-bold text-lg">Landing Page</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* avatars row, need to fix this spacing later */}
         <View className="flex-row justify-between px-24 mt-40">
