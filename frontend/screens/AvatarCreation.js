@@ -188,7 +188,7 @@ const AvatarCreation = () => {
                 onPress={() => isFaceSection ? setSelectedFace(item) : setSelectedHair(item)}
               >
                 <View
-                  className={`items-center justify-center ${selectedHair === item || selectedFace === item ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
+                  className={`items-center justify-center ${selectedHair && selectedHair.id === item.id || selectedFace && selectedFace.id === item.id ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
                 >
                   <Image source={item.image} style={{ width: 130, height: 130 }} />
                 </View>
@@ -202,7 +202,7 @@ const AvatarCreation = () => {
                 onPress={() => isFaceSection ? setSelectedFace(item) : setSelectedHair(item)}
               >
                 <View
-                  className={`items-center justify-center ${selectedHair === item || selectedFace === item ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
+                  className={`items-center justify-center ${selectedHair && selectedHair.id === item.id || selectedFace && selectedFace.id === item.id ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
                 >
                   <Image source={item.image} style={{ width: 130, height: 130 }} />
                 </View>
