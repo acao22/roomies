@@ -85,7 +85,7 @@ const formatDueDate = (dateStr) => {
     return (
       <Text className="text-red-700 flex-row items-center">
         <Ionicons name="alert-circle-sharp" size={14} className="mr-1" />
-        {` past due - ${dueDate.toLocaleDateString("en-US", options)}`}
+        {` past due: ${dueDate.toLocaleDateString("en-US", options)}`}
       </Text>
     );
   }

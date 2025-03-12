@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/native-stack";
+
 import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "./screens/HomeScreen";
 import TaskScreen from "./screens/TaskScreen";
@@ -10,14 +14,20 @@ import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import LandingScreen from "./screens/LandingScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
-import { Platform, UIManager, TouchableOpacity, View, ActivityIndicator} from "react-native";
+import {
+  Platform,
+  UIManager,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import "./global.css";
 import { useFonts } from "expo-font";
 import SignUpScreen from "./screens/SignUpScreen";
 import LoginScreen from "./screens/LoginScreen";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import 'react-native-gesture-handler';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // for verifying user, user session management
 import { verifyUserSession } from "./api/users.api.js";
@@ -93,7 +103,7 @@ function MainTabs({ setUser }) {
             iconName = "person";
           }
 
-          return <Ionicons name={iconName} size={size+4} color={"#ffffff"} />;
+          return <Ionicons name={iconName} size={size + 4} color={"#ffffff"} />;
         },
         tabBarShowLabel: false,
         headerShown: false,
@@ -104,10 +114,10 @@ function MainTabs({ setUser }) {
           paddingBottom: 5,
         },
         tabBarItemStyle: {
-            flex: 1, // Ensures equal space for all tabs
-            alignItems: "center",
-            justifyContent: "center",
-            width: 65,
+          flex: 1, // Ensures equal space for all tabs
+          alignItems: "center",
+          justifyContent: "center",
+          width: 65,
         },
         tabBarButton: (props) => {
           const isSelected = props.accessibilityState?.selected;
@@ -135,7 +145,6 @@ function MainTabs({ setUser }) {
             </View>
           );
         },
-        
       })}
     >
       <Tab.Screen name="HomePage" component={HomeStackScreen} />
@@ -188,7 +197,7 @@ export default function App() {
       try {
         const session = await verifyUserSession();
         console.log("User session:", session);
-  
+
         if (session) {
           setUser(session);
         } else {
@@ -201,7 +210,7 @@ export default function App() {
       }
       setLoading(false);
     };
-  
+
     checkSession();
   }, []);
 
@@ -233,7 +242,13 @@ export default function App() {
           </RootStack.Screen>
         ) : (
           <>
-            <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
+            <RootStack.Screen
+              name="Landing"
+              component={LandingScreenWrapper}
+              options={{
+                animation: "slide_from_left",
+              }}
+            />
             <RootStack.Screen name="Signup">
               {() => <SignUpScreen setUser={setUser} />}
             </RootStack.Screen>
