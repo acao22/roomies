@@ -89,13 +89,33 @@ const AvatarCreation = () => {
     <View className="flex-1 bg-[#788ABF]">
       <View className="flex-1 items-center justify-center pt-8">
         <Text className="m-10 text-white text-4xl font-bold font-spaceGrotesk">my avatar</Text>
+        
         {/* Circle with avatar head */}
-        <View className="w-72 h-72 mb-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden">
+        <View className="w-72 h-72 mb-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
+          {/* Base head image */}
           <Image
             source={require("../../frontend/assets/head/base-head.png")}
             className="h-96 w-96"
             resizeMode="contain"
           />
+          
+          {/* Superimposed face image */}
+          {selectedFace && (
+            <Image 
+              source={selectedFace.image}
+              className="h-96 w-96 absolute"
+              resizeMode="contain"
+            />
+          )}
+
+          {/* Superimposed hair image */}
+          {selectedHair && (
+            <Image
+              source={selectedHair.image}
+              className="h-96 w-96 absolute"
+              resizeMode="contain"
+            />
+          )}
         </View>
 
         {/* toggle and done button row */}
@@ -140,8 +160,11 @@ const AvatarCreation = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/*bottom part */}
       <View className="w-full h-[45%] bg-[#F5A58C] flex justify-center">
         <View className="absolute top-0 w-full bg-[#f6b59d] p-5 flex-row justify-between items-center">
+          {/* < button */}
           <TouchableOpacity onPress={prevPage} disabled={currentPage === 0}>
             <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${currentPage === 0 ? "opacity-50" : ""}`}>
               {"<"}
@@ -150,6 +173,7 @@ const AvatarCreation = () => {
           <Text className="text-[#FEF9E5] text-4xl font-bold font-spaceGrotesk">
             {isFaceSection ? "face" : "hair"}
           </Text>
+          {/* > button */}
           <TouchableOpacity onPress={nextPage} disabled={currentPage >= totalPages - 1}>
             <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${currentPage >= totalPages - 1 ? "opacity-50" : ""}`}>
               {">"}
@@ -161,10 +185,10 @@ const AvatarCreation = () => {
             {displayedImages.slice(0, 3).map((item) => (
               <Pressable
                 key={item.id}
-                onPress={() => isFaceSection ? setSelectedFace(item.id) : setSelectedHair(item.id)}
+                onPress={() => isFaceSection ? setSelectedFace(item) : setSelectedHair(item)}
               >
                 <View
-                  className={`items-center justify-center ${selectedHair === item.id || selectedFace === item.id ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
+                  className={`items-center justify-center ${selectedHair === item || selectedFace === item ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
                 >
                   <Image source={item.image} style={{ width: 130, height: 130 }} />
                 </View>
@@ -175,10 +199,10 @@ const AvatarCreation = () => {
             {displayedImages.slice(3, 6).map((item) => (
               <Pressable
                 key={item.id}
-                onPress={() => isFaceSection ? setSelectedFace(item.id) : setSelectedHair(item.id)}
+                onPress={() => isFaceSection ? setSelectedFace(item) : setSelectedHair(item)}
               >
                 <View
-                  className={`items-center justify-center ${selectedHair === item.id || selectedFace === item.id ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
+                  className={`items-center justify-center ${selectedHair === item || selectedFace === item ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
                 >
                   <Image source={item.image} style={{ width: 130, height: 130 }} />
                 </View>
