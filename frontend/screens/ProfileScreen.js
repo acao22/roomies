@@ -14,7 +14,7 @@ const ProfileScreen = () => {
 
   // hardcoded data for now
   const roomies = [
-    { id: "1", name: "roomie #1", bgClass: "bg-[#FF8C83]" },
+    { id: "1", name: "roomie #1", Image: "bg-[#FF8C83]" },
     { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
     { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
   ];
