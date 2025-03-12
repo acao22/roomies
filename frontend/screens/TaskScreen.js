@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CalendarScreen from "./CalendarScreen";
+import AddTaskScreen from "./AddTaskScreen";
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -222,9 +223,15 @@ export default function TaskScreen() {
         {/* tasks tab */}
         <TouchableOpacity
           onPress={() => setActiveTab("tasks")}
-          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-pink-200"
+          className={` ${
+            activeTab === "tasks"
+              ? "bg-custom-pink-200"
+              : activeTab === "addTask"
+              ? "bg-custom-blue-200"
+              : "bg-custom-pink-200"
+          } px-5 py-2 rounded-t-[20px] z-10`}
         >
-          <Text className="text-2xl font-bold mb-2 text-white font-spaceGrotesk ">
+          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk ">
             tasks
           </Text>
         </TouchableOpacity>
@@ -234,7 +241,7 @@ export default function TaskScreen() {
           onPress={() => setActiveTab("calendar")}
           className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-yellow"
         >
-          <Text className="text-2xl font-bold mb-2 text-white font-spaceGrotesk ">
+          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk ">
             calendar
           </Text>
         </TouchableOpacity>
@@ -246,7 +253,9 @@ export default function TaskScreen() {
           className={`w-[92%] flex-1 border-[20px] ${
             activeTab === "tasks"
               ? "border-custom-pink-200"
-              : "border-custom-yellow"
+              : activeTab === "calendar"
+              ? "border-custom-yellow"
+              : "border-custom-blue-200"
           } rounded-t-3xl bg-custom-tan`}
         >
           <View className="flex-1 p-4">
@@ -261,15 +270,15 @@ export default function TaskScreen() {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item, index }) =>
                   item === "upcoming" ? (
-                    <View className="flex-row justify-between items-center my-4 mx-1 shadow-md">
+                    <View className="flex-row justify-between items-center my-4 mx-1">
                       <Text className="text-3xl font-bold font-spaceGrotesk text-custom-blue-200">
                         upcoming
                       </Text>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={() => setActiveTab("addTask")}>
                         <Ionicons
                           name="add-circle-outline"
-                          size={24}
-                          color="#5E6AA6"
+                          size={30}
+                          color="#788ABF"
                         />
                       </TouchableOpacity>
                     </View>
@@ -286,8 +295,10 @@ export default function TaskScreen() {
                 }
                 contentContainerStyle={{ paddingBottom: 15 }}
               />
-            ) : (
+            ) : activeTab === "calendar" ? (
               <CalendarScreen />
+            ) : (
+              <AddTaskScreen />
             )}
           </View>
         </View>

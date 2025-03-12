@@ -7,7 +7,7 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import Ionicons from  "@expo/vector-icons/Ionicons";
 import { registerUser } from "../api/users.api.js";
 import { useNavigation } from "@react-navigation/native";
 
