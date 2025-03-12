@@ -64,7 +64,15 @@ const AvatarCreation = () => {
         <Text className="m-10 text-white text-4xl font-bold font-spaceGrotesk">my avatar</Text>
 
         {/* Avatar Circle */}
-        <View className="w-72 h-72 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden"></View>
+        <View className="w-72 h-72 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden">
+          <Image 
+          source={require("../../frontend/assets/head/base-head.png")} 
+          className="h-96 w-96"
+          resizeMode="contain"
+          >
+
+          </Image>
+        </View>
 
         <View className="pt-6 w-full flex flex-row justify-between px-8">
           {/* Toggle Button */}
