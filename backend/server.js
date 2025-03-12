@@ -1,48 +1,29 @@
 import express from "express";
 import cors from "cors";
-import { auth } from "./config/firebaseAdmin.js";
+import routes from "./routes/index.js";
+import { admin, db } from "./config/firebaseAdmin.js";
 
 const app = express();
-app.use(cors());
+
+// middleware
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// User Registration (Signup)
-app.post("/signup", async (req, res) => {
-  const { email, password, displayName } = req.body;
+// all api routes start with /api
+app.use("/api", routes); // Prefix all API routes with `/api`
+
+// test firestore connection route
+app.get("/test-db", async (req, res) => {
   try {
-    const user = await auth.createUser({
-      email,
-      password,
-      displayName,
-    });
-    res.status(201).json({ uid: user.uid, message: "User created successfully!" });
+    const testDoc = await db.collection("testCollection").doc("testDoc").get();
+    res.json(testDoc.exists ? testDoc.data() : { message: "No data found." });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Error accessing Firestore", details: error.message });
   }
 });
 
-// User Login (Get Firebase ID Token)
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    // Firebase Admin SDK **CANNOT** verify passwords, so you should use Firebase Authentication SDK in the frontend.
-    res.status(400).json({ error: "Use frontend to sign in and send ID token to backend." });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Verify ID Token (Called by Frontend After Login)
-app.post("/verify-token", async (req, res) => {
-  const { idToken } = req.body;
-  try {
-    const decodedToken = await auth.verifyIdToken(idToken);
-    res.status(200).json({ uid: decodedToken.uid });
-  } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
-  }
-});
-
-// Start the server
+// start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+export { db, app };

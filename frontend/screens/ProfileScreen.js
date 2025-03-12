@@ -5,11 +5,14 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Alert
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
+import { logoutUser } from "../api/users.api";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
 
   // hardcoded data for now
@@ -18,6 +21,19 @@ const ProfileScreen = () => {
     { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
     { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser(setUser);
+      Alert.alert("Logged Out", "You have been successfully logged out.");
+
+      const token = await AsyncStorage.getItem("idToken");
+      console.log("Token after logout:", token);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Alert.alert("Error", "Failed to log out. Try again.");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -84,7 +100,7 @@ const ProfileScreen = () => {
         {/* leave btn */}
         <View className="items-end mt-2">
           <TouchableOpacity
-            onPress={() => console.log("leave pressed")}
+            onPress={handleLogout}
             className="px-4 py-2 bg-gray-200 rounded-full"
           >
             <Text className="text-sm text-gray-700">leave</Text>

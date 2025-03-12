@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -10,11 +10,15 @@ import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import LandingScreen from "./screens/LandingScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
-import { Platform, UIManager, TouchableOpacity, View } from "react-native";
+import { Platform, UIManager, TouchableOpacity, View, ActivityIndicator} from "react-native";
 import "./global.css";
 import { useFonts } from "expo-font";
 import SignUpScreen from "./screens/SignUpScreen";
 import LoginScreen from "./screens/LoginScreen";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// for verifying user, user session management
+import { verifyUserSession } from "./api/users.api.js";
 
 // for layout animation
 if (
@@ -59,16 +63,18 @@ function LeaderboardStackScreen() {
   );
 }
 
-function ProfileStackScreen() {
+function ProfileStackScreen({ setUser }) {
   const ProfileStack = createNativeStackNavigator();
   return (
     <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-      <ProfileStack.Screen name="ProfileDrawer" component={ProfileDrawer} />
+      <ProfileStack.Screen name="ProfileDrawer">
+        {() => <ProfileScreen setUser={setUser} />}
+      </ProfileStack.Screen>
     </ProfileStack.Navigator>
   );
 }
 
-function MainTabs() {
+function MainTabs({ setUser }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -133,7 +139,9 @@ function MainTabs() {
       <Tab.Screen name="HomePage" component={HomeStackScreen} />
       <Tab.Screen name="TaskPage" component={TaskStackScreen} />
       <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
-      <Tab.Screen name="ProfilePage" component={ProfileStackScreen} />
+      <Tab.Screen name="ProfilePage">
+        {() => <ProfileStackScreen setUser={setUser} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
@@ -159,23 +167,79 @@ function LoginScreenWrapper({ navigation }) {
       style={{ flex: 1 }}
       onPress={() => navigation.replace("Landing")}
     >
-      <LoginScreen />
+      <LoginScreen setUser={setUser} />
     </TouchableOpacity>
   );
 }
 
 export default function App() {
+  // for user sessions
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [fontsLoaded] = useFonts({
     SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"),
   });
 
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const session = await verifyUserSession();
+        console.log("User session:", session);
+  
+        if (session) {
+          setUser(session);
+        } else {
+          await AsyncStorage.removeItem("idToken"); // Clear expired token
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+        setUser(null);
+      }
+      setLoading(false);
+    };
+  
+    checkSession();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#788ABF" />
+      </View>
+    );
+  }
+
+  // return (
+  //   <NavigationContainer>
+  //     <RootStack.Navigator screenOptions={{ headerShown: false }}>
+  //       <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
+  //       <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
+  //       <RootStack.Screen name="Login" component={LoginScreenWrapper} />
+  //       <RootStack.Screen name="Main" component={MainTabs} />
+  //     </RootStack.Navigator>
+  //   </NavigationContainer>
+  // );
+
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
-        <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
-        <RootStack.Screen name="Login" component={LoginScreenWrapper} />
-        <RootStack.Screen name="Main" component={MainTabs} />
+        {user ? (
+          <RootStack.Screen name="Main">
+            {() => <MainTabs setUser={setUser} />}
+          </RootStack.Screen>
+        ) : (
+          <>
+            <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
+            <RootStack.Screen name="Signup">
+              {() => <SignUpScreen setUser={setUser} />}
+            </RootStack.Screen>
+            <RootStack.Screen name="Login">
+              {() => <LoginScreen setUser={setUser} />}
+            </RootStack.Screen>
+          </>
+        )}
       </RootStack.Navigator>
     </NavigationContainer>
   );
