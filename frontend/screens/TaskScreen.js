@@ -162,7 +162,7 @@ export default function TaskScreen() {
     return (
       <Animatable.View
         animation={isCompleted ? "lightSpeedIn" : "slideInUp"}
-        duration={isCompleted ? 500 : 350}
+        duration={isCompleted ? 500 : 300}
         delay={index * 100} // stagger animation a little for each item
         // easing={"cubic"}
         className={`flex-row items-center ${backgroundColor} rounded-xl p-4 mb-3 shadow-sm`}
@@ -227,7 +227,7 @@ export default function TaskScreen() {
             activeTab === "tasks"
               ? "bg-custom-pink-200"
               : activeTab === "addTask"
-              ? "bg-custom-blue-200"
+              ? "bg-custom-blue-100"
               : "bg-custom-pink-200"
           } px-5 py-2 rounded-t-[20px] z-10`}
         >
@@ -255,7 +255,7 @@ export default function TaskScreen() {
               ? "border-custom-pink-200"
               : activeTab === "calendar"
               ? "border-custom-yellow"
-              : "border-custom-blue-200"
+              : "border-custom-blue-100"
           } rounded-t-3xl bg-custom-tan`}
         >
           <View className="flex-1 p-4">
@@ -298,7 +298,7 @@ export default function TaskScreen() {
             ) : activeTab === "calendar" ? (
               <CalendarScreen />
             ) : (
-              <AddTaskScreen />
+              <AddTaskScreen setActiveTab={setActiveTab} />
             )}
           </View>
         </View>
