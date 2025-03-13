@@ -114,6 +114,10 @@ function AvatarCreationWrapper () {
     return <AvatarCreation />
 }
 
+function ProfileScreenWrapper () {
+  return <ProfileScreen />
+}
+
 function SignupScreenWrapper({ navigation }) {
   return (
     <TouchableOpacity
@@ -149,6 +153,7 @@ export default function App() {
         <RootStack.Screen name="Login" component={LoginScreenWrapper} />
         <RootStack.Screen name="Main" component={MainTabs} />
         <RootStack.Screen name="AvatarCreation" component={AvatarCreationWrapper} />
+        <RootStack.Screen name="ProfileScreen" component={ProfileScreenWrapper} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { Profiler, useState } from "react";
 import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const AvatarCreation = () => {
   const [isToggled, setIsToggled] = useState(false);
@@ -7,6 +8,7 @@ const AvatarCreation = () => {
   const [selectedHair, setSelectedHair] = useState(null);
   const [selectedFace, setSelectedFace] = useState(null);
   const imagesPerPage = 6;
+  const navigation = useNavigation();
 
   const dark_hair = [
     { id: "1", name: "female #1", image: require("../../frontend/assets/dark_hair/hair-f1-dark.png") },
@@ -153,7 +155,10 @@ const AvatarCreation = () => {
 
           {/* Done Button */}
           <TouchableOpacity
-            onPress={() => console.log("save and go back")}
+            onPress={() => {
+              console.log("save and go back");
+              navigation.navigate("ProfileScreen")
+            }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
           >
             <Text className="text-white text-2xl font-bold font-spaceGrotesk">done</Text>
