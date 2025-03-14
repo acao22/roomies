@@ -164,7 +164,11 @@ const AvatarCreation = () => {
 
           {/* Done Button */}
           <TouchableOpacity
-          onPress={saveAvatar}
+          onPress={() => {
+            navigation.navigate("ProfileScreen");
+            saveAvatar;
+            console.log("go back to profile screen and save avatar");
+          }}
           className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
         >
           <Text className="text-white text-2xl font-bold font-spaceGrotesk">done</Text>
