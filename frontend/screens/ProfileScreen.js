@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Alert
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import face1 from '../assets/face1.png';
@@ -14,8 +15,10 @@ import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
 
 
+import { logoutUser } from "../api/users.api";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
 
   // hardcoded data for now
@@ -24,6 +27,19 @@ const ProfileScreen = () => {
     { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
     { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser(setUser);
+      Alert.alert("Logged Out", "You have been successfully logged out.");
+
+      const token = await AsyncStorage.getItem("idToken");
+      console.log("Token after logout:", token);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Alert.alert("Error", "Failed to log out. Try again.");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">

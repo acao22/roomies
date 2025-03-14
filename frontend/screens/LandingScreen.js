@@ -57,14 +57,14 @@ const LandingScreen = ({}) => {
         </TouchableOpacity>
 
         {/* temp go to app button for testing */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="bg-custom-blue-200 items-center p-3 rounded-full mt-10 w-70"
           onPress={() => navigation.replace("Main")}
         >
           <Text className="text-white font-bold font-spaceGrotesk text-2xl text-center">
             go directly to app
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <StatusBar style="auto" />
       </View>
