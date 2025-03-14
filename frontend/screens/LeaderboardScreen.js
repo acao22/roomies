@@ -8,7 +8,6 @@ import {
   Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 
 const LeaderBoardScreen = () => {
   const navigation = useNavigation();
@@ -25,9 +24,9 @@ const LeaderBoardScreen = () => {
   const [first, second, third] = sortedRoomies;
 
   return (
-    <View className="mt-6 px-4 bg-bg">
+    <ScrollView className="mt-6 px-4 bg-custom-tan flex-1">
       {/* Header */}
-      <View className="items-center mt-4 pb-3">
+      <View className="items-center mt-4 pb-3 bg-custom-tan">
         <Text className="mt-10 text-custom-red text-5xl font-bold font-spaceGrotesk">leaderboard</Text>
       </View>
       {/* Podium */}
@@ -89,7 +88,7 @@ const LeaderBoardScreen = () => {
         className={`flex-row items-center`}
       >
         
-        <ScrollView className="mt-6 px-4">
+        <View className="mt-6 px-4">
         {sortedRoomies.map((roomie, index) => (
           <View key={roomie.id} className="flex-row items-center mb-1 px-4">
               <Text className="text-4xl text-custom-blue-100 font-bold font-spaceGrotesk mr-5">{index + 1}</Text>
@@ -119,11 +118,11 @@ const LeaderBoardScreen = () => {
           </TouchableOpacity>
           </View>
         ))}
-      </ScrollView>
+      </View>
 
       </View>
       
-    </View>
+    </ScrollView>
   );
 };
 
