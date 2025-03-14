@@ -1,6 +1,8 @@
-import React, { Profiler, useState } from "react";
+import React, { useState, useRef } from "react";
 import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import ViewShot from "react-native-view-shot";
+import * as FileSystem from "expo-file-system";
 
 const AvatarCreation = () => {
   const [isToggled, setIsToggled] = useState(false);
@@ -9,6 +11,32 @@ const AvatarCreation = () => {
   const [selectedFace, setSelectedFace] = useState(null);
   const imagesPerPage = 6;
   const navigation = useNavigation();
+  const viewShotRef = useRef(null);
+
+  const saveAvatar = async () => {
+    if (viewShotRef.current) {
+      try {
+        // Capture the avatar image
+        const uri = await viewShotRef.current.capture();
+        console.log("Captured avatar at:", uri);
+  
+        // Define a new permanent file path in the app's document directory
+        const fileName = "my-avatar.png";
+        const newUri = FileSystem.documentDirectory + fileName;
+  
+        // Copy the captured file to a permanent location
+        await FileSystem.copyAsync({
+          from: uri,
+          to: newUri,
+        });
+  
+        console.log("Avatar saved at:", newUri);
+        return newUri;
+      } catch (error) {
+        console.error("Error saving avatar:", error);
+      }
+    }
+  };
 
   const dark_hair = [
     { id: "1", name: "female #1", image: require("../../frontend/assets/dark_hair/hair-f1-dark.png") },
@@ -91,34 +119,15 @@ const AvatarCreation = () => {
     <View className="flex-1 bg-[#788ABF]">
       <View className="flex-1 items-center justify-center pt-8">
         <Text className="m-10 text-white text-4xl font-bold font-spaceGrotesk">my avatar</Text>
-        
-        {/* Circle with avatar head */}
-        <View className="w-72 h-72 mb-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
-          {/* Base head image */}
-          <Image
-            source={require("../../frontend/assets/head/base-head.png")}
-            className="h-96 w-96"
-            resizeMode="contain"
-          />
-          
-          {/* Superimposed face image */}
-          {selectedFace && (
-            <Image 
-              source={selectedFace.image}
-              className="h-96 w-96 absolute"
-              resizeMode="contain"
-            />
-          )}
 
-          {/* Superimposed hair image */}
-          {selectedHair && (
-            <Image
-              source={selectedHair.image}
-              className="h-96 w-96 absolute"
-              resizeMode="contain"
-            />
-          )}
-        </View>
+         {/* ViewShot captures avatar */}
+         <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
+          <View className="w-72 h-72 mb-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
+            <Image source={require("../../frontend/assets/head/base-head.png")} className="h-96 w-96" resizeMode="contain" />
+            {selectedFace && <Image source={selectedFace.image} className="h-96 w-96 absolute" resizeMode="contain" />}
+            {selectedHair && <Image source={selectedHair.image} className="h-96 w-96 absolute" resizeMode="contain" />}
+          </View>
+        </ViewShot>
 
         {/* toggle and done button row */}
         <View className="flex-1 flex-row w-full justify-between p-2">
@@ -155,14 +164,11 @@ const AvatarCreation = () => {
 
           {/* Done Button */}
           <TouchableOpacity
-            onPress={() => {
-              console.log("save and go back");
-              navigation.navigate("ProfileScreen")
-            }}
-            className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
-          >
-            <Text className="text-white text-2xl font-bold font-spaceGrotesk">done</Text>
-          </TouchableOpacity>
+          onPress={saveAvatar}
+          className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
+        >
+          <Text className="text-white text-2xl font-bold font-spaceGrotesk">done</Text>
+        </TouchableOpacity>
         </View>
       </View>
 
