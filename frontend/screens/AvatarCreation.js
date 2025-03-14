@@ -165,8 +165,8 @@ const AvatarCreation = () => {
           {/* Done Button */}
           <TouchableOpacity
           onPress={() => {
+            saveAvatar();
             navigation.navigate("ProfileScreen");
-            saveAvatar;
             console.log("go back to profile screen and save avatar");
           }}
           className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
