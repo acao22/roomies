@@ -25,7 +25,7 @@ const initialTasks = [
   {
     id: "1",
     title: "vacuum",
-    assignedTo: ["Luna"],
+    assignedTo: ["Luna", "Andrew"],
     status: "open",
     dueDate: "2025-03-12",
   },

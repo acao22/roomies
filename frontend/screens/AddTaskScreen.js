@@ -89,9 +89,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
           </TouchableOpacity>
 
           {/* TASK TITLE */}
-          <Text className="text-2xl font-bold font-spaceGrotesk">
-            Add title
-          </Text>
+          <Text className="text-3xl font-bold font-spaceGrotesk">Add Task</Text>
           <TextInput
             className="border-b border-gray-400 text-lg py-2 mb-4 font-spaceGrotesk "
             placeholder="Enter task title"
@@ -248,7 +246,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
           <Animatable.View animation={"pulse"} duration={500}>
             <TouchableOpacity
               onPress={() => setShowRecurrenceDropdown(!showRecurrenceDropdown)}
-              className="p-4 rounded-xl bg-gray-200 my-2 shadow-sm"
+              className="p-4 rounded-xl bg-gray-200 my-4 shadow-sm"
             >
               <Text className="text-lg font-spaceGrotesk text-custom-blue-200 font-semibold">
                 {recurrence}
@@ -292,7 +290,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
           />
 
           {/* DONE BUTTON */}
-          <TouchableOpacity className="self-center w-36 bg-custom-pink-200 py-4 rounded-lg mt-4 shadow-sm">
+          <TouchableOpacity className="self-center w-36 bg-custom-pink-200 py-4 rounded-lg m-4 shadow-sm">
             <Text className="text-center text-white text-xl font-bold font-spaceGrotesk">
               Done
             </Text>
