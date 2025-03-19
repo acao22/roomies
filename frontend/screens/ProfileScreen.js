@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -13,6 +13,8 @@ import face1 from '../assets/face1.png';
 import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
+import CustomModal from "./AddGroupModal";
+
 
 
 import { logoutUser } from "../api/users.api";
@@ -20,6 +22,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+
 
   // hardcoded data for now
   const roomies = [
@@ -39,6 +43,15 @@ const ProfileScreen = ({ setUser }) => {
       console.error("Logout failed:", error);
       Alert.alert("Error", "Failed to log out. Try again.");
     }
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
+  };
+
+  const handleModalSubmit = () => {
+    // Optionally, add logic to save profile changes here
+    setModalVisible(false);
   };
 
   return (
@@ -84,7 +97,9 @@ const ProfileScreen = ({ setUser }) => {
           <Text className="p-4 text-2xl font-bold text-custom-black mb-2 font-spaceGrotesk">
             My homes
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+          >
             <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
               Edit
             </Text>
@@ -141,7 +156,7 @@ const ProfileScreen = ({ setUser }) => {
 
           </TouchableOpacity>
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout}>
             <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">Logout</Text>
           </TouchableOpacity>
 
@@ -149,6 +164,11 @@ const ProfileScreen = ({ setUser }) => {
 
       </View>
       </ScrollView>
+      <CustomModal
+        visible={modalVisible}
+        onCancel={handleModalCancel}
+        onSubmit={handleModalSubmit}
+      />
     </SafeAreaView>
   );
 };

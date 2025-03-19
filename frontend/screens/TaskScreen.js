@@ -111,6 +111,7 @@ export default function TaskScreen() {
 
 
 
+
   // helper function to toggle task completion status
   const toggleTaskCompletion = (taskId) => {
     setTasks((prevTasks) =>

@@ -14,7 +14,7 @@ const LeaderBoardScreen = () => {
 
   // Hardcoded data for now
   const roomies = [
-    { id: "1", name: "roomie1", bgClass: "bg-custom-red", score: 5, image: require("../assets/face1.png") },
+    { id: "1", name: "roomie1", bgClass: "bg-custom-pink-200", score: 5, image: require("../assets/face1.png") },
     { id: "2", name: "roomie2", bgClass: "bg-custom-blue-100", score: 200, image: require("../assets/face2.png")  },
     { id: "3", name: "roomie3", bgClass: "bg-custom-yellow", score: 300, image: require("../assets/face3.png")  },
   ];
@@ -24,14 +24,17 @@ const LeaderBoardScreen = () => {
   const [first, second, third] = sortedRoomies;
 
   return (
+    <View className="flex-1 bg-custom-tan">
+
+
     <ScrollView className="mt-6 px-4 bg-custom-tan flex-1">
       {/* Header */}
       <View className="items-center mt-4 pb-3 bg-custom-tan">
-        <Text className="mt-10 text-custom-red text-5xl font-bold font-spaceGrotesk">leaderboard</Text>
+        <Text className="mt-10 text-custom-pink-200 text-5xl font-bold font-spaceGrotesk">leaderboard</Text>
       </View>
       {/* Podium */}
       <View
-        className="bg-custom-red rounded-3xl p-2 mb-4 shadow-sm pb-28"
+        className="bg-custom-pink-200 rounded-3xl p-2 mb-4 shadow-sm pb-28"
       >
         {/* Podium Structure */}
         <View className="flex-row justify-center items-end mt-6 relative h-32 w-full">
@@ -123,6 +126,7 @@ const LeaderBoardScreen = () => {
       </View>
       
     </ScrollView>
+    </View>
   );
 };
 

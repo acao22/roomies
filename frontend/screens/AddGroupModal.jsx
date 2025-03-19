@@ -18,15 +18,11 @@ const CustomModal = ({ visible, onCancel, onSubmit }) => {
           <View style={styles.overlay}>
             <View className="bg-custom-blue-200" style={styles.modalView}>
               <Text className="font-spaceGrotesk text-white text-3xl font-bold" style={styles.modalText}>
-                task completed!
+                add group members!
               </Text>
-              <View className="w-52 p-8 bg-custom-blue-100 rounded-3xl items-center mb-4" style={{ width: 240 }}>
-                <Image source={camera} className="w-32 h-32" />
-                <Text className="font-spaceGrotesk text-white text-xl">photo (optional)</Text>
-              </View>
               <View className="justify-center pt-[12px]">
                 <TextInput
-                  placeholder="caption (optional)"
+                  placeholder="email used to register"
                   placeholderTextColor="#788ABF"
                   className="bg-white text-custom-blue-200 py-2 px-6 rounded-3xl font-spaceGrotesk text-l"
                   style={{ width: 236, textAlign: 'center' }}
@@ -37,7 +33,7 @@ const CustomModal = ({ visible, onCancel, onSubmit }) => {
                   <Text className="font-spaceGrotesk text-custom-blue-100 text-2xl font-bold">cancel</Text>
                 </Pressable>
                 <Pressable style={[styles.button, styles.buttonSubmit]} onPress={onSubmit}>
-                  <Text className="font-spaceGrotesk text-white text-2xl font-bold">submit!</Text>
+                  <Text className="font-spaceGrotesk text-white text-2xl font-bold">send!</Text>
                 </Pressable>
               </View>
             </View>
