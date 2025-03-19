@@ -84,9 +84,11 @@ const ProfileScreen = ({ setUser }) => {
           <Text className="p-4 text-2xl font-bold text-custom-black mb-2 font-spaceGrotesk">
             My homes
           </Text>
-          <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
-            Edit
-          </Text>
+          <TouchableOpacity>
+            <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
+              Edit
+            </Text>
+          </TouchableOpacity>
         </View>
         <View className="bg-custom-blue-100 rounded-xl p-6 w-full items-center justify-center">
           <Image source={home} className="w-50 h-50" />
@@ -118,26 +120,30 @@ const ProfileScreen = ({ setUser }) => {
           Settings
         </Text>
         <View className="mb-6">
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Notifications</Text>
             <Ionicons name="notifications" size={32} color="white" />
 
-          </View>
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Password</Text>
             <Ionicons name="pencil" size={32} color="white" />
 
-          </View>
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Display</Text>
             <Ionicons name="moon" size={32} color="white" />
 
-          </View>
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Archived</Text>
             <Image source={history} className="w-10 h-10" style={{tintColor: 'white'}} />
 
-          </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity>
+            <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">Logout</Text>
+          </TouchableOpacity>
 
         </View>
 

@@ -11,6 +11,7 @@ import {
 } from "react-native-reanimated";
 import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
+import CustomModal from "./CustomModal";
 
 // HARDCODED SHART FOR NOW
 
@@ -105,19 +106,43 @@ const formatDueDate = (dateStr) => {
 export default function TaskScreen() {
   const [tasks, setTasks] = useState(initialTasks);
   const [activeTab, setActiveTab] = useState("tasks");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+
 
   // helper function to toggle task completion status
   const toggleTaskCompletion = (taskId) => {
     setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId
-          ? {
-              ...task,
-              status: task.status === "completed" ? "open" : "completed",
-            }
-          : task
-      )
+      prevTasks.map((task) => {
+        if (task.id === taskId) {
+          const newStatus = task.status === "completed" ? "open" : "completed";
+          // Open modal when marking task as completed
+          if (newStatus === "completed") {
+            setSelectedTaskId(taskId);
+            setModalVisible(true);
+          }
+          return { ...task, status: newStatus };
+        }
+        return task;
+      })
     );
+  };
+
+  // handling cancel vs submit in modal
+  const handleModalCancel = () => {
+    // Revert the task status (toggle again)
+    if (selectedTaskId) {
+      toggleTaskCompletion(selectedTaskId); // toggles back to open
+    }
+    setModalVisible(false);
+    setSelectedTaskId(null);
+  };
+
+  const handleModalSubmit = () => {
+    // Leave the task as completed
+    setModalVisible(false);
+    setSelectedTaskId(null);
   };
 
   // helper function to sort upcoming tasks by due date
@@ -139,7 +164,7 @@ export default function TaskScreen() {
   // completed tasks should be separate
   const completedTasks = tasks.filter((t) => t.status === "completed");
 
-  const renderTaskItem = ({ item, index }) => {
+  const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";
 
     // rendering alternating colors of tasks
@@ -259,6 +284,8 @@ export default function TaskScreen() {
           } rounded-t-3xl bg-custom-tan`}
         >
           <View className="flex-1 p-4">
+          <CustomModal visible={modalVisible} onCancel={handleModalCancel} onSubmit={handleModalSubmit} />
+
             {activeTab === "tasks" ? (
               <FlatList
                 data={[
@@ -287,7 +314,7 @@ export default function TaskScreen() {
                       completed
                     </Text>
                   ) : (
-                    renderTaskItem({ item, index })
+                    renderTaskItem({ item, index, toggleTaskCompletion })
                   )
                 }
                 keyExtractor={(item, index) =>
@@ -301,8 +328,11 @@ export default function TaskScreen() {
               <AddTaskScreen setActiveTab={setActiveTab} />
             )}
           </View>
+          
         </View>
+        
       </Animated.View>
+      
     </View>
   );
 }
