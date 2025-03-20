@@ -14,7 +14,7 @@ import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
 import CustomModal from "./AddGroupModal";
-import { getUserInfo,  } from "../api/users.api.js";
+import { getUserInfo, getUserGroup } from "../api/users.api.js";
 
 
 
@@ -25,26 +25,25 @@ const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
-
-
-  // hardcoded data for now
-  const roomies = [
-    { id: "1", name: "roomie #1", bgClass: "bg-[#FF8C83]" },
-    { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
-    { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
-  ];
+  const [userGroup, setUserGroup] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const {firstName, lastName} = await getUserInfo();
         setUserData({firstName: firstName, lastName: lastName});
+
+        const {groupName, members} = await getUserGroup();
+        setUserGroup({groupName: groupName, members: members});
+
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
     fetchUserData();
   }, []);
+
+
 
   const handleLogout = async () => {
     try {
@@ -121,7 +120,7 @@ const ProfileScreen = ({ setUser }) => {
         </View>
         <View className="bg-custom-blue-100 rounded-xl p-6 w-full items-center justify-center">
           <Image source={home} className="w-50 h-50" />
-          <Text className="font-bold font-spaceGrotesk text-custom-black text-xl mt-3">Group name</Text>
+          <Text className="font-bold font-spaceGrotesk text-custom-black text-xl mt-3">{userGroup ? `${userGroup.groupName}` : "you loner roomie"}</Text>
         </View>
         { /* might beed later so I just commented out 
         {/*

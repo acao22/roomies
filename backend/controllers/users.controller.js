@@ -109,3 +109,46 @@ export const loginUser = async (req, res) => {
       res.status(401).json({ error: "Invalid credentials" });
     }
   };
+  
+// get group name, members
+  export const getUserGroup = async (req, res) => {
+    const { uid } = req.body; 
+  
+    try {
+      const userDoc = await db.collection("users").doc(uid).get();
+  
+      if (!userDoc.exists) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      const { roomieGroup } = userDoc.data();
+      if (!roomieGroup) {
+        return res.status(404).json({ error: "User does not belong to any roomieGroup"})
+      }
+
+      const groupDoc = await roomieGroup.get();
+
+      if (!groupDoc.exists) {
+        return res.status(404).json({ error: "Roomie group not found" });
+      }
+      const { groupName, members } = groupDoc.data();
+
+      // expand members
+      const memberDataPromises = members.map(async (memberRef) => {
+        const memberDoc = await memberRef.get();  
+        if (!memberDoc.exists) {
+          return null;
+        }
+        return {
+          uid: memberDoc.id,
+          ...memberDoc.data(),
+        };
+      });
+  
+      const expandedMembers = (await Promise.all(memberDataPromises)).filter((user) => user !== null);
+      res.status(200).json({ groupName, members: expandedMembers });
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+      res.status(500).json({ error: "Error retrieving user data" });
+    }
+  };

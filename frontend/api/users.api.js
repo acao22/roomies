@@ -17,6 +17,17 @@ export const getUserInfo = async () => {
   }
 }
 
+// get user's roommate group members, group name
+export const getUserGroup = async () => {
+  const {uid, groupName, members} = await verifyUserSession();
+  if (uid) {
+    const response = await axios.post(`${API_USER_BASE_URL}/getUserGroup`, {
+      uid
+    });
+    return response.data;
+  }
+}
+
 
 
 // checking if a user is still logged in
