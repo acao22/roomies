@@ -74,7 +74,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
   };
 
   const handleAddTask = async () => {
-    await addTask(title, selectedIcon, date.toISOString(), time.toISOString(), 
+    await addTask(title, selectedIcon, date.toISOString().split('T')[0], time.toISOString().split('T')[1].substring(0, 8), 
       members.filter(m => m.selected).map(m => m.name), recurrence, description);
       setActiveTab("tasks");
   };

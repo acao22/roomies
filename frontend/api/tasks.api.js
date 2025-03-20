@@ -4,9 +4,7 @@ import { API_BASE_URL } from "@env";
 import { getAuth } from "firebase/auth";
 
 const API_USER_BASE_URL = `${API_BASE_URL}/tasks`;
-const auth = getAuth();
-const user = auth.currentUser;
-const userId = user ? user.uid : null;
+
 export const getAllTasks = async () => {
   try {
       const response = await axios.get(`${API_USER_BASE_URL}/getAllTasks`);
@@ -19,7 +17,9 @@ export const getAllTasks = async () => {
 
 export const addTask = async (title, selectedIcon, date, time, members, recurrence, description) => {
   try {
-    
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const userId = user ? user.uid : null;
       await axios.post(`${API_USER_BASE_URL}/addTask`, 
         JSON.stringify({ 
           title, 
@@ -29,8 +29,8 @@ export const addTask = async (title, selectedIcon, date, time, members, recurren
           members, 
           recurrence, 
           description, 
-          createdAt: "today", 
-          createdBy: "yuh"
+          createdAt: (new Date()).toISOString(), 
+          createdBy: userId
       }),
       {
         headers: { "Content-Type": "application/json" },
