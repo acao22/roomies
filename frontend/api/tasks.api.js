@@ -1,9 +1,12 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from "@env";
+import { getAuth } from "firebase/auth";
 
 const API_USER_BASE_URL = `${API_BASE_URL}/tasks`;
-
+const auth = getAuth();
+const user = auth.currentUser;
+const userId = user ? user.uid : null;
 export const getAllTasks = async () => {
   try {
       const response = await axios.get(`${API_USER_BASE_URL}/getAllTasks`);
@@ -16,10 +19,26 @@ export const getAllTasks = async () => {
 
 export const addTask = async (title, selectedIcon, date, time, members, recurrence, description) => {
   try {
+    
       await axios.post(`${API_USER_BASE_URL}/addTask`, 
-          JSON.stringify({ title, selectedIcon, date, time, members, recurrence, description }));
+        JSON.stringify({ 
+          title, 
+          selectedIcon, 
+          date, 
+          time, 
+          members, 
+          recurrence, 
+          description, 
+          createdAt: "today", 
+          createdBy: "yuh"
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log(title, selectedIcon, date, time, members, recurrence, description);
   } catch (error) {
       console.error(error);
+      
   }
 };
 

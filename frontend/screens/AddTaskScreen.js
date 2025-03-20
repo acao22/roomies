@@ -12,6 +12,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { addTask } from "../api/tasks.api.js";
 
 // hardcoded stuff for now
 const userAvatars = {
@@ -48,6 +49,8 @@ const recurrenceOptions = [
   "Custom",
 ];
 
+
+
 const AddTaskScreen = ({ setActiveTab }) => {
   const [title, setTitle] = useState("");
   const [selectedIcon, setSelectedIcon] = useState(null);
@@ -60,12 +63,20 @@ const AddTaskScreen = ({ setActiveTab }) => {
   const [showRecurrenceDropdown, setShowRecurrenceDropdown] = useState(false);
   const [description, setDescription] = useState("");
 
+  
+
   const toggleMemberSelection = (id) => {
     setMembers((prev) =>
       prev.map((member) =>
         member.id === id ? { ...member, selected: !member.selected } : member
       )
     );
+  };
+
+  const handleAddTask = async () => {
+    await addTask(title, selectedIcon, date.toISOString(), time.toISOString(), 
+      members.filter(m => m.selected).map(m => m.name), recurrence, description);
+      setActiveTab("tasks");
   };
 
   return (
@@ -292,7 +303,9 @@ const AddTaskScreen = ({ setActiveTab }) => {
           />
 
           {/* DONE BUTTON */}
-          <TouchableOpacity className="self-center w-36 bg-custom-pink-200 py-4 rounded-lg mt-4 shadow-sm">
+          <TouchableOpacity 
+            onPress={handleAddTask}
+            className="self-center w-36 bg-custom-pink-200 py-4 rounded-lg mt-4 shadow-sm">
             <Text className="text-center text-white text-xl font-bold font-spaceGrotesk">
               Done
             </Text>
