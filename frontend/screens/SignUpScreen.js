@@ -16,11 +16,13 @@ const gridImage = require("../assets/grid.png");
 const SignUpScreen = ({ setUser }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const navigation = useNavigation();
 
   const handleRegister = async () => {
     try {
-      const userCredential = await registerUser(email, password);
+      const userCredential = await registerUser(email, password, firstName, lastName);
       if (userCredential) {
         setUser(userCredential);
         Alert.alert("Registration successful", "", [
@@ -66,6 +68,7 @@ const SignUpScreen = ({ setUser }) => {
           <TextInput
             placeholder="first name"
             placeholderTextColor="#788ABF" // Matching placeholder color
+            onChangeText={setFirstName}
             className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
           />
         </View>
@@ -75,6 +78,7 @@ const SignUpScreen = ({ setUser }) => {
             placeholder="last name"
             placeholderTextColor="#788ABF" // Matching placeholder color
             className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+            onChangeText={setLastName}
           />
         </View>
 

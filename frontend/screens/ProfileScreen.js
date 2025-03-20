@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -13,6 +13,9 @@ import face1 from '../assets/face1.png';
 import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
+import CustomModal from "./AddGroupModal";
+import { getUserInfo,  } from "../api/users.api.js";
+
 
 
 import { logoutUser } from "../api/users.api";
@@ -20,6 +23,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+
 
   // hardcoded data for now
   const roomies = [
@@ -27,6 +33,18 @@ const ProfileScreen = ({ setUser }) => {
     { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
     { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
   ];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const {firstName, lastName} = await getUserInfo();
+        setUserData({firstName: firstName, lastName: lastName});
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -41,12 +59,21 @@ const ProfileScreen = ({ setUser }) => {
     }
   };
 
+  const handleModalCancel = () => {
+    setModalVisible(false);
+  };
+
+  const handleModalSubmit = () => {
+    // Optionally, add logic to save profile changes here
+    setModalVisible(false);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
       <ScrollView>
 
       <View className="bg-custom-yellow w-full h-56 absolute top-0 z-0">
-        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, [username]</Text>
+        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
         <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">Day 365 of rooming</Text>
       </View>
 
@@ -70,7 +97,7 @@ const ProfileScreen = ({ setUser }) => {
 
         {/* user name */}
         <Text className="text-lg font-bold text-custom-black mt-3">
-          first last
+        {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}
         </Text>
         {/* rating + star */}
         <View className="flex-row items-center mt-1">
@@ -84,9 +111,13 @@ const ProfileScreen = ({ setUser }) => {
           <Text className="p-4 text-2xl font-bold text-custom-black mb-2 font-spaceGrotesk">
             My homes
           </Text>
-          <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
-            Edit
-          </Text>
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+          >
+            <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
+              Edit
+            </Text>
+          </TouchableOpacity>
         </View>
         <View className="bg-custom-blue-100 rounded-xl p-6 w-full items-center justify-center">
           <Image source={home} className="w-50 h-50" />
@@ -118,31 +149,40 @@ const ProfileScreen = ({ setUser }) => {
           Settings
         </Text>
         <View className="mb-6">
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Notifications</Text>
             <Ionicons name="notifications" size={32} color="white" />
 
-          </View>
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Password</Text>
             <Ionicons name="pencil" size={32} color="white" />
 
-          </View>
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Display</Text>
             <Ionicons name="moon" size={32} color="white" />
 
-          </View>
-          <View className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          </TouchableOpacity>
+          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Archived</Text>
             <Image source={history} className="w-10 h-10" style={{tintColor: 'white'}} />
 
-          </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleLogout}>
+            <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">Logout</Text>
+          </TouchableOpacity>
 
         </View>
 
       </View>
       </ScrollView>
+      <CustomModal
+        visible={modalVisible}
+        onCancel={handleModalCancel}
+        onSubmit={handleModalSubmit}
+      />
     </SafeAreaView>
   );
 };
