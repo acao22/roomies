@@ -1,6 +1,27 @@
 import { db, auth } from "../config/firebaseAdmin.js";
 import admin from "firebase-admin";
 
+
+export const getUserByUid = async (req, res) => {
+  const { uid } = req.body; 
+
+  try {
+    const userDoc = await db.collection("users").doc(uid).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { firstName, lastName } = userDoc.data();
+
+    res.status(200).json({ firstName, lastName });
+  } catch (error) {
+    console.error("Error retrieving user data:", error);
+    res.status(500).json({ error: "Error retrieving user data" });
+  }
+};
+
+
 // verifying the user's session
 export const verify = async (req, res) => {
     const { idToken } = req.body; // id token, not custom token
@@ -26,14 +47,15 @@ export const verify = async (req, res) => {
 
 // USER SIGNUP (both firebase and our own db)
 export const registerUser = async (req, res) => {
-  const { email, password, displayName } = req.body;
+  const { email, password, displayName, firstName, lastName} = req.body;
+  console.log(firstName, lastName);
   try {
-
+    
     // FIREBASE AUTHENTICATION
     const user = await auth.createUser({
       email,
       password,
-      displayName,
+      displayName
     });
 
     // INSERT TO OUR OWN USERS TABLE
@@ -42,6 +64,8 @@ export const registerUser = async (req, res) => {
         uid: user.uid,
         email,
         displayName,
+        firstName,
+        lastName,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       };
       await db.collection("users").doc(user.uid).set(userData);
