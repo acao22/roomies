@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -14,6 +14,7 @@ import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
 import CustomModal from "./AddGroupModal";
+import { getUserInfo,  } from "../api/users.api.js";
 
 
 
@@ -23,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
 
 
   // hardcoded data for now
@@ -31,6 +33,18 @@ const ProfileScreen = ({ setUser }) => {
     { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
     { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
   ];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const {firstName, lastName} = await getUserInfo();
+        setUserData({firstName: firstName, lastName: lastName});
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -59,7 +73,7 @@ const ProfileScreen = ({ setUser }) => {
       <ScrollView>
 
       <View className="bg-custom-yellow w-full h-56 absolute top-0 z-0">
-        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, [username]</Text>
+        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
         <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">Day 365 of rooming</Text>
       </View>
 
@@ -83,7 +97,7 @@ const ProfileScreen = ({ setUser }) => {
 
         {/* user name */}
         <Text className="text-lg font-bold text-custom-black mt-3">
-          first last
+        {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}
         </Text>
         {/* rating + star */}
         <View className="flex-row items-center mt-1">

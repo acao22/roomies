@@ -6,6 +6,18 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
 
+// get first name and last name from database
+export const getUserInfo = async () => {
+  const {uid, email, message} = await verifyUserSession();
+  if (uid) {
+    const response = await axios.post(`${API_USER_BASE_URL}/getInfo`, {
+      uid
+    });
+    return response.data;
+  }
+}
+
+
 
 // checking if a user is still logged in
 export const verifyUserSession = async () => {
@@ -25,11 +37,12 @@ export const verifyUserSession = async () => {
 
 
 // register a new user
-export const registerUser = async (email, password, displayName = "roomie") => {
+export const registerUser = async (email, password, firstName, lastName, displayName = "roomie") => {
+    console.log(firstName, lastName, displayName);
     try {
       const response = await axios.post(
         `${API_USER_BASE_URL}/signup`,
-        JSON.stringify({ email, password, displayName }),
+        JSON.stringify({ email, password, displayName, firstName, lastName }),
         {
           headers: { "Content-Type": "application/json" },
         }
