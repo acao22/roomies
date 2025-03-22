@@ -7,6 +7,8 @@ import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
+import { getUserGroup, getUserInfo } from "../api/users.api";
+
 
 // Hardcoded avatars
 const userAvatars = {
@@ -79,11 +81,12 @@ const formatTimestamp = (timestamp) => {
 };
 
 
-export default function TaskScreen() {
+export default function TaskScreen({ user }) {
   const [tasks, setTasks] = useState([]); // tasks will be set from API
   const [activeTab, setActiveTab] = useState("tasks");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+  
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -102,6 +105,12 @@ export default function TaskScreen() {
 
     fetchTasks();
   }, []);
+
+
+  const filteredTasks = tasks.filter(task =>
+    task.groupId && user.roomieGroup &&
+    task.groupId.toString() === user.roomieGroup.toString()
+  );
 
   
 
@@ -156,7 +165,7 @@ export default function TaskScreen() {
   };
 
   // Sort upcoming tasks by dueDate
-  const upcomingTasks = tasks
+  const upcomingTasks = filteredTasks
     .filter((t) => t.status === "open")
     .sort((a, b) => {
       const dateA = new Date(a.dueDate);
@@ -165,7 +174,7 @@ export default function TaskScreen() {
     });
 
   // Get completed tasks
-  const completedTasks = tasks.filter((t) => t.status === "completed");
+  const completedTasks = filteredTasks.filter((t) => t.status === "completed");
 
   const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";

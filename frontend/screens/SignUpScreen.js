@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Ionicons from  "@expo/vector-icons/Ionicons";
 import { registerUser } from "../api/users.api.js";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const gridImage = require("../assets/grid.png");
 
@@ -19,17 +19,21 @@ const SignUpScreen = ({ setUser }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const navigation = useNavigation();
+  const route = useRoute();
+  const origin = route.params?.origin || "Landing";
 
   const handleRegister = async () => {
     try {
       const userCredential = await registerUser(email, password, firstName, lastName);
       if (userCredential) {
         setUser(userCredential);
+        
         Alert.alert("Registration successful", "", [
           {
             text: "OK",
           },
         ]);
+        navigation.replace("Group")
       } else {
         Alert.alert("Error", "Unexpected error occurred.");
       }
@@ -45,7 +49,7 @@ const SignUpScreen = ({ setUser }) => {
         <TouchableOpacity
           onPress={() => {
             if (navigation.canGoBack()) {
-              navigation.goBack();
+              navigation.replace(origin);
             } else {
               navigation.navigate("Landing");
             }
@@ -118,7 +122,7 @@ const SignUpScreen = ({ setUser }) => {
           <Text className="text-xl font-spaceGrotesk text-[#504E4D] mt-6">
             already have an account?
           </Text>
-          <TouchableOpacity onPress={() => navigation.replace("Login")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Login", { origin: "Signup"} )}>
             <Text className="underline text-xl text-[#504E4D]">login</Text>
           </TouchableOpacity>
         </View>

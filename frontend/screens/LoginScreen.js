@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { loginUser } from "../api/users.api.js";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 const LoginScreen = ({ setUser }) => {
@@ -16,6 +16,8 @@ const LoginScreen = ({ setUser }) => {
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
   const gridImage = require("../assets/grid.png");
+  const route = useRoute();
+  const origin = route.params?.origin || "Landing";
 
   const handleLogin = async () => {
     try {
@@ -41,7 +43,7 @@ const LoginScreen = ({ setUser }) => {
         <TouchableOpacity
           onPress={() => {
             if (navigation.canGoBack()) {
-              navigation.goBack();
+              navigation.replace(origin);
             } else {
               navigation.navigate("Landing");
             }
@@ -96,7 +98,7 @@ const LoginScreen = ({ setUser }) => {
             <Text className="text-xl font-spaceGrotesk text-[#504E4D]">
               don't have an account yet?
             </Text>
-            <TouchableOpacity onPress={() => navigation.replace("Signup")}>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup", { origin: "Landing"} )}>
               <Text className="underline text-xl text-[#504E4D]">sign up</Text>
             </TouchableOpacity>
           </View>
