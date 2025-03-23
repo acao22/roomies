@@ -7,7 +7,7 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
-import { loginUser } from "../api/users.api.js";
+import { loginUser, verifyUserSession, getUserGroup } from "../api/users.api.js";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -22,18 +22,23 @@ const LoginScreen = ({ setUser }) => {
   const handleLogin = async () => {
     try {
       const userCredential = await loginUser(email, password);
-      if (userCredential) {
-        setUser(userCredential);
-        Alert.alert("Login successful", "", [
-          {
-            text: "OK",
-          },
-        ]);
+      const sessionData = await verifyUserSession();
+      const groupData = await getUserGroup();
+
+      const fullUser = {
+        ...sessionData,
+        roomieGroup: groupData.groupName,
+        members: groupData.members, // optional
+      };
+
+      if (sessionData && groupData?.groupName) {
+        setUser(fullUser);
+        Alert.alert("Login successful", "", [{ text: "OK" }]);
       } else {
-        Alert.alert("Error", "Unexpected error occurred.");
+        Alert.alert("Missing group", "Please join or create a group.");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message || "An unexpected error occurred.");
     }
   };
   return (

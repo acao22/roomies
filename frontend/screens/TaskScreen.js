@@ -107,11 +107,6 @@ export default function TaskScreen({ user }) {
   }, []);
 
 
-  const filteredTasks = tasks.filter(task =>
-    task.groupId && user.roomieGroup &&
-    task.groupId.toString() === user.roomieGroup.toString()
-  );
-
   
 
   // Toggle task completion status and open modal if marking as completed
@@ -165,7 +160,7 @@ export default function TaskScreen({ user }) {
   };
 
   // Sort upcoming tasks by dueDate
-  const upcomingTasks = filteredTasks
+  const upcomingTasks = tasks
     .filter((t) => t.status === "open")
     .sort((a, b) => {
       const dateA = new Date(a.dueDate);
@@ -174,7 +169,7 @@ export default function TaskScreen({ user }) {
     });
 
   // Get completed tasks
-  const completedTasks = filteredTasks.filter((t) => t.status === "completed");
+  const completedTasks = tasks.filter((t) => t.status === "completed");
 
   const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";

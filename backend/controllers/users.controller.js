@@ -111,6 +111,7 @@ export const loginUser = async (req, res) => {
   };
   
 // get group name, members
+// THIS IS THE DEFAULT GROUP, WHICH IS AT INDEX 0
   export const getUserGroup = async (req, res) => {
     const { uid } = req.body; 
   
@@ -126,7 +127,8 @@ export const loginUser = async (req, res) => {
         return res.status(404).json({ error: "User does not belong to any roomieGroup"})
       }
 
-      const groupDoc = await roomieGroup.get();
+      const groupRef = roomieGroup[0];
+      const groupDoc = await groupRef.get();
 
       if (!groupDoc.exists) {
         return res.status(404).json({ error: "Roomie group not found" });
@@ -150,5 +152,126 @@ export const loginUser = async (req, res) => {
     } catch (error) {
       console.error("Error retrieving user data:", error);
       res.status(500).json({ error: "Error retrieving user data" });
+    }
+  };
+
+
+// join group
+// this allows the user to join a group given the name and the passcode
+// making the group they join the FIRST group
+export const joinGroup = async (req, res) => {
+    const { uid, groupName, passcode } = req.body;
+  
+    if (!uid || !groupName || !passcode) {
+      return res.status(400).json({ error: "Missing uid, groupName, or passcode" });
+    }
+  
+    try {
+      const userRef = db.collection("users").doc(uid);
+      const userDoc = await userRef.get();
+  
+      if (!userDoc.exists) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      // find the group with matching groupName AND passcode
+      const groupQuery = await db
+        .collection("roomieGroups")
+        .where("groupName", "==", groupName)
+        .where("passcode", "==", passcode)
+        .limit(1)
+        .get();
+  
+      if (groupQuery.empty) {
+        return res.status(404).json({ error: "No group found with matching name and passcode" });
+      }
+  
+      const groupDoc = groupQuery.docs[0];
+      const groupRef = groupDoc.ref;
+      const groupData = groupDoc.data();
+  
+      const alreadyInGroup = groupData.members?.some((ref) => ref.id === uid);
+  
+      if (!alreadyInGroup) {
+        await groupRef.update({
+          members: admin.firestore.FieldValue.arrayUnion(userRef),
+        });
+      }
+  
+      const userData = userDoc.data();
+      let updatedGroups = [groupRef];
+  
+      if (userData.roomieGroup && Array.isArray(userData.roomieGroup)) {
+        const otherGroups = userData.roomieGroup.filter(
+          (ref) => ref.id !== groupRef.id
+        );
+        updatedGroups = [groupRef, ...otherGroups];
+      }
+  
+      await userRef.update({
+        roomieGroup: updatedGroups,
+      });
+  
+      return res.status(200).json({
+        message: "Successfully joined group",
+        groupId: groupRef.id,
+        groupName: groupData.groupName,
+      });
+    } catch (error) {
+      console.error("Error joining group:", error);
+      res.status(500).json({ error: "Failed to join group" });
+    }
+  };
+
+
+// create group
+export const createGroup = async (req, res) => {
+    const { uid, groupName, passcode } = req.body;
+  
+    if (!uid || !groupName || !passcode) {
+      return res.status(400).json({ error: "Missing uid, groupName, or passcode" });
+    }
+  
+    try {
+      const userRef = db.collection("users").doc(uid);
+      const userDoc = await userRef.get();
+  
+      if (!userDoc.exists) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      // 1. Create the group with the user as the initial member
+      const groupRef = await db.collection("roomieGroups").add({
+        groupName,
+        passcode,
+        createdBy: uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        members: [userRef], // add the creator as the first member
+      });
+  
+      // 2. Update user's roomieGroup array, placing this group at the front
+      const userData = userDoc.data();
+      let updatedGroups = [groupRef];
+  
+      if (userData.roomieGroup && Array.isArray(userData.roomieGroup)) {
+        const otherGroups = userData.roomieGroup.filter(
+          (ref) => ref.id !== groupRef.id
+        );
+        updatedGroups = [groupRef, ...otherGroups];
+      }
+  
+      await userRef.update({
+        roomieGroup: updatedGroups,
+      });
+  
+      res.status(201).json({
+        message: "Group created and joined successfully",
+        groupId: groupRef.id,
+        groupName,
+      });
+    } catch (error) {
+      console.error("Error creating group:", error);
+      res.status(500).json({ error: "Failed to create group" });
     }
   };

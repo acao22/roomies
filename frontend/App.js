@@ -206,7 +206,7 @@ export default function App() {
         const session = await verifyUserSession();
         console.log("User session:", session);
 
-        if (session) {
+        if (session?.uid && session?.roomieGroup) {
           setUser(session);
         } else {
           await AsyncStorage.removeItem("idToken"); // Clear expired token

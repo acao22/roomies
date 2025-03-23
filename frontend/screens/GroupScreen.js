@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   View, 
   Text, 
@@ -9,8 +9,15 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
+import { createGroup, joinGroup, getUserGroup, verifyUserSession } from "../api/users.api.js";
+
 const GroupScreen = ({ setUser }) => {
   const navigation = useNavigation();
+
+  const [createRoomName, setCreateRoomName] = useState("");
+  const [createPasscode, setCreatePasscode] = useState("");
+  const [joinRoomName, setJoinRoomName] = useState("");
+  const [joinPasscode, setJoinPasscode] = useState("");
 
   return (
     <View className="bg-custom-yellow" style={{ flex: 1 }}>
@@ -44,6 +51,8 @@ const GroupScreen = ({ setUser }) => {
                 <TextInput
                 placeholder="room name"
                 placeholderTextColor="white"
+                value={createRoomName}
+                onChangeText={setCreateRoomName}
                 style={{
                     height: 40,
                     fontSize: 20,
@@ -55,6 +64,8 @@ const GroupScreen = ({ setUser }) => {
                 <TextInput
                 placeholder="passcode"
                 placeholderTextColor="white"
+                value={createPasscode}
+                onChangeText={setCreatePasscode}
                 style={{
                     height: 40,
                     fontSize: 20,
@@ -65,9 +76,26 @@ const GroupScreen = ({ setUser }) => {
             <View className="items-end">
                 <TouchableOpacity
                     
-                    onPress={() => {
-                        setUser((prev) => ({ ...prev, roomieGroup: true }));
-                    }}
+                    onPress={async () => {
+                        try {
+                            console.log("Create button pressed!");
+                          const session = await verifyUserSession();
+                          if (!session?.uid) return;
+                      
+                          await createGroup({
+                            uid: session.uid,
+                            groupName: createRoomName,
+                            passcode: createPasscode,
+                          });
+                          console.log("Group created!");
+                      
+                          const updated = await getUserGroup();
+                          setUser((prev) => ({ ...prev, roomieGroup: updated.groupName, members: updated.members }));
+                          //navigation.replace("Main");
+                        } catch (error) {
+                          console.error("Create group failed", error);
+                        }
+                      }}
                     className="w-36 h-[52px] bg-custom-blue-200 justify-center items-center rounded-full mt-6"
                     >
                     <Text className="text-white font-spaceGrotesk text-3xl font-bold">
@@ -77,12 +105,28 @@ const GroupScreen = ({ setUser }) => {
 
             </View>
         </View>
+
         <View className="bg-custom-pink-200 p-6 justify-items-start rounded-3xl w-96 mt-12">
             <Text className="font-spaceGrotesk font-bold text-white text-3xl">join an existing room</Text>
             <View style={{ width: "90%", borderBottomWidth: 2, borderColor: "white", marginBottom: 24, marginTop: 20, }}>
                 <TextInput
+                placeholder="room name"
+                placeholderTextColor="white"
+                value={joinRoomName}
+                onChangeText={setJoinRoomName}
+                style={{
+                    height: 40,
+                    fontSize: 20,
+                }}
+                className="font-spaceGrotesk"
+                />
+            </View>
+            <View style={{ width: "90%", borderBottomWidth: 2, borderColor: "white", marginBottom: 24, marginTop: 20, }}>
+                <TextInput
                 placeholder="passcode"
                 placeholderTextColor="white"
+                value={joinPasscode}
+                onChangeText={setJoinPasscode}
                 style={{
                     height: 40,
                     fontSize: 20,
@@ -93,12 +137,33 @@ const GroupScreen = ({ setUser }) => {
             <View className="items-end">
                 <TouchableOpacity
                     className="w-36 h-[52px] bg-custom-blue-200 justify-center items-center rounded-full mt-6"
+                    onPress={async () => {
+                        try {
+                        const session = await verifyUserSession();
+                        if (!session?.uid) return;
+
+                        await joinGroup({
+                            uid: session.uid,
+                            groupName: joinRoomName,
+                            passcode: joinPasscode,
+                        });
+
+                        const updated = await getUserGroup();
+                        setUser((prev) => ({
+                            ...prev,
+                            roomieGroup: updated.groupName,
+                            members: updated.members,
+                        }));
+                        //navigation.replace("Main");
+                        } catch (error) {
+                        console.error("Join group failed", error);
+                        }
+                    }}
                     >
                     <Text className="text-white font-spaceGrotesk text-3xl font-bold">
                         join
                     </Text>
-                </TouchableOpacity>
-
+                    </TouchableOpacity>
             </View>
         </View>
     </View>
