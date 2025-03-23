@@ -188,6 +188,7 @@ const AvatarCreation = () => {
           </TouchableOpacity>
         </View>
 
+
       {/* Scrollable Face/Hair Options */}
       <View className="bg-[#F5A58C] flex-1 px-4">
         <FlatList
