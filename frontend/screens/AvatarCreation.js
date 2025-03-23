@@ -1,8 +1,18 @@
 import React, { useState, useRef } from "react";
-import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Pressable,
+  FlatList,
+  Dimensions,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
+
+const screenWidth = Dimensions.get("window").width;
 
 const AvatarCreation = () => {
   const [isToggled, setIsToggled] = useState(false);
@@ -16,20 +26,15 @@ const AvatarCreation = () => {
   const saveAvatar = async () => {
     if (viewShotRef.current) {
       try {
-        // Capture the avatar image
         const uri = await viewShotRef.current.capture();
-        console.log("Captured avatar at:", uri);
-  
-        // Define a new permanent file path in the app's document directory
         const fileName = "my-avatar.png";
         const newUri = FileSystem.documentDirectory + fileName;
-  
-        // Copy the captured file to a permanent location
+
         await FileSystem.copyAsync({
           from: uri,
           to: newUri,
         });
-  
+
         console.log("Avatar saved at:", newUri);
         return newUri;
       } catch (error) {
@@ -54,7 +59,7 @@ const AvatarCreation = () => {
     { id: "13", name: "male #4", image: require("../../frontend/assets/dark_hair/hair-m4-dark.png") },
     { id: "14", name: "male #5", image: require("../../frontend/assets/dark_hair/hair-m5-dark.png") },
   ];
-  
+
   const light_hair = [
     { id: "1", name: "female #1", image: require("../../frontend/assets/light_hair/hair-f1-light.png") },
     { id: "2", name: "female #2", image: require("../../frontend/assets/light_hair/hair-f2-light.png") },
@@ -71,7 +76,7 @@ const AvatarCreation = () => {
     { id: "13", name: "male #4", image: require("../../frontend/assets/light_hair/hair-m4-light.png") },
     { id: "14", name: "male #5", image: require("../../frontend/assets/light_hair/hair-m5-light.png") },
   ];
-  
+
   const faces = [
     { id: "1", name: "face #1", image: require("../../frontend/assets/faces/face-1.png") },
     { id: "2", name: "face #2", image: require("../../frontend/assets/faces/face-2.png") },
@@ -89,30 +94,32 @@ const AvatarCreation = () => {
     { id: "14", name: "face #14", image: require("../../frontend/assets/faces/face-14.png") },
     { id: "15", name: "face #15", image: require("../../frontend/assets/faces/face-15.png") },
   ];
-  
 
-  const totalHairPages = Math.ceil(dark_hair.length / imagesPerPage);
-  const isFaceSection = currentPage >= totalHairPages;
+  const displayedImages = currentPage === 0
+    ? isToggled ? light_hair : dark_hair
+    : faces;
 
-  const startIndex = isFaceSection
-    ? (currentPage - totalHairPages) * imagesPerPage
-    : currentPage * imagesPerPage;
-  const endIndex = startIndex + imagesPerPage;
-
-  const displayedImages = isFaceSection
-    ? faces.slice(startIndex, endIndex)
-    : isToggled
-    ? light_hair.slice(startIndex, endIndex)
-    : dark_hair.slice(startIndex, endIndex);
-
-  const totalPages = totalHairPages + Math.ceil(faces.length / imagesPerPage);
-
-  const nextPage = () => {
-    if (currentPage < totalPages - 1) setCurrentPage(currentPage + 1);
+  const handleSelect = (item) => {
+    if (currentPage === 0) {
+      setSelectedHair(item);
+    } else {
+      setSelectedFace(item);
+    }
   };
 
-  const prevPage = () => {
-    if (currentPage > 0) setCurrentPage(currentPage - 1);
+  const renderRow = ({ item }) => {
+    const isSelected =
+      (currentPage === 0 && selectedHair?.id === item.id) ||
+      (currentPage === 1 && selectedFace?.id === item.id);
+    return (
+      <Pressable onPress={() => handleSelect(item)} className="m-3">
+        <View
+          className={`items-center justify-center ${isSelected ? "bg-[#FEF9E5] h-32 w-32 rounded-xl" : ""}`}
+        >
+          <Image source={item.image} style={{ width: 130, height: 130 }} />
+        </View>
+      </Pressable>
+    );
   };
 
   return (
@@ -120,8 +127,7 @@ const AvatarCreation = () => {
       <View className="flex-1 items-center justify-center pt-8">
         <Text className="m-10 text-white text-4xl font-bold font-spaceGrotesk">my avatar</Text>
 
-         {/* ViewShot captures avatar */}
-         <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
+        <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
           <View className="w-72 h-72 mb-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
             <Image source={require("../../frontend/assets/head/base-head.png")} className="h-96 w-96" resizeMode="contain" />
             {selectedFace && <Image source={selectedFace.image} className="h-96 w-96 absolute" resizeMode="contain" />}
@@ -129,102 +135,71 @@ const AvatarCreation = () => {
           </View>
         </ViewShot>
 
-        {/* toggle and done button row */}
-        <View className="flex-1 flex-row w-full justify-between p-2">
-
-           {/* Toggle Button */}
-         <Pressable
+        {/* Toggle & Done */}
+        <View className="flex-row w-full justify-between px-6 mb-4">
+          <Pressable
             onPress={() => setIsToggled(!isToggled)}
             className="w-28 h-12 rounded-full bg-white flex-row items-center justify-between relative"
           >
-            {/* Toggle Circle */}
             <View
               className="w-12 h-12 bg-[#FFB95C] rounded-full"
               style={{
                 position: "absolute",
                 left: isToggled ? "74%" : "-17%",
                 transform: [{ translateX: isToggled ? -16 : 16 }],
-                transition: "all 0.3s ease",
               }}
             />
-            {/* Dark Hair Image */}
             <Image
               source={require("../../frontend/assets/dark_hair/hair-m4-dark.png")}
               className="w-20 h-20 absolute left-0 -ml-[17%]"
               resizeMode="contain"
             />
-
-            {/* Light Hair Image */}
             <Image
               source={require("../../frontend/assets/light_hair/hair-m4-light.png")}
-              className="w-20 h-20 absolute right-0 -mr-[15%]"
+              className="w-20 h-20 absolute right-0 -mr-[17%]"
               resizeMode="contain"
             />
           </Pressable>
 
-          {/* Done Button */}
           <TouchableOpacity
-          onPress={() => {
-            saveAvatar();
-            navigation.navigate("ProfileScreen");
-            console.log("go back to profile screen and save avatar");
-          }}
-          className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
-        >
-          <Text className="text-white text-2xl font-bold font-spaceGrotesk">done</Text>
-        </TouchableOpacity>
+            onPress={async () => {
+              const avatarUri = await saveAvatar();
+              navigation.navigate("Home", { avatarUri });
+            }}
+            className="bg-[#FFD49B] px-5 py-2 rounded-full"
+          >
+            <Text className="text-[#3B3B3B] text-xl font-semibold">done</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/*bottom part */}
-      <View className="w-full h-[45%] bg-[#F5A58C] flex justify-center">
-        <View className="absolute top-0 w-full bg-[#f6b59d] p-5 flex-row justify-between items-center">
-          {/* < button */}
-          <TouchableOpacity onPress={prevPage} disabled={currentPage === 0}>
-            <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${currentPage === 0 ? "opacity-50" : ""}`}>
-              {"<"}
-            </Text>
+      <View className="flex-row justify-center space-x-4 mt-2">
+          <TouchableOpacity
+            onPress={() => setCurrentPage(0)}
+            className={`px-4 py-2 rounded-full ${currentPage === 0 ? "bg-[#FFD49B]" : "bg-[#FEF9E5]"}`}
+          >
+            <Text>Hair</Text>
           </TouchableOpacity>
-          <Text className="text-[#FEF9E5] text-4xl font-bold font-spaceGrotesk">
-            {isFaceSection ? "face" : "hair"}
-          </Text>
-          {/* > button */}
-          <TouchableOpacity onPress={nextPage} disabled={currentPage >= totalPages - 1}>
-            <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${currentPage >= totalPages - 1 ? "opacity-50" : ""}`}>
-              {">"}
-            </Text>
+          <TouchableOpacity
+            onPress={() => setCurrentPage(1)}
+            className={`px-4 py-2 rounded-full ${currentPage === 1 ? "bg-[#FFD49B]" : "bg-[#FEF9E5]"}`}
+          >
+            <Text>Face</Text>
           </TouchableOpacity>
         </View>
-        <View className="w-full bg-[#F5A58C] flex justify-center">
-          <View className="flex flex-row justify-center mb-3">
-            {displayedImages.slice(0, 3).map((item) => (
-              <Pressable
-                key={item.id}
-                onPress={() => isFaceSection ? setSelectedFace(item) : setSelectedHair(item)}
-              >
-                <View
-                  className={`items-center justify-center ${selectedHair && selectedHair.id === item.id || selectedFace && selectedFace.id === item.id ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
-                >
-                  <Image source={item.image} style={{ width: 130, height: 130 }} />
-                </View>
-              </Pressable>
-            ))}
-          </View>
-          <View className="flex flex-row justify-center">
-            {displayedImages.slice(3, 6).map((item) => (
-              <Pressable
-                key={item.id}
-                onPress={() => isFaceSection ? setSelectedFace(item) : setSelectedHair(item)}
-              >
-                <View
-                  className={`items-center justify-center ${selectedHair && selectedHair.id === item.id || selectedFace && selectedFace.id === item.id ? "bg-[#FEF9E5] h-32 w-32 m-3 rounded-xl" : ""}`}
-                >
-                  <Image source={item.image} style={{ width: 130, height: 130 }} />
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        </View>
+
+      {/* Scrollable Face/Hair Options */}
+      <View className="bg-[#F5A58C] flex-1 px-4">
+        <FlatList
+          data={displayedImages}
+          renderItem={renderRow}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={{
+            paddingVertical: 16,
+            alignItems: 'center',
+          }}
+        />
       </View>
     </View>
   );
