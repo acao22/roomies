@@ -148,7 +148,7 @@ export const loginUser = async (req, res) => {
       });
   
       const expandedMembers = (await Promise.all(memberDataPromises)).filter((user) => user !== null);
-      res.status(200).json({ groupName, members: expandedMembers });
+      res.status(200).json({ id: groupDoc.id, groupName, members: expandedMembers });
     } catch (error) {
       console.error("Error retrieving user data:", error);
       res.status(500).json({ error: "Error retrieving user data" });

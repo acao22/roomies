@@ -27,11 +27,11 @@ const LoginScreen = ({ setUser }) => {
 
       const fullUser = {
         ...sessionData,
-        roomieGroup: groupData.groupName,
+        roomieGroup: groupData,
         members: groupData.members, // optional
       };
 
-      if (sessionData && groupData?.groupName) {
+      if (fullUser) {
         setUser(fullUser);
         Alert.alert("Login successful", "", [{ text: "OK" }]);
       } else {

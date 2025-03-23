@@ -8,6 +8,10 @@ import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
 import { getUserGroup, getUserInfo } from "../api/users.api";
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { db } from "../firebaseConfig.js";
+
+
 
 
 // Hardcoded avatars
@@ -16,6 +20,15 @@ const userAvatars = {
   Andrew: require("../images/avatar2.png"),
   Angie: require("../images/avatar3.png"),
   Default: require("../images/avatar4.png"),
+};
+
+const computeDueDate = (task) => {
+  if (task.date && task.time) {
+    // Combine ISO date and time (e.g., "2025-03-23" and "15:52:26")
+    return new Date(`${task.date}T${task.time}`);
+  }
+  // Fallback: try to use task.dueDate
+  return new Date(task.dueDate);
 };
 
 // Helper function to format a due date (from a string like "2025-03-12")
@@ -86,26 +99,44 @@ export default function TaskScreen({ user }) {
   const [activeTab, setActiveTab] = useState("tasks");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  // const filteredTasks = tasks.filter(task =>
+  //   task.groupId &&
+  //   user.roomieGroup &&
+  //   task.groupId.toString() === `/roomieGroups/${user.roomieGroup.id}`
+  // );
   
-
+  
+  // update screen irl
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const data = await getAllTasks();
-        console.log("Fetched tasks:", data);
-        // If API returns an array directly:
-        setTasks(data || []);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-        setTasks([]);
+    const q = query(collection(db, "task"));
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const tasksArray = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          // Process assignedTo if it's an array of DocumentReferences
+          if (data.assignedTo && Array.isArray(data.assignedTo)) {
+            // For now, we assume these references have been stored as strings or processed already.
+            // If they're still DocumentReferences, you'll need additional logic.
+            // Here, we assume they are strings.
+          }
+          return {
+            id: doc.id,
+            ...data,
+            completedAt: data.completedAt
+              ? data.completedAt.toDate().toISOString()
+              : null,
+          };
+        });
+        setTasks(tasksArray);
+      },
+      (error) => {
+        console.error("Error fetching tasks with onSnapshot:", error);
       }
-    };
-
-    
-
-    fetchTasks();
+    );
+    return () => unsubscribe();
   }, []);
-
 
   
 
@@ -212,7 +243,7 @@ export default function TaskScreen({ user }) {
             {item.title}
           </Text>
           <Text className={`text-s font-spaceGrotesk ${textColor}`}>
-            {formatDueDate(item.dueDate)}
+            {formatDueDate(computeDueDate(item))}
           </Text>
           {isCompleted && item.completedAt && (
             <Text className="text-xs text-custom-blue-200">
@@ -230,7 +261,7 @@ export default function TaskScreen({ user }) {
 
         {/* Avatars */}
         <View className="flex-row justify-between z-10">
-          {item.assignedTo.map((user, i) => (
+          {(item.assignedTo || []).map((user, i) => ( // need to make assignedTo correctly
             <View
               key={i}
               style={{
@@ -338,7 +369,7 @@ export default function TaskScreen({ user }) {
             ) : activeTab === "calendar" ? (
               <CalendarScreen />
             ) : (
-              <AddTaskScreen setActiveTab={setActiveTab} />
+              <AddTaskScreen setActiveTab={setActiveTab} user={user}/>
             )}
           </View>
         </View>

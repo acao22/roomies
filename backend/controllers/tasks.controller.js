@@ -39,7 +39,7 @@ export const getAllTasks = async (req, res) => {
 export const addTask = async (req, res) => {
     // the body should have the required fields: 
     console.log("works");
-    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy} = req.body;
+    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy, assignedTo, groupId} = req.body;
     const taskData = {
         title,
         icon: selectedIcon,
@@ -50,8 +50,15 @@ export const addTask = async (req, res) => {
         recurrence,
         description,
         createdAt, 
-        createdBy
+        createdBy,
+        groupId
     };
+
+    // need to convert assignedTo from string to array
+    if (assignedTo && Array.isArray(assignedTo)) {
+        taskData.assignedTo = assignedTo.map(uid => db.doc(`users/${uid}`));
+    }
+
     try {
       await db.collection("task").add(taskData);
       res.status(200).json({message: "task added successfully"});
