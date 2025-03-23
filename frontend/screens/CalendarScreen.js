@@ -14,13 +14,6 @@ import {
   Platform,
 } from "react-native";
 
-//layout animation for android
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 export default function CalendarScreen() {
   const navigation = useNavigation();
   const [selectedDate, setSelectedDate] = useState("");

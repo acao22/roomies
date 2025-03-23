@@ -1,10 +1,33 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from "@env";
-import { auth } from "../firebaseConfig"; // ✅ Import initialized auth
+import { auth } from "../firebaseConfig";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
+
+// get first name and last name from database
+export const getUserInfo = async () => {
+  const {uid, email, message} = await verifyUserSession();
+  if (uid) {
+    const response = await axios.post(`${API_USER_BASE_URL}/getInfo`, {
+      uid
+    });
+    return response.data;
+  }
+}
+
+// get user's roommate group members, group name
+export const getUserGroup = async () => {
+  const {uid, email, message} = await verifyUserSession();
+  if (uid) {
+    const response = await axios.post(`${API_USER_BASE_URL}/getUserGroup`, {
+      uid
+    });
+    return response.data;
+  }
+}
+
 
 
 // checking if a user is still logged in
@@ -16,20 +39,47 @@ export const verifyUserSession = async () => {
       const response = await axios.post(`${API_USER_BASE_URL}/verify`, {
         idToken, // this sends firebase ID token, not the custom token
       });
-      return response.data; // { uid, email, message }
+    //   const { uid, email, message } = response.data;
+
+    //   const groupResponse = await axios.post(`${API_USER_BASE_URL}/getUserGroup`, {
+    //     uid,
+    //   });
+
+    //   const { groupName, members } = groupResponse.data;
+
+    //   return {
+    //     uid,
+    //     email,
+    //     roomieGroup: groupName,
+    //   };
+
+        const { uid, email } = response.data;
+        return { uid, email };
+        
+      //return response.data; // { uid, email, message }
     } catch (error) {
-      console.error("Session verification failed:", error.response?.data || error.message);
+      // Still return user info if session is valid but group is missing
+      if (error?.response?.status === 404 && error.response.data?.error?.includes("roomieGroup")) {
+        return {
+          uid: error.response.config?.data?.uid || null,
+          email: null,
+          roomieGroup: null,
+          members: [],
+        };
+      }
+  
       return null;
     }
 };
 
 
 // register a new user
-export const registerUser = async (email, password, displayName = "roomie") => {
+export const registerUser = async (email, password, firstName, lastName, displayName = "roomie") => {
+    console.log(firstName, lastName, displayName);
     try {
       const response = await axios.post(
         `${API_USER_BASE_URL}/signup`,
-        JSON.stringify({ email, password, displayName }),
+        JSON.stringify({ email, password, displayName, firstName, lastName }),
         {
           headers: { "Content-Type": "application/json" },
         }
@@ -81,5 +131,37 @@ export const logoutUser = async (setUser) => {
       console.log("User logged out successfully.");
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+// join an existing group by name + passcode
+export const joinGroup = async ({ uid, groupName, passcode }) => {
+    try {
+      const response = await axios.post(`${API_USER_BASE_URL}/joinGroup`, {
+        uid,
+        groupName,
+        passcode,
+      });
+  
+      return response.data; // { message, groupId, groupName }
+    } catch (error) {
+      console.error("Join group failed:", error.response?.data || error.message);
+      throw error;
+    }
+  };
+  
+  // create a new group
+  export const createGroup = async ({ uid, groupName, passcode }) => {
+    try {
+      const response = await axios.post(`${API_USER_BASE_URL}/createGroup`, {
+        uid,
+        groupName,
+        passcode,
+      });
+  
+      return response.data; // { message, groupId, groupName }
+    } catch (error) {
+      console.error("Create group failed:", error.response?.data || error.message);
+      throw error;
     }
   };

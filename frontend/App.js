@@ -32,6 +32,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // for verifying user, user session management
 import { verifyUserSession } from "./api/users.api.js";
+import GroupScreen from "./screens/GroupScreen";
 
 // for layout animation
 if (
@@ -87,7 +88,7 @@ function ProfileStackScreen({ setUser }) {
   );
 }
 
-function MainTabs({ setUser }) {
+function MainTabs({ user, setUser }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -149,10 +150,12 @@ function MainTabs({ setUser }) {
       })}
     >
       <Tab.Screen name="HomePage" component={HomeStackScreen} />
-      <Tab.Screen name="TaskPage" component={TaskStackScreen} />
+      <Tab.Screen name="TaskPage">
+        {() => <TaskScreen user={user} />}
+      </Tab.Screen>
       <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
       <Tab.Screen name="ProfilePage">
-        {() => <ProfileStackScreen setUser={setUser} />}
+        {() => <ProfileStackScreen user={user} setUser={setUser} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
@@ -162,27 +165,31 @@ function LandingScreenWrapper() {
   return <LandingScreen />;
 }
 
-function SignupScreenWrapper({ navigation }) {
-  return (
-    <TouchableOpacity
-      style={{ flex: 1 }}
-      onPress={() => navigation.replace("Landing")}
-    >
-      <SignUpScreen />
-    </TouchableOpacity>
-  );
+function GroupScreenWrapper({ setUser }) {
+  return <GroupScreen setUser={setUser} />;
 }
 
-function LoginScreenWrapper({ navigation }) {
-  return (
-    <TouchableOpacity
-      style={{ flex: 1 }}
-      onPress={() => navigation.replace("Landing")}
-    >
-      <LoginScreen setUser={setUser} />
-    </TouchableOpacity>
-  );
-}
+// function SignupScreenWrapper({ navigation }) {
+//   return (
+//     <TouchableOpacity
+//       style={{ flex: 1 }}
+//       onPress={() => navigation.replace("Landing")}
+//     >
+//       <SignUpScreen />
+//     </TouchableOpacity>
+//   );
+// }
+
+// function LoginScreenWrapper({ navigation }) {
+//   return (
+//     <TouchableOpacity
+//       style={{ flex: 1 }}
+//       onPress={() => navigation.replace("Landing")}
+//     >
+//       <LoginScreen setUser={setUser} />
+//     </TouchableOpacity>
+//   );
+// }
 
 export default function App() {
   // for user sessions
@@ -199,7 +206,7 @@ export default function App() {
         const session = await verifyUserSession();
         console.log("User session:", session);
 
-        if (session) {
+        if (session?.uid && session?.roomieGroup) {
           setUser(session);
         } else {
           await AsyncStorage.removeItem("idToken"); // Clear expired token
@@ -237,7 +244,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
+        {user && user.roomieGroup ? (
           <RootStack.Screen name="Main">
             {() => <MainTabs setUser={setUser} />}
           </RootStack.Screen>
@@ -252,6 +259,9 @@ export default function App() {
             />
             <RootStack.Screen name="Signup">
               {() => <SignUpScreen setUser={setUser} />}
+            </RootStack.Screen>
+            <RootStack.Screen name="Group" options={{ animation: "slide_from_left" }}>
+              {() => <GroupScreen setUser={setUser} />}
             </RootStack.Screen>
             <RootStack.Screen name="Login">
               {() => <LoginScreen setUser={setUser} />}

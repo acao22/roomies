@@ -37,7 +37,7 @@ const LandingScreen = ({}) => {
         </View>
         <TouchableOpacity
           className="bg-custom-red items-center p-3 rounded-full mt-10 w-44"
-          onPress={() => navigation.replace("Signup")}
+          onPress={() => navigation.navigate("Signup", { origin: "Landing"} )}
         >
           <Text
             className=" text-white font-bold font-spaceGrotesk text-2xl"
@@ -52,7 +52,7 @@ const LandingScreen = ({}) => {
         >
           already have an account?
         </Text>
-        <TouchableOpacity onPress={() => navigation.replace("Login")}>
+        <TouchableOpacity onPress={() => navigation.navigate("Login", {origin: "Landing"} )}>
           <Text className="underline text-2xl">log in</Text>
         </TouchableOpacity>
 

@@ -7,8 +7,8 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
-import { loginUser } from "../api/users.api.js";
-import { useNavigation } from "@react-navigation/native";
+import { loginUser, verifyUserSession, getUserGroup } from "../api/users.api.js";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 const LoginScreen = ({ setUser }) => {
@@ -16,22 +16,29 @@ const LoginScreen = ({ setUser }) => {
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
   const gridImage = require("../assets/grid.png");
+  const route = useRoute();
+  const origin = route.params?.origin || "Landing";
 
   const handleLogin = async () => {
     try {
       const userCredential = await loginUser(email, password);
-      if (userCredential) {
-        setUser(userCredential);
-        Alert.alert("Login successful", "", [
-          {
-            text: "OK",
-          },
-        ]);
+      const sessionData = await verifyUserSession();
+      const groupData = await getUserGroup();
+
+      const fullUser = {
+        ...sessionData,
+        roomieGroup: groupData.groupName,
+        members: groupData.members, // optional
+      };
+
+      if (sessionData && groupData?.groupName) {
+        setUser(fullUser);
+        Alert.alert("Login successful", "", [{ text: "OK" }]);
       } else {
-        Alert.alert("Error", "Unexpected error occurred.");
+        Alert.alert("Missing group", "Please join or create a group.");
       }
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message || "An unexpected error occurred.");
     }
   };
   return (
@@ -41,7 +48,7 @@ const LoginScreen = ({ setUser }) => {
         <TouchableOpacity
           onPress={() => {
             if (navigation.canGoBack()) {
-              navigation.goBack();
+              navigation.replace(origin);
             } else {
               navigation.navigate("Landing");
             }
@@ -96,7 +103,7 @@ const LoginScreen = ({ setUser }) => {
             <Text className="text-xl font-spaceGrotesk text-[#504E4D]">
               don't have an account yet?
             </Text>
-            <TouchableOpacity onPress={() => navigation.replace("Signup")}>
+            <TouchableOpacity onPress={() => navigation.navigate("Signup", { origin: "Landing"} )}>
               <Text className="underline text-xl text-[#504E4D]">sign up</Text>
             </TouchableOpacity>
           </View>

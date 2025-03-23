@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -14,6 +14,7 @@ import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
 import CustomModal from "./AddGroupModal";
+import { getUserInfo, getUserGroup } from "../api/users.api.js";
 
 
 
@@ -23,14 +24,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [userGroup, setUserGroup] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const {firstName, lastName} = await getUserInfo();
+        setUserData({firstName: firstName, lastName: lastName});
+
+        const {groupName, members} = await getUserGroup();
+        setUserGroup({groupName: groupName, members: members});
+
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
 
-  // hardcoded data for now
-  const roomies = [
-    { id: "1", name: "roomie #1", bgClass: "bg-[#FF8C83]" },
-    { id: "2", name: "roomie #2", bgClass: "bg-[#FFB95C]" },
-    { id: "3", name: "roomie #3", bgClass: "bg-[#6CD8D5]" },
-  ];
 
   const handleLogout = async () => {
     try {
@@ -59,7 +72,7 @@ const ProfileScreen = ({ setUser }) => {
       <ScrollView>
 
       <View className="bg-custom-yellow w-full h-56 absolute top-0 z-0">
-        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, [username]</Text>
+        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
         <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">Day 365 of rooming</Text>
       </View>
 
@@ -83,7 +96,7 @@ const ProfileScreen = ({ setUser }) => {
 
         {/* user name */}
         <Text className="text-lg font-bold text-custom-black mt-3">
-          first last
+        {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}
         </Text>
         {/* rating + star */}
         <View className="flex-row items-center mt-1">
@@ -107,7 +120,7 @@ const ProfileScreen = ({ setUser }) => {
         </View>
         <View className="bg-custom-blue-100 rounded-xl p-6 w-full items-center justify-center">
           <Image source={home} className="w-50 h-50" />
-          <Text className="font-bold font-spaceGrotesk text-custom-black text-xl mt-3">Group name</Text>
+          <Text className="font-bold font-spaceGrotesk text-custom-black text-xl mt-3">{userGroup ? `${userGroup.groupName}` : "you loner roomie"}</Text>
         </View>
         { /* might beed later so I just commented out 
         {/*
