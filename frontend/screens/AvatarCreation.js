@@ -173,7 +173,16 @@ const AvatarCreation = () => {
         </View>
       </View>
 
-      <View className="flex-row justify-center space-x-4 mt-2">
+      {/* Scrollable Face/Hair Options */}
+      <View className="bg-[#F5A58C] flex-1 px-4">
+        <FlatList
+          data={displayedImages}
+          renderItem={renderRow}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          contentContainerStyle={{ paddingVertical: 16 }}
+        />
+        <View className="flex-row justify-center space-x-4 mt-2">
           <TouchableOpacity
             onPress={() => setCurrentPage(0)}
             className={`px-4 py-2 rounded-full ${currentPage === 0 ? "bg-[#FFD49B]" : "bg-[#FEF9E5]"}`}
@@ -187,20 +196,6 @@ const AvatarCreation = () => {
             <Text>Face</Text>
           </TouchableOpacity>
         </View>
-
-
-      {/* Scrollable Face/Hair Options */}
-      <View className="bg-[#F5A58C] flex-1 px-4">
-        <FlatList
-          data={displayedImages}
-          renderItem={renderRow}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={{
-            paddingVertical: 16,
-            alignItems: 'center',
-          }}
-        />
       </View>
     </View>
   );
