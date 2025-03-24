@@ -180,21 +180,26 @@ const AvatarCreation = () => {
           renderItem={renderRow}
           keyExtractor={(item) => item.id}
           numColumns={3}
-          contentContainerStyle={{ paddingVertical: 16 }}
+          contentContainerStyle={{ padding: 10 }}
         />
         <View className="flex-row justify-center space-x-4 mt-2">
-          <TouchableOpacity
-            onPress={() => setCurrentPage(0)}
-            className={`px-4 py-2 rounded-full ${currentPage === 0 ? "bg-[#FFD49B]" : "bg-[#FEF9E5]"}`}
-          >
-            <Text>Hair</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setCurrentPage(1)}
-            className={`px-4 py-2 rounded-full ${currentPage === 1 ? "bg-[#FFD49B]" : "bg-[#FEF9E5]"}`}
-          >
-            <Text>Face</Text>
-          </TouchableOpacity>
+          <View className="absolute top-0 w-full bg-[#f6b59d] p-5 flex-row justify-between items-center">
+            {/* < button */}
+            <TouchableOpacity onPress={prevPage} disabled={currentPage === 0}>
+              <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${currentPage === 0 ? "opacity-50" : ""}`}>
+                {"<"}
+              </Text>
+            </TouchableOpacity>
+            <Text className="text-[#FEF9E5] text-4xl font-bold font-spaceGrotesk">
+              {isFaceSection ? "face" : "hair"}
+            </Text>
+            {/* > button */}
+            <TouchableOpacity onPress={nextPage} disabled={currentPage >= totalPages - 1}>
+              <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${currentPage >= totalPages - 1 ? "opacity-50" : ""}`}>
+                {">"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
