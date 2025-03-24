@@ -19,9 +19,16 @@ const AvatarCreation = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedHair, setSelectedHair] = useState(null);
   const [selectedFace, setSelectedFace] = useState(null);
-  const imagesPerPage = 6;
   const navigation = useNavigation();
   const viewShotRef = useRef(null);
+
+  const nextPage = () => {
+    if (currentPage < totalPages - 1) setCurrentPage(currentPage + 1);
+  };
+
+  const prevPage = () => {
+    if (currentPage > 0) setCurrentPage(currentPage - 1);
+  };
 
   const saveAvatar = async () => {
     if (viewShotRef.current) {
