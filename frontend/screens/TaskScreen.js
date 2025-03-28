@@ -7,7 +7,7 @@ import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
-import { getUserGroup, getUserInfo } from "../api/users.api";
+import { getUserGroup, getUserInfo, verifyUserSession} from "../api/users.api";
 import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
 
@@ -152,6 +152,7 @@ export default function TaskScreen({ user }) {
 
   // Toggle task completion status and open modal if marking as completed
   const toggleTaskCompletion = async (taskId) => {
+    const {uid, email, message} = await verifyUserSession();
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
         const newStatus = task.status === "completed" ? "open" : "completed";
@@ -159,6 +160,8 @@ export default function TaskScreen({ user }) {
           ...task,
           status: newStatus,
           completedAt: newStatus === "completed" ? new Date() : null,
+          completedBy: newStatus === "completed" ? uid : null,
+          updatedAt: new Date()
         };
         return updatedTask;
       }
@@ -173,6 +176,8 @@ export default function TaskScreen({ user }) {
       await updateTask(taskId, {
         status: taskToUpdate.status,
         completedAt: taskToUpdate.completedAt,
+        updatedAt: taskToUpdate.updatedAt,
+        completedBy: taskToUpdate.completedBy
       });
     } catch (error) {
       console.error("Error updating task in firebase:", error);

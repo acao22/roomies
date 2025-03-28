@@ -72,8 +72,8 @@ export default function GroupFeedScreen() {
         const q = query(
           tasksRef,
           where("groupId", "==", groupId),
-          where("status","==", "completed"),
-          orderBy("completedAt", "desc") //updatedAt isn't a field rn so just using created
+          //where("status","==", "completed"),
+          orderBy("updatedAt", "desc") 
         );
 
         unsubscribe = onSnapshot(q, snapshot => {
@@ -95,13 +95,22 @@ export default function GroupFeedScreen() {
 
 
   // find only completed ones
-  const completedTasks = tasks.filter(task => task.status === "completed");
+  //const completedTasks = tasks.filter(task => task.status === "completed");
+  const completedTasks = tasks;
 
 
   // find users of completed tasks
   useEffect(() => {
     const fetchUsersForCompletedTasks = async () => {
-      const uids = [...new Set(completedTasks.map(task => task.completedBy))];
+      //const uids = [...new Set(completedTasks.map(task => task.completedBy))];
+      const uids = [
+        ...new Set(
+          tasks
+            .map((task) => task.createdBy)
+            .concat(tasks.map((task) => task.completedBy))
+            .filter(Boolean)
+        ),
+      ];
       const tempUsers = {};
       for (const uid of uids) {
         try {
@@ -156,7 +165,16 @@ export default function GroupFeedScreen() {
         {/* feed list */}
         <View className="mt-6 px-4">
           {completedTasks.map((task) => {
-            const user = userMap[task.completedBy] || {};
+            // Determine which user to display
+            // For completed tasks, use completedBy, for open tasks, use createdBy
+            const userUid = task.status === "completed" ? task.completedBy : task.createdBy;
+            const user = userMap[userUid] || {};
+
+            // Conditionally create the message based on task status
+            const message =
+              task.status === "completed"
+                ? `${user.firstName} completed "${task.title}"!`
+                : `${user.firstName} created "${task.title}"!`;
             const imageSource = task.image ? task.image : getTaskImage(task.id);
             return (
 
@@ -166,7 +184,7 @@ export default function GroupFeedScreen() {
             >
               {/* user & task info */}
               <Text className="text-[#FEF9E5] font-bold text-lg">
-                {user.firstName} completed “{task.title}”!
+                {message}
               </Text>
 
               {/* image if input */}
