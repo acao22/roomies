@@ -8,7 +8,7 @@ import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
 import { getUserGroup, getUserInfo } from "../api/users.api";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
 
 
@@ -109,33 +109,43 @@ export default function TaskScreen({ user }) {
   
   // update screen irl
   useEffect(() => {
-    const q = query(collection(db, "task"));
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const tasksArray = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          // Process assignedTo if it's an array of DocumentReferences
-          if (data.assignedTo && Array.isArray(data.assignedTo)) {
-            // For now, we assume these references have been stored as strings or processed already.
-            // If they're still DocumentReferences, you'll need additional logic.
-            // Here, we assume they are strings.
+    let unsubscribe;
+    async function fetchUserId() {
+      try {
+        const groupData = await getUserGroup();
+        const groupId = groupData.id;
+        const q = query(collection(db, "task"), where("groupId", "==", groupId));
+        unsubscribe = onSnapshot(
+          q,
+          (querySnapshot) => {
+            const tasksArray = querySnapshot.docs.map((doc) => {
+              const data = doc.data();
+              // Process assignedTo if it's an array of DocumentReferences
+              if (data.assignedTo && Array.isArray(data.assignedTo)) {
+                // For now, we assume these references have been stored as strings or processed already.
+                // If they're still DocumentReferencess, you'll need additional logic.
+                // Here, we assume they are strings.
+              }
+              return {
+                id: doc.id,
+                ...data,
+                completedAt: data.completedAt
+                  ? data.completedAt.toDate().toISOString()
+                  : null,
+              };
+            });
+            setTasks(tasksArray);
+          },
+          (error) => {
+            console.error("Error fetching tasks with onSnapshot:", error);
           }
-          return {
-            id: doc.id,
-            ...data,
-            completedAt: data.completedAt
-              ? data.completedAt.toDate().toISOString()
-              : null,
-          };
-        });
-        setTasks(tasksArray);
-      },
-      (error) => {
-        console.error("Error fetching tasks with onSnapshot:", error);
+        );
+      } catch (error) {
+        console.error("Error fetching group data:", error);
       }
-    );
-    return () => unsubscribe();
+    }
+    fetchUserId();
+    return () => {if (unsubscribe) unsubscribe()};
   }, []);
 
   
