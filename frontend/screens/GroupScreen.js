@@ -10,6 +10,7 @@ import { useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { createGroup, joinGroup, getUserGroup, verifyUserSession } from "../api/users.api.js";
+import { ScrollView } from "react-native";
 
 const GroupScreen = ({ setUser }) => {
   const navigation = useNavigation();
@@ -20,7 +21,7 @@ const GroupScreen = ({ setUser }) => {
   const [joinPasscode, setJoinPasscode] = useState("");
 
   return (
-    <View className="bg-custom-yellow" style={{ flex: 1 }}>
+    <ScrollView className="bg-custom-yellow" style={{ flex: 1 }}>
     {/* Back button - simply navigate to Landing */}
     <TouchableOpacity
         onPress={() => navigation.navigate("Landing")}
@@ -167,7 +168,7 @@ const GroupScreen = ({ setUser }) => {
             </View>
         </View>
     </View>
-    </View>
+    </ScrollView>
   );
 };
 

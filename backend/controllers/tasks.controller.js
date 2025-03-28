@@ -1,9 +1,13 @@
 import { db, auth } from "../config/firebaseAdmin.js";
 import admin from "firebase-admin";
+import { getUserGroupData } from '../utils/groupHelper.js';
 
 export const getAllTasks = async (req, res) => {
   try {
-    const querySnapshot = await db.collection("task").get();
+    // get group info and group ID
+    const groupData = await getUserGroupData(uid);
+    const groupId = groupData.id;
+    const querySnapshot = await db.collection("task").where("groupId", "==", groupId).get();
     
     // Map over the docs and populate assignedTo with display names if possible.
     const documents = await Promise.all(
@@ -39,7 +43,7 @@ export const getAllTasks = async (req, res) => {
 export const addTask = async (req, res) => {
     // the body should have the required fields: 
     console.log("works");
-    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy, assignedTo, groupId} = req.body;
+    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy, updatedAt, groupId} = req.body;
     const taskData = {
         title,
         icon: selectedIcon,
@@ -51,9 +55,13 @@ export const addTask = async (req, res) => {
         description,
         createdAt, 
         createdBy,
+        completedAt: null,
+        completedBy: null,
+        updatedAt,
         groupId
     };
-
+    console.log(taskData);
+    const assignedTo = null;
     // need to convert assignedTo from string to array
     if (assignedTo && Array.isArray(assignedTo)) {
         taskData.assignedTo = assignedTo.map(uid => db.doc(`users/${uid}`));
@@ -74,6 +82,7 @@ export const updateTask = async (req, res) => {
 
     if (updatedData.completedAt) {
         updatedData.completedAt = admin.firestore.Timestamp.fromDate(new Date(updatedData.completedAt));
+        updatedData.completedAt = admin.firestore.Timestamp.fromDate(new Date(updatedData.updatedAt));
     }
 
     try {
