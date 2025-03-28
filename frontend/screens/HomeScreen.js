@@ -72,8 +72,8 @@ export default function GroupFeedScreen() {
         const q = query(
           tasksRef,
           where("groupId", "==", groupId),
-          where("status","==", "completed"),
-          orderBy("completedAt", "desc") //updatedAt isn't a field rn so just using created
+          //where("status","==", "completed"),
+          orderBy("updatedAt", "desc") 
         );
 
         unsubscribe = onSnapshot(q, snapshot => {
