@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 // needed for real time updates
-import { collection, query, onSnapshot } from "firebase/firestore";
-import { getUserInfo } from "../api/users.api.js";
+import { collection, query, onSnapshot, where, orderBy } from "firebase/firestore";
+import { getUserInfo, getUserGroup } from "../api/users.api.js";
 import face1 from "../images/avatar1.png";
 import { db } from "../firebaseConfig.js";
 
@@ -61,18 +61,35 @@ export default function GroupFeedScreen() {
   const [userMap, setUsersMap] = useState([]);
 
   useEffect(() => {
-    const tasksRef = collection(db, "task");
-    const q = query(tasksRef);
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const tasksData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setTasks(tasksData);
-    }, error => {
-      console.error("Error listening to tasks:", error);
-    });
-    return () => unsubscribe();
+    let unsubscribe;
+    async function fetchAndSubscribe() {
+      try {
+        const groupData = await getUserGroup();
+        const groupId = groupData.id;
+
+        // Build a query filtering by groupId and ordering by updatedAt descending.
+        const tasksRef = collection(db, "task");
+        const q = query(
+          tasksRef,
+          where("groupId", "==", groupId),
+          orderBy("createdAt", "desc") //updatedAt isn't a field rn so just using created
+        );
+
+        unsubscribe = onSnapshot(q, snapshot => {
+          const tasksData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setTasks(tasksData);
+        }, error => {
+          console.error("Error listening to tasks:", error);
+        });
+      } catch (error) {
+        console.error("Error fetching group data:", error);
+      }
+    }
+    fetchAndSubscribe();
+    return () => {if (unsubscribe) unsubscribe()};
   }, []);
 
 
