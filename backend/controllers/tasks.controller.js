@@ -43,7 +43,7 @@ export const getAllTasks = async (req, res) => {
 export const addTask = async (req, res) => {
     // the body should have the required fields: 
     console.log("works");
-    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy, groupId} = req.body;
+    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy, updatedAt, groupId} = req.body;
     const taskData = {
         title,
         icon: selectedIcon,
@@ -55,6 +55,9 @@ export const addTask = async (req, res) => {
         description,
         createdAt, 
         createdBy,
+        completedAt: null,
+        completedBy: null,
+        updatedAt,
         groupId
     };
     console.log(taskData);
@@ -79,6 +82,7 @@ export const updateTask = async (req, res) => {
 
     if (updatedData.completedAt) {
         updatedData.completedAt = admin.firestore.Timestamp.fromDate(new Date(updatedData.completedAt));
+        updatedData.completedAt = admin.firestore.Timestamp.fromDate(new Date(updatedData.updatedAt));
     }
 
     try {

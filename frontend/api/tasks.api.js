@@ -32,6 +32,7 @@ export const addTask = async (title, selectedIcon, date, time, members, recurren
           description, 
           createdAt: (new Date()).toISOString(), 
           createdBy: userId,
+          updatedAt: (new Date()).toISOString(),
           groupId
       }),
       {
