@@ -14,7 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { addTask } from "../api/tasks.api.js";
 
-
+import { getUserGroup } from "../api/users.api.js";
 // hardcoded stuff for now
 const userAvatars = {
   Luna: require("../images/avatar1.png"),
@@ -75,11 +75,15 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   };
 
   const handleAddTask = async () => {
-    const groupId =
-    user && Array.isArray(user.roomieGroup) && user.roomieGroup.length > 0
-      ? `/roomiesGroup/${user.roomieGroup[0]}`  // adjust collection name as needed
-      : null;   
     try {
+      const groupData = await getUserGroup();
+      console.log(groupData);
+      const groupId = groupData.id;
+      /*
+      user && Array.isArray(user.roomieGroup) && user.roomieGroup.length > 0
+        ? `/roomiesGroup/${user.roomieGroup[0]}`  // adjust collection name as needed
+        : null; */
+      console.log(groupId);   
       await addTask(title, selectedIcon, date.toISOString().split('T')[0], time.toISOString().split('T')[1].substring(0, 8), 
       members.filter(m => m.selected).map(m => m.name), recurrence, description, groupId); // need to add assignedTo
       setActiveTab("tasks");
