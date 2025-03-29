@@ -6,6 +6,30 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
 
+
+export const fetchAvatar = async () => {
+  const {uid, email, message} = await verifyUserSession(); 
+  if (uid) {
+    const response = await axios.post(`${API_USER_BASE_URL}/fetchAvatar`, {
+      uid
+    });
+    return response.data;
+  }
+}
+
+// save an avatar 
+export const saveAvatar = async (uri) => {
+  const {uid, email, message} = await verifyUserSession(); 
+  if (uid) {
+    const response = await axios.post(`${API_USER_BASE_URL}/saveAvatar`, {
+      uid, uri
+    });
+    return response.data;
+  }
+}
+
+
+
 // get first name and last name from database
 export const getUserInfo = async () => {
   const {uid, email, message} = await verifyUserSession();
