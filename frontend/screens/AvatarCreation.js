@@ -123,7 +123,7 @@ const AvatarCreation = () => {
 
         {/* Avatar Preview */}
         <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
-          <View className="w-72 h-72 mt-12 mb-4 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
+          <View className="w-80 h-80 mt-12 mb-4 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
             <Image
               source={require("../../frontend/assets/head/base-head.png")}
               className="h-96 w-96"
