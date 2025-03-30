@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+// needed for real time updates
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { getUserInfo } from "../api/users.api.js";
+import face1 from "../images/avatar1.png";
+import { db } from "../firebaseConfig.js";
+
 
 const avatars = [
   require("../images/avatar1.png"),
@@ -9,35 +15,94 @@ const avatars = [
   require("../images/avatar4.png"),
 ];
 
-const feedItems = [
-  {
-    id: "1",
-    userName: "Angie",
-    taskName: "trash",
-    timeAgo: "7 min ago",
-    message: "yay! i just took out the trash.",
-    image: require("../images/task1.png"),
-  },
-  {
-    id: "2",
-    userName: "Luna",
-    taskName: "recycling",
-    timeAgo: "34 min ago",
-    message: "skibidi",
-    image: require("../images/task2.png"),
-  },
-  {
-    id: "3",
-    userName: "Katherine",
-    taskName: "poop",
-    timeAgo: "24 years ago",
-    message: "i just pooped",
-    image: require("../images/task1.png"),
-  },
+// default images since we don't know how to upload yet
+const taskImages = [
+  require("../images/task1.png"),
+  require("../images/task2.png"),
 ];
+
+const getTaskImage = (taskId) => {
+  const hash = taskId
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return taskImages[hash % taskImages.length];
+};
+
+// const feedItems = [
+//   {
+//     id: "1",
+//     userName: "Angie",
+//     taskName: "trash",
+//     timeAgo: "7 min ago",
+//     message: "yay! i just took out the trash.",
+//     image: require("../images/task1.png"),
+//   },
+//   {
+//     id: "2",
+//     userName: "Luna",
+//     taskName: "recycling",
+//     timeAgo: "34 min ago",
+//     message: "skibidi",
+//     image: require("../images/task2.png"),
+//   },
+//   {
+//     id: "3",
+//     userName: "Katherine",
+//     taskName: "poop",
+//     timeAgo: "24 years ago",
+//     message: "i just pooped",
+//     image: require("../images/task1.png"),
+//   },
+// ];
 
 export default function GroupFeedScreen() {
   const navigation = useNavigation();
+  const [tasks, setTasks] = useState([]);
+  const [userMap, setUsersMap] = useState([]);
+
+  useEffect(() => {
+    const tasksRef = collection(db, "task");
+    const q = query(tasksRef);
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const tasksData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setTasks(tasksData);
+    }, error => {
+      console.error("Error listening to tasks:", error);
+    });
+    return () => unsubscribe();
+  }, []);
+
+
+  // find only completed ones
+  const completedTasks = tasks.filter(task => task.status === "completed");
+
+
+  // find users of completed tasks
+  useEffect(() => {
+    const fetchUsersForCompletedTasks = async () => {
+      const uids = [...new Set(completedTasks.map(task => task.completedBy))];
+      const tempUsers = {};
+      for (const uid of uids) {
+        try {
+          const userData = await getUserInfo({ uid });
+          tempUsers[uid] = userData;
+        } catch (error) {
+          console.error("Error fetching user for uid:", uid, error);
+        }
+      }
+      setUsersMap(tempUsers);
+    };
+
+    if (completedTasks.length > 0) {
+      fetchUsersForCompletedTasks();
+    }
+  }, [completedTasks]);
+
+
+
 
   return (
     <View className="flex-1 bg-[#FEF9E5]">
@@ -45,12 +110,12 @@ export default function GroupFeedScreen() {
         <View className="bg-[#F5A58C] w-full h-48 absolute top-0 z-0" />
 
         {/* temp button for landing page for testing */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           className="bg-[#9CABD8]  p-3 rounded-full mx-4 mt-14 absolute z-10"
           onPress={() => navigation.replace("Landing")}
         >
           <Text className="text-white font-bold text-lg">Landing Page</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* avatars row, need to fix this spacing later */}
         <View className="flex-row justify-between px-24 mt-40">
@@ -72,20 +137,24 @@ export default function GroupFeedScreen() {
         </View>
         {/* feed list */}
         <View className="mt-6 px-4">
-          {feedItems.map((item) => (
+          {completedTasks.map((task) => {
+            const user = userMap[task.completedBy] || {};
+            const imageSource = task.image ? task.image : getTaskImage(task.id);
+            return (
+
             <View
-              key={item.id}
+              key={task.id}
               className="bg-[#9CABD8] rounded-2xl p-4 mb-6 shadow-sm"
             >
               {/* user & task info */}
               <Text className="text-[#FEF9E5] font-bold text-lg">
-                {item.userName} completed “{item.taskName}”!
+                {user.firstName} completed “{task.title}”!
               </Text>
 
               {/* image if input */}
               <View className="mt-3 rounded-xl overflow-hidden">
                 <Image
-                  source={item.image}
+                  source={imageSource}
                   className="w-full h-48"
                   resizeMode="cover"
                 />
@@ -94,19 +163,23 @@ export default function GroupFeedScreen() {
               {/* msg & time */}
               <View className="flex-row items-center space-x-2 mt-3">
                 <Image
-                  source={avatars[0]}
+                  source={user.avatarURL ? { uri: user.avatarURL } : face1}
                   className="h-10 w-10 rounded-full bg-gray-300"
                 />
                 <Text className="mx-2 text-[#FEF9E5] text-lg">
-                  {item.message}
+                  {task.description}
                 </Text>
               </View>
+              {task.completedAt && (
+                <Text className="text-[#FEF9E5] font-bold text-xs mt-1">
+                {new Date(task.completedAt.seconds * 1000).toLocaleString()}
+                </Text>
+                
+              )}
 
-              <Text className="text-[#FEF9E5] font-bold text-xs mt-1">
-                {item.timeAgo}
-              </Text>
             </View>
-          ))}
+          );
+          })}
         </View>
       </ScrollView>
     </View>

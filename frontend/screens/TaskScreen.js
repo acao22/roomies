@@ -1,124 +1,379 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import CalendarScreen from "./CalendarScreen";
+import AddTaskScreen from "./AddTaskScreen";
+import Animated from "react-native-reanimated";
+import * as Animatable from "react-native-animatable";
+import CustomModal from "./CustomModal";
+import { getAllTasks, updateTask } from "../api/tasks.api.js";
+import { getUserGroup, getUserInfo } from "../api/users.api";
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { db } from "../firebaseConfig.js";
 
-const initialTasks = [
-  {
-    id: "1",
-    title: "Take out trash",
-    description: "take out the trash from the kitchen",
-    status: "open",
-    assignedTo: "angie",
-    dueDate: "2025-02-20",
-    pointValue: 10,
-    recurring: "weekly",
-    groupId: "group123",
-  },
-  {
-    id: "2",
-    title: "Wash dishes",
-    description: "clean the dinner dishes!",
-    status: "open",
-    assignedTo: "luna",
-    dueDate: "2025-02-25",
-    pointValue: 5,
-    recurring: "daily",
-    groupId: "group123",
-  },
-  {
-    id: "3",
-    title: "Vacuum living room",
-    description: "skibidi",
-    status: "open",
-    assignedTo: "kat",
-    dueDate: "2025-02-19",
-    pointValue: 15,
-    recurring: "weekly",
-    groupId: "group123",
-  },
-];
 
-export default function TaskScreen() {
-  const [tasks, setTasks] = useState(initialTasks);
 
-  const isTaskPastDue = (dueDateStr) => {
-    if (!dueDateStr) return false;
-    const dueDate = new Date(dueDateStr);
-    const now = new Date();
-    return dueDate < now;
-  };
 
-  const toggleTaskCompletion = (taskId) => {
+// Hardcoded avatars
+const userAvatars = {
+  Luna: require("../images/avatar1.png"),
+  Andrew: require("../images/avatar2.png"),
+  Angie: require("../images/avatar3.png"),
+  Default: require("../images/avatar4.png"),
+};
+
+const computeDueDate = (task) => {
+  if (task.date && task.time) {
+    // Combine ISO date and time (e.g., "2025-03-23" and "15:52:26")
+    return new Date(`${task.date}T${task.time}`);
+  }
+  // Fallback: try to use task.dueDate
+  return new Date(task.dueDate);
+};
+
+// Helper function to format a due date (from a string like "2025-03-12")
+const formatDueDate = (dateVal) => {
+  let dateObj;
+  // If dateVal is an object with _seconds, assume it's a serialized Firestore Timestamp.
+  if (dateVal && typeof dateVal === "object" && dateVal._seconds) {
+    dateObj = new Date(dateVal._seconds * 1000);
+  } else {
+    dateObj = new Date(dateVal);
+  }
+
+  // Check if the date is valid
+  if (isNaN(dateObj.getTime())) return <Text>Invalid Date</Text>;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const options = { weekday: "short", month: "short", day: "numeric" };
+
+  if (dateObj < today) {
+    return (
+      <Text className="text-red-700 flex-row items-center">
+        <Ionicons name="alert-circle-sharp" size={14} className="mr-1" />
+        {` past due: ${dateObj.toLocaleDateString("en-US", options)}`}
+      </Text>
+    );
+  }
+
+  if (
+    dateObj.getFullYear() === tomorrow.getFullYear() &&
+    dateObj.getMonth() === tomorrow.getMonth() &&
+    dateObj.getDate() === tomorrow.getDate()
+  ) {
+    return <Text>due tomorrow</Text>;
+  }
+  
+  return <Text>{dateObj.toLocaleDateString("en-US", options)}</Text>;
+};
+
+
+
+// Helper function to format a Firestore Timestamp (e.g. completedAt)
+const formatTimestamp = (timestamp) => {
+  let dateObj;
+  if (timestamp && typeof timestamp === "object" && timestamp._seconds) {
+    dateObj = new Date(timestamp._seconds * 1000);
+  } else {
+    dateObj = new Date(timestamp);
+  }
+  if (isNaN(dateObj.getTime())) return "Invalid Date";
+  
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1; // months are zero-indexed
+  const day = dateObj.getDate();
+  const hours = dateObj.getHours();
+  const minutes = dateObj.getMinutes().toString().padStart(2, "0");
+  
+  return `${month}/${day}/${year} ${hours}:${minutes}`;
+};
+
+
+export default function TaskScreen({ user }) {
+  const [tasks, setTasks] = useState([]); // tasks will be set from API
+  const [activeTab, setActiveTab] = useState("tasks");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+
+  // const filteredTasks = tasks.filter(task =>
+  //   task.groupId &&
+  //   user.roomieGroup &&
+  //   task.groupId.toString() === `/roomieGroups/${user.roomieGroup.id}`
+  // );
+  
+  
+  // update screen irl
+  useEffect(() => {
+    const q = query(collection(db, "task"));
+    const unsubscribe = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const tasksArray = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          // Process assignedTo if it's an array of DocumentReferences
+          if (data.assignedTo && Array.isArray(data.assignedTo)) {
+            // For now, we assume these references have been stored as strings or processed already.
+            // If they're still DocumentReferences, you'll need additional logic.
+            // Here, we assume they are strings.
+          }
+          return {
+            id: doc.id,
+            ...data,
+            completedAt: data.completedAt
+              ? data.completedAt.toDate().toISOString()
+              : null,
+          };
+        });
+        setTasks(tasksArray);
+      },
+      (error) => {
+        console.error("Error fetching tasks with onSnapshot:", error);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  
+
+  // Toggle task completion status and open modal if marking as completed
+  const toggleTaskCompletion = async (taskId) => {
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
-        return {
+        const newStatus = task.status === "completed" ? "open" : "completed";
+        const updatedTask = {
           ...task,
-          status: task.status === "completed" ? "open" : "completed",
+          status: newStatus,
+          completedAt: newStatus === "completed" ? new Date() : null,
         };
+        return updatedTask;
       }
       return task;
     });
-
-    updatedTasks.sort((a, b) => {
-      if (a.status === "completed" && b.status !== "completed") return 1;
-      if (b.status === "completed" && a.status !== "completed") return -1;
-      return 0;
-    });
-
     setTasks(updatedTasks);
+
+    // Find the updated task
+    const taskToUpdate = updatedTasks.find((task) => task.id === taskId);
+    try {
+      // Update the task in firebase
+      await updateTask(taskId, {
+        status: taskToUpdate.status,
+        completedAt: taskToUpdate.completedAt,
+      });
+    } catch (error) {
+      console.error("Error updating task in firebase:", error);
+    }
+
+    // Open modal if marking as completed
+    if (taskToUpdate.status === "completed") {
+      setSelectedTaskId(taskId);
+      setModalVisible(true);
+    }
+  };
+  // Modal handlers
+  const handleModalCancel = () => {
+    if (selectedTaskId) {
+      // Revert the change: toggling the task back to open
+      toggleTaskCompletion(selectedTaskId);
+    }
+    setModalVisible(false);
+    setSelectedTaskId(null);
   };
 
-  const renderTaskItem = ({ item }) => {
-    const pastDue = isTaskPastDue(item.dueDate) && item.status !== "completed";
-    const completed = item.status === "completed";
+  const handleModalSubmit = () => {
+    // Leave the task as completed
+    setModalVisible(false);
+    setSelectedTaskId(null);
+  };
+
+  // Sort upcoming tasks by dueDate
+  const upcomingTasks = tasks
+    .filter((t) => t.status === "open")
+    .sort((a, b) => {
+      const dateA = new Date(a.dueDate);
+      const dateB = new Date(b.dueDate);
+      return dateA - dateB;
+    });
+
+  // Get completed tasks
+  const completedTasks = tasks.filter((t) => t.status === "completed");
+
+  const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
+    const isCompleted = item.status === "completed";
+    const backgroundColor = isCompleted
+      ? "bg-custom-pink-100"
+      : index % 2 === 0
+      ? "bg-custom-yellow"
+      : "bg-custom-blue-100";
+    const textColor = isCompleted
+      ? "text-custom-tan line-through"
+      : index % 2 === 0
+      ? "text-custom-blue-200"
+      : "text-custom-tan";
+    const iconColor = isCompleted
+      ? "#FEF9E5"
+      : index % 2 === 0
+      ? "#788ABF"
+      : "#FEF9E5";
 
     return (
-      <View
-        className={`flex-row items-center ${
-          completed ? "bg-[#C8F2F1]" : "bg-[#f2f2f2]"
-        } rounded-xl mb-3 p-3`}
+      <Animatable.View
+        animation={isCompleted ? "lightSpeedIn" : "slideInUp"}
+        duration={isCompleted ? 500 : 300}
+        delay={index * 100}
+        className={`flex-row items-center ${backgroundColor} rounded-xl p-4 mb-3 shadow-sm`}
       >
-        <TouchableOpacity
-          className="mr-2.5"
-          onPress={() => toggleTaskCompletion(item.id)}
-        >
+        {/* Checkbox */}
+        <TouchableOpacity onPress={() => toggleTaskCompletion(item.id)}>
           <Ionicons
-            name={completed ? "checkmark-circle" : "ellipse-outline"}
-            size={24}
-            color={completed ? "#00B8B6" : "#999"}
+            name={isCompleted ? "checkbox" : "square-outline"}
+            size={32}
+            color={iconColor}
+            className="mr-3"
           />
         </TouchableOpacity>
+
+        {/* Task details */}
         <View className="flex-1">
-          <Text
-            className={`text-base font-semibold ${
-              completed ? "line-through text-gray-400" : "text-gray-800"
-            }`}
-          >
+          <Text className={`text-2xl font-spaceGrotesk font-bold ${textColor}`}>
             {item.title}
           </Text>
-          <Text className="text-gray-600">{item.description}</Text>
-          <Text className="mt-1 text-gray-500">
-            Assigned to: {item.assignedTo} • {item.pointValue} points
+          <Text className={`text-s font-spaceGrotesk ${textColor}`}>
+            {formatDueDate(computeDueDate(item))}
           </Text>
-          {pastDue ? (
-            <Text className="mt-1 text-[#FF8C83] font-bold">past Due</Text>
-          ) : (
-            <Text className="mt-1 text-gray-600">Due: {item.dueDate}</Text>
+          {isCompleted && item.completedAt && (
+            <Text className="text-xs text-custom-blue-200">
+              Completed: {formatTimestamp(item.completedAt)}
+            </Text>
           )}
+          <Text className={`text-s font-spaceGrotesk ${textColor}`}>
+          {Array.isArray(item.assignedTo)
+            ? item.assignedTo
+                .map(u => typeof u === 'object' ? u.name : u)
+                .join(" & ")
+            : item.assignedTo}
+          </Text>
         </View>
-      </View>
+
+        {/* Avatars */}
+        <View className="flex-row justify-between z-10">
+          {(item.assignedTo || []).map((user, i) => ( // need to make assignedTo correctly
+            <View
+              key={i}
+              style={{
+                backgroundColor: "rgba(254,249,229,0.52)",
+                borderRadius: 9999,
+                overflow: "hidden",
+                height: 64,
+                width: 64,
+                marginLeft: i === 0 ? 0 : -36,
+              }}
+            >
+              <Image
+                source={userAvatars[user] || userAvatars["Default"]}
+                className="h-full w-full"
+                resizeMode="cover"
+              />
+            </View>
+          ))}
+        </View>
+      </Animatable.View>
     );
   };
 
   return (
-    <View className="flex-1 bg-white pt-12 px-4">
-      <Text className="text-2xl font-bold mb-4 text-gray-800">Tasks</Text>
-      <FlatList
-        data={tasks}
-        renderItem={renderTaskItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+    <View className="flex-1 bg-custom-tan">
+      {/* TABS */}
+      <View className="flex-row mt-16 ml-5">
+        <TouchableOpacity
+          onPress={() => setActiveTab("tasks")}
+          className={`${
+            activeTab === "tasks"
+              ? "bg-custom-pink-200"
+              : activeTab === "addTask"
+              ? "bg-custom-blue-100"
+              : "bg-custom-pink-200"
+          } px-5 py-2 rounded-t-[20px] z-10`}
+        >
+          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk">
+            tasks
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setActiveTab("calendar")}
+          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-yellow"
+        >
+          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk">
+            calendar
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* CORAL border */}
+      <Animated.View className="flex-1 items-center -mt-4 z-10">
+        <View
+          className={`w-[92%] flex-1 border-[20px] ${
+            activeTab === "tasks"
+              ? "border-custom-pink-200"
+              : activeTab === "calendar"
+              ? "border-custom-yellow"
+              : "border-custom-blue-100"
+          } rounded-t-3xl bg-custom-tan`}
+        >
+          <View className="flex-1 p-4">
+            <CustomModal
+              visible={modalVisible}
+              onCancel={handleModalCancel}
+              onSubmit={handleModalSubmit}
+            />
+            {activeTab === "tasks" ? (
+              <FlatList
+                data={[
+                  "upcoming",
+                  ...upcomingTasks,
+                  "completed",
+                  ...completedTasks,
+                ]}
+                showsVerticalScrollIndicator={false}
+                renderItem={({ item, index }) =>
+                  item === "upcoming" ? (
+                    <View className="flex-row justify-between items-center my-4 mx-1">
+                      <Text className="text-3xl font-bold font-spaceGrotesk text-custom-blue-200">
+                        upcoming
+                      </Text>
+                      <TouchableOpacity onPress={() => setActiveTab("addTask")}>
+                        <Ionicons
+                          name="add-circle-outline"
+                          size={30}
+                          color="#788ABF"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ) : item === "completed" ? (
+                    <Text className="text-3xl font-spaceGrotesk font-bold text-custom-blue-200 my-4 mx-1">
+                      completed
+                    </Text>
+                  ) : (
+                    renderTaskItem({ item, index, toggleTaskCompletion })
+                  )
+                }
+                keyExtractor={(item, index) =>
+                  typeof item === "string" ? item : item.id
+                }
+                contentContainerStyle={{ paddingBottom: 15 }}
+              />
+            ) : activeTab === "calendar" ? (
+              <CalendarScreen />
+            ) : (
+              <AddTaskScreen setActiveTab={setActiveTab} user={user}/>
+            )}
+          </View>
+        </View>
+      </Animated.View>
     </View>
   );
 }
