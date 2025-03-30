@@ -71,49 +71,42 @@ const ProfileScreen = ({ setUser }) => {
     <SafeAreaView className="flex-1 bg-custom-tan">
       <ScrollView>
 
-      <View className="bg-custom-yellow w-full h-56 absolute top-0 z-0">
-        <Text className="font-spaceGrotesk text-white mt-20 ml-10 text-2xl font-bold">Welcome back, {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
-        <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">Day 365 of rooming</Text>
-      </View>
-
-      
-      {/* pfp + name + rating */}
-      <View className="items-center mt-40">
-        {/* avatar circle */}
-        <View className="relative">
+      <View className="absolute top-0 left-0 right-0 bg-custom-yellow h-72 rounded-b-3xl z-0 items-center">
+        
+       <View className="items-center pt-10">
           <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
-                <Image source={face1} className="w-32 h-32" />
+            <Image source={face1} className="w-32 h-32" />
           </View>
 
           {/* pencil edit icon w/ absolute overlate */}
           <TouchableOpacity
             onPress={() => console.log("edit profile picture")}
-            className="absolute bottom-2 right-2 w-8 h-8 rounded-ful items-center justify-center"
+            className="absolute bottom-2 right-0 w-8 h-8 rounded-ful items-center justify-center"
           >
             <Ionicons name="pencil" size={16} color="#788ABF" />
           </TouchableOpacity>
         </View>
-
-        {/* user name */}
-        <Text className="text-lg font-bold text-custom-black mt-3">
-        {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}
-        </Text>
-        {/* rating + star */}
-        <View className="flex-row items-center mt-1">
-          <Text className="text-base text-custom-black mr-1 font-spaceGrotesk">87 points</Text>
-        </View>
+        <Text className="font-spaceGrotesk text-white mt-6 text-4xl font-bold"> {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
+        <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">87 pts</Text>
       </View>
 
+    
+
       {/* roomies list */}
-      <View className="mt-6 px-6">
+      
+      <View className="mt-4 pt-72 px-6">
+        <Text className="p-4 text-l text-custom-blue-200 mb-2 font-spaceGrotesk ">
+          Day 365 of rooming
+        </Text>
         <View className="flex-row flex-1 justify-between items-center">
-          <Text className="p-4 text-2xl font-bold text-custom-black mb-2 font-spaceGrotesk">
+          
+          <Text className="pl-4 text-2xl font-bold text-custom-blue-200 mb-2 font-spaceGrotesk ">
             My homes
           </Text>
           <TouchableOpacity
             onPress={() => setModalVisible(true)}
           >
-            <Text className="right-0 text-custom-blue-100 font-spaceGrotesk">
+            <Text className="right-0 text-custom-blue-100 font-spaceGrotesk pr-4">
               Edit
             </Text>
           </TouchableOpacity>
@@ -144,7 +137,7 @@ const ProfileScreen = ({ setUser }) => {
         /*}
 
         {/* leave btn */}
-        <Text className="p-4 text-2xl font-bold text-custom-black mb-2 mt-10 font-spaceGrotesk">
+        <Text className="p-4 text-2xl font-bold text-custom-blue-200 mb-2 mt-10 font-spaceGrotesk">
           Settings
         </Text>
         <View className="mb-6">
@@ -153,7 +146,10 @@ const ProfileScreen = ({ setUser }) => {
             <Ionicons name="notifications" size={32} color="white" />
 
           </TouchableOpacity>
-          <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
+          <TouchableOpacity 
+            className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center" 
+            onPress={() => navigation.navigate("Password")}
+          >
             <Text className="text-white font-bold font-spaceGrotesk text-2xl">Password</Text>
             <Ionicons name="pencil" size={32} color="white" />
 
