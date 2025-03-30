@@ -186,7 +186,7 @@ const AvatarCreation = () => {
               if (from === "group") {
                 navigation.replace("Main"); // redirect to MainTabs if from group
               } else {
-                navigation.goBack(); // go back to ProfileDrawer
+                navigation.replace("ProfileScreen"); // go back to ProfileDrawer
     }
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
