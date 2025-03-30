@@ -29,6 +29,8 @@ import LoginScreen from "./screens/LoginScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import PasswordScreen from "./screens/PasswordScreen";
+
 
 // for verifying user, user session management
 import { verifyUserSession } from "./api/users.api.js";
@@ -84,9 +86,12 @@ function ProfileStackScreen({ setUser }) {
       <ProfileStack.Screen name="ProfileDrawer">
         {() => <ProfileScreen setUser={setUser} />}
       </ProfileStack.Screen>
+      <ProfileStack.Screen name="Password" component={PasswordScreen} />
+
     </ProfileStack.Navigator>
   );
 }
+
 
 function MainTabs({ user, setUser }) {
   return (
@@ -103,7 +108,7 @@ function MainTabs({ user, setUser }) {
             iconName = "trophy";
           } else if (route.name === "ProfilePage") {
             iconName = "person";
-          }
+          } 
 
           return <Ionicons name={iconName} size={size + 4} color={"#ffffff"} />;
         },

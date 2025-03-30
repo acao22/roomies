@@ -1,8 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from "@env";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
 
@@ -152,6 +153,16 @@ export const joinGroup = async ({ uid, groupName, passcode }) => {
   
   // create a new group
   export const createGroup = async ({ uid, groupName, passcode }) => {
+    const groupRef = collection(db, "roomieGroups");
+    const q = query(groupRef, where("passcode", "==", passcode));
+    const existing = await getDocs(q);
+
+    if (!existing.empty) {
+      throw new Error("Passcode already in use. Please choose another.");
+    }
+
+
+
     try {
       const response = await axios.post(`${API_USER_BASE_URL}/createGroup`, {
         uid,
