@@ -90,6 +90,9 @@ const ProfileScreen = ({ setUser }) => {
       <View className="absolute top-0 left-0 right-0 bg-custom-yellow h-72 rounded-b-3xl z-0 items-center">
         
        <View className="items-center pt-10">
+        <View className="relative">
+
+        
           <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
                 <Image source={avatarUri && typeof avatarUri === "string" && avatarUri.trim().length > 0 ? { uri: avatarUri } : face1} className="w-32 h-32" />
           </View>
@@ -100,10 +103,11 @@ const ProfileScreen = ({ setUser }) => {
               console.log("edit profile picture / go to AvatarCreation");
               navigation.navigate("AvatarCreation", { origin: "ProfileScreen"})
             }}
-            className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#6CD8D5] items-center justify-center"
+            className="absolute bottom-2 right-2 w-8 h-8 rounded-full items-center justify-center"
           >
-            <Ionicons name="pencil" size={16} color="#FFFFFF" />
+            <Ionicons name="pencil" size={16} color="#788ABF" />
           </TouchableOpacity>
+          </View>
         </View>
         <Text className="font-spaceGrotesk text-white mt-6 text-4xl font-bold"> {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
         <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">87 pts</Text>

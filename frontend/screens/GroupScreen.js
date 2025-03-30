@@ -92,7 +92,7 @@ const GroupScreen = ({ setUser }) => {
                       
                           const updated = await getUserGroup();
                           setUser((prev) => ({ ...prev, roomieGroup: updated.groupName, members: updated.members }));
-                          navigation.navigate("AvatarCreation");
+                          navigation.navigate("AvatarCreation", { from: "group" });
                           //navigation.replace("Main");
                         } catch (error) {
                           console.error("Create group failed", error);

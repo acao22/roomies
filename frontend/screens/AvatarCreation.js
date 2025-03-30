@@ -8,7 +8,7 @@ import {
   FlatList,
   SafeAreaView
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { saveAvatar } from "../api/users.api";
 import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
@@ -20,6 +20,10 @@ const AvatarCreation = () => {
   const [showFaces, setShowFaces] = useState(false);
   const navigation = useNavigation();
   const viewShotRef = useRef(null);
+  const route = useRoute();
+  const from = route.params?.from || "ProfileScreen";
+
+  
 
   const writeAvatar = async () => {
     if (viewShotRef.current) {
@@ -176,9 +180,14 @@ const AvatarCreation = () => {
           </Pressable>
 
           <TouchableOpacity
-            onPress={() => {
+            onPress={async () => {
               writeAvatar();
-              navigation.navigate("Main");
+              await writeAvatar();
+              if (from === "group") {
+                navigation.replace("Main"); // redirect to MainTabs if from group
+              } else {
+                navigation.goBack(); // go back to ProfileDrawer
+    }
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
           >
