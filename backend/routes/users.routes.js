@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, verify, getUserByUid, getUserGroup, joinGroup, createGroup } from "../controllers/users.controller.js";
+import { registerUser, loginUser, verify, getUserByUid, getUserGroup, joinGroup, createGroup, saveAvatar, fetchAvatar } from "../controllers/users.controller.js";
 
 const router = express.Router();
 
@@ -13,5 +13,7 @@ router.post("/getInfo", getUserByUid);
 router.post("/getUserGroup", getUserGroup);
 router.post("/joinGroup", joinGroup);
 router.post("/createGroup", createGroup);
+router.post("/saveAvatar", saveAvatar);
+router.post("/fetchAvatar", fetchAvatar)
 
 export default router;

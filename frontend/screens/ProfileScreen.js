@@ -14,7 +14,7 @@ import home from '../assets/HomeSample.png';
 import { Ionicons } from "@expo/vector-icons";
 import history from '../assets/history.png';
 import CustomModal from "./AddGroupModal";
-import { getUserInfo, getUserGroup } from "../api/users.api.js";
+import { getUserInfo, getUserGroup, fetchAvatar } from "../api/users.api.js";
 
 
 
@@ -26,6 +26,7 @@ const ProfileScreen = ({ setUser }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
   const [userGroup, setUserGroup] = useState(null);
+  const [avatarUri, setAvatarUri] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -42,6 +43,21 @@ const ProfileScreen = ({ setUser }) => {
     };
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    // Fetch the user's avatar URI from your API
+    const loadAvatar = async () => {
+      try {
+        const uri = await fetchAvatar();
+        console.log(uri.uri);
+        setAvatarUri(uri.uri);
+      } catch (error) {
+        console.error("Error fetching avatar:", error);
+      }
+    };
+    loadAvatar();
+  }, []);
+
 
 
 
@@ -75,18 +91,18 @@ const ProfileScreen = ({ setUser }) => {
         
        <View className="items-center pt-10">
           <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
-            <Image source={face1} className="w-32 h-32" />
+                <Image source={avatarUri && typeof avatarUri === "string" && avatarUri.trim().length > 0 ? { uri: avatarUri } : face1} className="w-32 h-32" />
           </View>
 
           {/* pencil edit icon w/ absolute overlate */}
           <TouchableOpacity
             onPress={() => {
               console.log("edit profile picture / go to AvatarCreation");
-              navigation.navigate("AvatarCreation")
+              navigation.navigate("AvatarCreation", { origin: "ProfileScreen"})
             }}
-            className="absolute bottom-2 right-0 w-8 h-8 rounded-ful items-center justify-center"
+            className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#6CD8D5] items-center justify-center"
           >
-            <Ionicons name="pencil" size={16} color="#788ABF" />
+            <Ionicons name="pencil" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
         <Text className="font-spaceGrotesk text-white mt-6 text-4xl font-bold"> {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>

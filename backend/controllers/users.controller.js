@@ -2,6 +2,43 @@ import { db, auth } from "../config/firebaseAdmin.js";
 import admin from "firebase-admin";
 import { getUserGroupData } from '../utils/groupHelper.js';
 
+export const saveAvatar = async (req, res) => {
+  const { uid, uri } = req.body;
+  try {
+    const avatarData = {
+      uid,
+      uri,
+      createdAt: new Date(),
+    };
+
+    await db.collection("avatar").doc(uid).set(avatarData);
+    res.status(200).json({ uri });
+  } catch (error) {
+    console.error("Error saving avatar:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const fetchAvatar = async (req, res) => {
+  const { uid } = req.body; 
+  console.log(uid);
+  try {
+    const userDoc = await db.collection("avatar").doc(uid).get();
+
+    if (!userDoc.exists) {
+      return res.status(200).json({ uri: null });
+    }
+
+    const { createdAt, id, uri } = userDoc.data();
+    console.log(uri);
+    res.status(200).json({ uri });
+  } catch (error) {
+    console.error("Error retrieving avatar data:", error);
+    res.status(500).json({ error: "Error retrieving avatar data" });
+  }
+
+}
+
 export const getUserByUid = async (req, res) => {
   const { uid } = req.body; 
 
