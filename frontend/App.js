@@ -35,6 +35,7 @@ import PasswordScreen from "./screens/PasswordScreen";
 // for verifying user, user session management
 import { verifyUserSession } from "./api/users.api.js";
 import GroupScreen from "./screens/GroupScreen";
+import AvatarCreation from "./screens/AvatarCreation";
 
 // for layout animation
 if (
@@ -170,20 +171,24 @@ function LandingScreenWrapper() {
   return <LandingScreen />;
 }
 
-function GroupScreenWrapper({ setUser }) {
-  return <GroupScreen setUser={setUser} />;
+function AvatarCreationWrapper () {
+    return <AvatarCreation />
 }
 
-// function SignupScreenWrapper({ navigation }) {
-//   return (
-//     <TouchableOpacity
-//       style={{ flex: 1 }}
-//       onPress={() => navigation.replace("Landing")}
-//     >
-//       <SignUpScreen />
-//     </TouchableOpacity>
-//   );
-// }
+function ProfileScreenWrapper () {
+  return <ProfileScreen />
+}
+
+function SignupScreenWrapper({ navigation }) {
+  return (
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => navigation.replace("Landing")}
+    >
+      <SignUpScreen />
+    </TouchableOpacity>
+  );
+}
 
 // function LoginScreenWrapper({ navigation }) {
 //   return (
@@ -273,6 +278,8 @@ export default function App() {
             </RootStack.Screen>
           </>
         )}
+        <RootStack.Screen name="AvatarCreation" component={AvatarCreationWrapper} />
+        <RootStack.Screen name="ProfileScreen" component={ProfileScreenWrapper} />
       </RootStack.Navigator>
     </NavigationContainer>
   );
