@@ -8,7 +8,8 @@ import {
   FlatList,
   SafeAreaView
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { saveAvatar } from "../api/users.api";
 import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
@@ -20,14 +21,20 @@ const AvatarCreation = () => {
   const [showFaces, setShowFaces] = useState(false);
   const navigation = useNavigation();
   const viewShotRef = useRef(null);
+  const route = useRoute();
+  const from = route.params?.from || "ProfileScreen";
 
-  const saveAvatar = async () => {
+  
+
+  const writeAvatar = async () => {
     if (viewShotRef.current) {
       try {
         const uri = await viewShotRef.current.capture();
         const fileName = "my-avatar.png";
         const newUri = FileSystem.documentDirectory + fileName;
         await FileSystem.copyAsync({ from: uri, to: newUri });
+        console.log("done");
+        await saveAvatar(newUri);
         console.log("Avatar saved at:", newUri);
         return newUri;
       } catch (error) {
@@ -118,13 +125,13 @@ const AvatarCreation = () => {
   return (
     <View className="flex-1 bg-[#788ABF]">
       <View className="items-center pt-10">
-        <Text className="text-white text-4xl mt-12 font-bold font-spaceGrotesk">
+        <Text className="text-white text-4xl font-bold font-spaceGrotesk">
           my avatar
         </Text>
 
         {/* Avatar Preview */}
         <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
-          <View className="w-80 h-80 mt-12 mb-4 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
+          <View className="w-72 h-72 my-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
             <Image
               source={require("../../frontend/assets/head/base-head.png")}
               className="h-96 w-96"
@@ -174,9 +181,14 @@ const AvatarCreation = () => {
           </Pressable>
 
           <TouchableOpacity
-            onPress={() => {
-              saveAvatar();
-              navigation.navigate("ProfileScreen");
+            onPress={async () => {
+              writeAvatar();
+              await writeAvatar();
+              if (from === "group") {
+                navigation.replace("Main"); // redirect to MainTabs if from group
+              } else {
+                navigation.goBack(); // go back to ProfileDrawer
+    }
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
           >
@@ -218,6 +230,7 @@ const AvatarCreation = () => {
             numColumns={3}
             contentContainerStyle={{
               alignItems: 'center',
+              //flexWrap: 'wrap',
             }}
           />
         </View>
