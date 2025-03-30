@@ -178,7 +178,7 @@ const AvatarCreation = () => {
           <TouchableOpacity
             onPress={() => {
               writeAvatar();
-              navigation.navigate("ProfileDrawer");
+              navigation.navigate("Main");
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
           >

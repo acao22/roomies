@@ -92,6 +92,7 @@ const GroupScreen = ({ setUser }) => {
                       
                           const updated = await getUserGroup();
                           setUser((prev) => ({ ...prev, roomieGroup: updated.groupName, members: updated.members }));
+                          navigation.navigate("AvatarCreation");
                           //navigation.replace("Main");
                         } catch (error) {
                           console.error("Create group failed", error);
@@ -155,6 +156,7 @@ const GroupScreen = ({ setUser }) => {
                             roomieGroup: updated.groupName,
                             members: updated.members,
                         }));
+                        navigation.navigate("AvatarCreation");
                         //navigation.replace("Main");
                         } catch (error) {
                         console.error("Join group failed", error);

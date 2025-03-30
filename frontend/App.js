@@ -15,7 +15,6 @@ import ProfileScreen from "./screens/ProfileScreen";
 import LandingScreen from "./screens/LandingScreen";
 import AddTaskScreen from "./screens/AddTaskScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
-import AvatarCreation from "./screens/AvatarCreation";
 import {
   Platform,
   UIManager,
