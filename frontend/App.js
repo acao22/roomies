@@ -88,8 +88,8 @@ function ProfileStackScreen({ setUser }) {
         {() => <ProfileScreen setUser={setUser} />}
       </ProfileStack.Screen>
       <ProfileStack.Screen name="Password" component={PasswordScreen} />
-
       <ProfileStack.Screen name="AvatarCreation" component={AvatarCreation} />
+
     </ProfileStack.Navigator>
   );
 }
@@ -279,7 +279,6 @@ export default function App() {
             </RootStack.Screen>
           </>
         )}
-        <RootStack.Screen name="AvatarCreation" component={AvatarCreationWrapper} />
         <RootStack.Screen name="ProfileScreen" component={ProfileScreenWrapper} />
       </RootStack.Navigator>
     </NavigationContainer>
