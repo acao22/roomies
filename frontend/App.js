@@ -89,8 +89,6 @@ function ProfileStackScreen({ setUser }) {
       </ProfileStack.Screen>
       <ProfileStack.Screen name="AvatarCreation" component={AvatarCreation} />
       <ProfileStack.Screen name="Password" component={PasswordScreen} />
-
-      <ProfileStack.Screen name="AvatarCreation" component={AvatarCreation} />
     </ProfileStack.Navigator>
   );
 }
