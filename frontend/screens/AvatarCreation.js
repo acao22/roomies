@@ -217,7 +217,6 @@ const AvatarCreation = () => {
             numColumns={3}
             contentContainerStyle={{
               alignItems: 'center',
-              flexWrap: 'wrap',
             }}
           />
         </View>
