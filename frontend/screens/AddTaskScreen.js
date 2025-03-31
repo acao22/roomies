@@ -11,10 +11,11 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { addTask } from "../api/tasks.api.js";
+import face1 from '../assets/face1.png';
 
-import { getUserGroup } from "../api/users.api.js";
+import { getUserGroup, fetchAvatar } from "../api/users.api.js";
 // hardcoded stuff for now
 const userAvatars = {
   Luna: require("../images/avatar1.png"),
@@ -59,17 +60,49 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [time, setTime] = useState(new Date());
-  const [members, setMembers] = useState(groupMembers);
+  const [members, setMembers] = useState([]);
   const [recurrence, setRecurrence] = useState(recurrenceOptions[0]);
   const [showRecurrenceDropdown, setShowRecurrenceDropdown] = useState(false);
   const [description, setDescription] = useState("");
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchGroupAndAvatars = async () => {
+        try {
+          const groupData = await getUserGroup();
+          if (groupData && groupData.members) {
+            // For each member, fetch the avatar using their uid.
+            const membersWithAvatars = await Promise.all(
+              groupData.members.map(async (member) => {
+                try {
+                  // Pass the uid as an argument to fetchAvatar
+                  const avatarData = await fetchAvatar(member.uid);
+                  return { ...member, avatar: avatarData.uri };
+                } catch (err) {
+                  console.error(`Error fetching avatar for ${member.uid}:`, err);
+                  // Use a default avatar if fetching fails
+                  return { ...member, avatar: null };
+                }
+              })
+            );
+            setMembers(membersWithAvatars);
+          }
+        } catch (err) {
+          console.error("Failed to fetch group data", err);
+        }
+      };
   
+      fetchGroupAndAvatars();
+    }, [])
+  );
+
+  const getAvatarSource = (member) =>
+    member.avatar ? { uri: member.avatar } : face1;
 
   const toggleMemberSelection = (id) => {
     setMembers((prev) =>
       prev.map((member) =>
-        member.id === id ? { ...member, selected: !member.selected } : member
+        member.uid === id ? { ...member, selected: !member.selected } : member
       )
     );
   };
@@ -85,7 +118,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
         : null; */
       console.log(groupId);   
       await addTask(title, selectedIcon, date.toISOString().split('T')[0], time.toISOString().split('T')[1].substring(0, 8), 
-      members.filter(m => m.selected).map(m => m.name), recurrence, description, groupId); // need to add assignedTo
+      members.filter(m => m.selected).map(m => m.firstName), recurrence, description, groupId); // need to add assignedTo
       setActiveTab("tasks");
     } catch (error) {
       console.error(error);
@@ -210,7 +243,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               data={members}
               horizontal
               showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item.id.toString()}
+              keyExtractor={(item) => item.uid.toString()}
               renderItem={({ item }) => (
                 <Animatable.View
                   // pulse on select, zoom on enter
@@ -218,7 +251,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                   duration={300}
                 >
                   <TouchableOpacity
-                    onPress={() => toggleMemberSelection(item.id)}
+                    onPress={() => toggleMemberSelection(item.uid)}
                     className={`m-1 rounded-full border-2 ${
                       item.selected
                         ? "bg-red-200 border-red-600"
@@ -236,7 +269,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                     >
                       <Image
                         source={
-                          userAvatars[item.name] || userAvatars["Default"]
+                          getAvatarSource(item)
                         }
                         className="h-full w-full"
                         resizeMode="cover"

@@ -7,34 +7,53 @@ import {
   TouchableOpacity,
   Image
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { getUserGroup, getUserInfo } from "../api/users.api";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { getUserGroup, getUserInfo, fetchAvatar } from "../api/users.api";
 import face1 from '../assets/face1.png';
+import crown from "../assets/crown.png";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../firebaseConfig"
 
 const LeaderBoardScreen = () => {
   const navigation = useNavigation();
   const [roomies, setRoomies] = useState([]);
-
-  //get group data
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        const groupData = await getUserGroup();
-        if (groupData && groupData.members) {
-          setRoomies(groupData.members);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchGroupAndAvatars = async () => {
+        try {
+          const groupData = await getUserGroup();
+          if (groupData && groupData.members) {
+            // For each member, fetch the avatar using their uid.
+            const membersWithAvatars = await Promise.all(
+              groupData.members.map(async (member) => {
+                try {
+                  // Pass the uid as an argument to fetchAvatar
+                  const avatarData = await fetchAvatar(member.uid);
+                  return { ...member, avatar: avatarData.uri };
+                } catch (err) {
+                  console.error(`Error fetching avatar for ${member.uid}:`, err);
+                  // Use a default avatar if fetching fails
+                  return { ...member, avatar: null };
+                }
+              })
+            );
+            setRoomies(membersWithAvatars);
+          }
+        } catch (err) {
+          console.error("Failed to fetch group data", err);
         }
-      } catch (err) {
-        console.error("Failed to fetch group data");
-      }
-    };
-
-    fetchGroup();
-  }, []);
-
+      };
+  
+      fetchGroupAndAvatars();
+    }, [])
+  );
 
   // Sort roomies so the highest score is first
   const sortedRoomies = [...roomies].sort((a, b) => b.totalPoints - a.totalPoints);
   const [first, second, third] = sortedRoomies;
+
+  const getAvatarSource = (member) =>
+    member.avatar ? { uri: member.avatar } : face1;
 
   return (
     <View className="flex-1 bg-custom-tan">
@@ -56,7 +75,7 @@ const LeaderBoardScreen = () => {
             <View className="absolute left-10 top-10 items-center">
               <Text className="text-custom-tan text-3xl mt-1 font-bold font-spaceGrotesk">2</Text>
               <View className="w-20 h-20 rounded-full bg-custom-tan items-center justify-center">
-                <Image source={face1} className="w-20 h-20" />
+                <Image source={getAvatarSource(second)} className="w-20 h-20" />
                 
               </View>
               <Text className="text-custom-tan text-2xl mt-1 font-bold">{second.firstName}</Text>
@@ -70,7 +89,7 @@ const LeaderBoardScreen = () => {
             <View className="absolute items-center top-1">
               <Text className="text-custom-tan text-3xl font-bold font-spaceGrotesk mb-5">1</Text>
               <View className="w-24 h-24 rounded-full bg-custom-tan items-center justify-center">
-                <Image source={face1} className="w-24 h-24" />
+                <Image source={getAvatarSource(first)} className="w-24 h-24" />
                 <Image source={require("../assets/crown.png")} className="absolute w-20 h-20" style={{top: -36, right: -10, transform:[{rotate: "5deg"}],}} />
 
 
@@ -87,7 +106,7 @@ const LeaderBoardScreen = () => {
               <Text className="text-custom-tan text-3xl mt-1 font-bold font-spaceGrotesk">3</Text>
 
               <View className="w-20 h-20 rounded-full bg-custom-tan items-center justify-center">
-                <Image source={face1} className="w-20 h-20" />
+                <Image source={getAvatarSource(third)} className="w-20 h-20" />
 
               </View>
               <Text className="text-custom-tan text-2xl mt-1 font-bold font-spaceGrotesk">{third.firstName}</Text>
@@ -124,7 +143,7 @@ const LeaderBoardScreen = () => {
             {/* Left side: Rank, Profile Picture, and Name */}
             <View className="flex-row items-center flex-1">
               <View className="w-12 h-12 rounded-full items-center justify-center mr-2 bg-custom-tan">
-                <Image source={face1} className="w-12 h-12" />
+                <Image source={getAvatarSource(roomie)} className="w-12 h-12" />
               </View>
               <Text className="text-2xl font-bold text-custom-tan font-spaceGrotesk">{roomie.firstName}</Text>
             </View>

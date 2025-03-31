@@ -29,7 +29,7 @@ const AvatarCreation = ({ }) => {
     if (viewShotRef.current) {
       try {
         const uri = await viewShotRef.current.capture();
-        const fileName = "my-avatar.png";
+        const fileName = `my-avatar-${Date.now()}.png`;
         const newUri = FileSystem.documentDirectory + fileName;
         await FileSystem.copyAsync({ from: uri, to: newUri });
         console.log("done");

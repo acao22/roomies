@@ -7,17 +7,19 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
 
-
-export const fetchAvatar = async () => {
-  const {uid, email, message} = await verifyUserSession(); 
+export const fetchAvatar = async (targetUid) => {
+  // If a targetUid is provided, use that; otherwise, use the current user's uid
+  let uid = targetUid;
+  if (!uid) {
+    const { uid: sessionUid } = await verifyUserSession();
+    uid = sessionUid;
+  }
+  
   if (uid) {
-    const response = await axios.post(`${API_USER_BASE_URL}/fetchAvatar`, {
-      uid
-    });
+    const response = await axios.post(`${API_USER_BASE_URL}/fetchAvatar`, { uid });
     return response.data;
   }
 }
-
 // save an avatar 
 export const saveAvatar = async (uri) => {
   const {uid, email, message} = await verifyUserSession(); 
