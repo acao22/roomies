@@ -13,7 +13,7 @@ import { saveAvatar } from "../api/users.api";
 import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
 
-const AvatarCreation = () => {
+const AvatarCreation = ({ }) => {
   const [isToggled, setIsToggled] = useState(false);
   const [selectedHair, setSelectedHair] = useState(null);
   const [selectedFace, setSelectedFace] = useState(null);
@@ -186,7 +186,7 @@ const AvatarCreation = () => {
               if (from === "group") {
                 navigation.replace("Main"); // redirect to MainTabs if from group
               } else {
-                navigation.replace("ProfileScreen"); // go back to ProfileDrawer
+                navigation.replace("ProfileDrawer"); // go back to ProfileDrawer
     }
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
