@@ -87,7 +87,7 @@ const LeaderBoardScreen = () => {
   return (
     <ScrollView className="mt-6 px-4 bg-custom-tan flex-1">
       <View className="mt-4 mb-2 items-center">
-        <Text className="text-custom-pink-200 text-5xl font-bold font-spaceGrotesk text-center">leaderboard</Text>
+        <Text className="text-custom-pink-200 text-5xl font-bold mt-6 font-spaceGrotesk text-center">leaderboard</Text>
       </View>
 
       <View className="relative bg-custom-pink-200 rounded-3xl mb-4">
@@ -96,7 +96,7 @@ const LeaderBoardScreen = () => {
         </TouchableOpacity>
 
         {showInfo && (
-          <View className="absolute top-16 left-1/2 -translate-x-1/2 bg-white rounded-2xl px-5 pt-4 pb-5 w-[340px] border-2 border-custom-pink-200 z-50">
+          <View className="absolute top-16 left-1/2 -translate-x-1/2 bg-white rounded-2xl px-5 pt-4 pb-5 w-[340px] border-2 border-custom-pink-200 z-50 shadow-md">
             <Text className="text-custom-pink-200 text-xl font-bold mb-2">ways to earn points:</Text>
             <Text className="text-custom-blue-100 text-3xl font-bold mt-2 mb-1 text-center">+1</Text>
             <Text className="text-custom-blue-100 text-1xl mb-3 text-center">every day for opening the roomies app!</Text>
@@ -111,10 +111,10 @@ const LeaderBoardScreen = () => {
         <View className="relative w-full h-[270px] flex items-center justify-end mt-6">
           {second && (
             <View className="absolute items-center bottom-0" style={{ left: 37 }}>
-              <Animated.View className="absolute bottom-0 w-[102px] rounded-t-lg" style={{ height: secondHeight, backgroundColor: "#f6b8a0" }} />
+              <Animated.View className="absolute bottom-0 w-[102px] rounded-t-lg shadow-md" style={{ height: secondHeight, backgroundColor: "#f6b8a0" }} />
               <View style={{ transform: [{ translateY: -Math.max(0, (second.totalPoints / maxScore) * 120 - 40) }] }}>
                 <Text className="text-custom-tan text-3xl font-bold font-spaceGrotesk text-center">2</Text>
-                <View className="w-20 h-20 rounded-full bg-custom-tan items-center justify-center">
+                <View className="w-20 h-20 rounded-full bg-custom-tan items-center justify-center shadow-sm">
                   <Image source={face1} className="w-[74px] h-[74px]" />
                 </View>
                 <Text className="text-custom-tan text-2xl mt-1 font-bold text-center">{second.firstName}</Text>
@@ -125,11 +125,11 @@ const LeaderBoardScreen = () => {
 
           {first && (
             <View className="absolute items-center bottom-0">
-              <Animated.View className="absolute bottom-0 w-[110px] rounded-t-lg" style={{ height: firstHeight, backgroundColor: "#fac9b3" }} />
+              <Animated.View className="absolute bottom-0 w-[110px] rounded-t-lg shadow-md" style={{ height: firstHeight, backgroundColor: "#fac9b3" }} />
               <View style={{ transform: [{ translateY: -Math.max(0, (first.totalPoints / maxScore) * 120 - 25) }] }}>
                 <Text className="text-custom-tan text-3xl font-bold font-spaceGrotesk text-center mb-5">1</Text>
                 <View className="w-24 h-24 rounded-full bg-custom-tan items-center justify-center">
-                  <Image source={face1} className="w-[74px] h-[74px]" />
+                  <Image source={face1} className="w-[74px] h-[74px] shadow-sm" />
                   <Image source={crown} className="absolute w-[59px] h-[59px] pt-[5px]" style={{ top: -36, right: -10, transform: [{ rotate: "5deg" }] }} />
                 </View>
                 <Text className="text-custom-tan text-2xl mt-1 font-bold font-spaceGrotesk text-center">{first.firstName}</Text>
@@ -140,10 +140,10 @@ const LeaderBoardScreen = () => {
 
           {third && (
             <View className="absolute items-center bottom-0" style={{ right: 37 }}>
-              <Animated.View className="absolute bottom-0 w-[102px] rounded-t-lg" style={{ height: thirdHeight, backgroundColor: "#f6b8a0" }} />
+              <Animated.View className="absolute bottom-0 w-[102px] rounded-t-lg shadow-md" style={{ height: thirdHeight, backgroundColor: "#f6b8a0" }} />
               <View style={{ transform: [{ translateY: -Math.max(0, (third.totalPoints / maxScore) * 120 - 40) }] }}>
                 <Text className="text-custom-tan text-3xl font-bold font-spaceGrotesk text-center">3</Text>
-                <View className="w-20 h-20 rounded-full bg-custom-tan items-center justify-center">
+                <View className="w-20 h-20 rounded-full bg-custom-tan items-center justify-center shadow-sm">
                   <Image source={face1} className="w-[74px] h-[74px]" />
                 </View>
                 <Text className="text-custom-tan text-2xl mt-1 font-bold text-center">{third.firstName}</Text>
@@ -164,7 +164,7 @@ const LeaderBoardScreen = () => {
             >
               <Text className="text-4xl text-custom-blue-100 font-bold font-spaceGrotesk mr-5 text-center" style={{ width: 40 }}>{index + 1}</Text>
               <TouchableOpacity
-                className="bg-custom-blue-100 p-4 rounded-2xl flex-row items-center justify-between"
+                className="bg-custom-blue-100 p-4 rounded-2xl flex-row items-center justify-between shadow-sm"
                 style={{ flex: 1, height: 70 }}
               >
                 <View className="flex-row items-center flex-1">
