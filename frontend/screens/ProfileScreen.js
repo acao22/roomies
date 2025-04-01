@@ -105,7 +105,7 @@ const ProfileScreen = ({ setUser }) => {
             }}
             className="absolute bottom-2 right-2 w-8 h-8 rounded-full items-center justify-center"
           >
-            <Ionicons name="pencil" size={16} color="#788ABF" />
+            <Ionicons name="pencil" size={16} color="#FFFFFF" />
           </TouchableOpacity>
           </View>
         </View>
