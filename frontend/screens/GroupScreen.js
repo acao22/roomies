@@ -10,7 +10,6 @@ import { useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { createGroup, joinGroup, getUserGroup, verifyUserSession } from "../api/users.api.js";
-import { ScrollView } from "react-native";
 
 const GroupScreen = ({ setUser }) => {
   const navigation = useNavigation();
@@ -21,7 +20,7 @@ const GroupScreen = ({ setUser }) => {
   const [joinPasscode, setJoinPasscode] = useState("");
 
   return (
-    <ScrollView className="bg-custom-yellow" style={{ flex: 1 }}>
+    <View className="bg-custom-yellow" style={{ flex: 1 }}>
     {/* Back button - simply navigate to Landing */}
     <TouchableOpacity
         onPress={() => navigation.navigate("Landing")}
@@ -92,7 +91,6 @@ const GroupScreen = ({ setUser }) => {
                       
                           const updated = await getUserGroup();
                           setUser((prev) => ({ ...prev, roomieGroup: updated.groupName, members: updated.members }));
-                          navigation.navigate("AvatarCreation", { from: "group" });
                           //navigation.replace("Main");
                         } catch (error) {
                           console.error("Create group failed", error);
@@ -156,7 +154,6 @@ const GroupScreen = ({ setUser }) => {
                             roomieGroup: updated.groupName,
                             members: updated.members,
                         }));
-                        navigation.navigate("AvatarCreation");
                         //navigation.replace("Main");
                         } catch (error) {
                         console.error("Join group failed", error);
@@ -170,7 +167,7 @@ const GroupScreen = ({ setUser }) => {
             </View>
         </View>
     </View>
-    </ScrollView>
+    </View>
   );
 };
 

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 // needed for real time updates
-import { collection, query, onSnapshot, where, orderBy } from "firebase/firestore";
-import { getUserInfo, getUserGroup } from "../api/users.api.js";
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { getUserInfo } from "../api/users.api.js";
 import face1 from "../images/avatar1.png";
 import { db } from "../firebaseConfig.js";
 
@@ -61,56 +61,29 @@ export default function GroupFeedScreen() {
   const [userMap, setUsersMap] = useState([]);
 
   useEffect(() => {
-    let unsubscribe;
-    async function fetchAndSubscribe() {
-      try {
-        const groupData = await getUserGroup();
-        const groupId = groupData.id;
-
-        // Build a query filtering by groupId and ordering by updatedAt descending.
-        const tasksRef = collection(db, "task");
-        const q = query(
-          tasksRef,
-          where("groupId", "==", groupId),
-          //where("status","==", "completed"),
-          orderBy("updatedAt", "desc") 
-        );
-
-        unsubscribe = onSnapshot(q, snapshot => {
-          const tasksData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          setTasks(tasksData);
-        }, error => {
-          console.error("Error listening to tasks:", error);
-        });
-      } catch (error) {
-        console.error("Error fetching group data:", error);
-      }
-    }
-    fetchAndSubscribe();
-    return () => {if (unsubscribe) unsubscribe()};
+    const tasksRef = collection(db, "task");
+    const q = query(tasksRef);
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const tasksData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setTasks(tasksData);
+    }, error => {
+      console.error("Error listening to tasks:", error);
+    });
+    return () => unsubscribe();
   }, []);
 
 
   // find only completed ones
-  //const completedTasks = tasks.filter(task => task.status === "completed");
-  const completedTasks = tasks;
+  const completedTasks = tasks.filter(task => task.status === "completed");
 
 
   // find users of completed tasks
   useEffect(() => {
     const fetchUsersForCompletedTasks = async () => {
-      //const uids = [...new Set(completedTasks.map(task => task.completedBy))];
-      const uids = [
-        ...new Set(
-          tasks
-            .map((task) => task.createdBy)
-            .concat(tasks.map((task) => task.completedBy))
-            .filter(Boolean)
-        ),
-      ];
+      const uids = [...new Set(completedTasks.map(task => task.completedBy))];
       const tempUsers = {};
       for (const uid of uids) {
         try {
@@ -165,16 +138,7 @@ export default function GroupFeedScreen() {
         {/* feed list */}
         <View className="mt-6 px-4">
           {completedTasks.map((task) => {
-            // Determine which user to display
-            // For completed tasks, use completedBy, for open tasks, use createdBy
-            const userUid = task.status === "completed" ? task.completedBy : task.createdBy;
-            const user = userMap[userUid] || {};
-
-            // Conditionally create the message based on task status
-            const message =
-              task.status === "completed"
-                ? `${user.firstName} completed "${task.title}"!`
-                : `${user.firstName} created "${task.title}"!`;
+            const user = userMap[task.completedBy] || {};
             const imageSource = task.image ? task.image : getTaskImage(task.id);
             return (
 
@@ -184,7 +148,7 @@ export default function GroupFeedScreen() {
             >
               {/* user & task info */}
               <Text className="text-[#FEF9E5] font-bold text-lg">
-                {message}
+                {user.firstName} completed “{task.title}”!
               </Text>
 
               {/* image if input */}
