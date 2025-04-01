@@ -10,6 +10,7 @@ import { getAllTasks, updateTask } from "../api/tasks.api.js";
 import { getUserGroup, getUserInfo, verifyUserSession} from "../api/users.api";
 import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
+import PointsModal from "./PointsModal";
 
 
 
@@ -98,6 +99,9 @@ export default function TaskScreen({ user }) {
   const [tasks, setTasks] = useState([]); // tasks will be set from API
   const [activeTab, setActiveTab] = useState("tasks");
   const [modalVisible, setModalVisible] = useState(false);
+  const [completedTaskName, setCompletedTaskName] = useState("");
+  const [totalPoints, setTotalPoints] = useState(0); // total points of user, need to adjust
+
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
   // const filteredTasks = tasks.filter(task =>
@@ -186,7 +190,14 @@ export default function TaskScreen({ user }) {
     // Open modal if marking as completed
     if (taskToUpdate.status === "completed") {
       setSelectedTaskId(taskId);
+      setCompletedTaskName(taskToUpdate.title);
       setModalVisible(true);
+      setTotalPoints(prev => prev + 5); // change to specific task's points once implemented function
+      setTimeout(() => {
+        setModalVisible(false);
+        setSelectedTaskId(null);
+      }, 3000);
+
     }
   };
   // Modal handlers
@@ -220,20 +231,18 @@ export default function TaskScreen({ user }) {
   const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";
     const backgroundColor = isCompleted
-      ? "bg-custom-pink-100"
-      : index % 2 === 0
-      ? "bg-custom-yellow"
-      : "bg-custom-blue-100";
+      ? "bg-[#fdddb3]"
+      : "bg-custom-yellow";
     const textColor = isCompleted
-      ? "text-custom-tan line-through"
+      ? "text-custom-blue-100 line-through"
       : index % 2 === 0
       ? "text-custom-blue-200"
-      : "text-custom-tan";
+      : "text-custom-blue-200";
     const iconColor = isCompleted
-      ? "#FEF9E5"
+      ? "#9CABD8"
       : index % 2 === 0
-      ? "#788ABF"
-      : "#FEF9E5";
+      ? "#495BA2"
+      : "#495BA2";
 
     return (
       <Animatable.View
@@ -301,49 +310,58 @@ export default function TaskScreen({ user }) {
   };
 
   return (
-    <View className="flex-1 bg-custom-tan">
+    <View className="flex-1 bg-custom-yellow">
       {/* TABS */}
       <View className="flex-row mt-16 ml-5">
         <TouchableOpacity
           onPress={() => setActiveTab("tasks")}
           className={`${
             activeTab === "tasks"
-              ? "bg-custom-pink-200"
+              ? "bg-custom-blue-200"
               : activeTab === "addTask"
-              ? "bg-custom-blue-100"
-              : "bg-custom-pink-200"
-          } px-5 py-2 rounded-t-[20px] z-10`}
+              ? "bg-custom-blue-100" // code for birder of add tasks???
+              : "bg-custom-blue-200"
+          } px-5 py-2 rounded-t-[20px] z-10 ml-4`}
         >
-          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk">
+          <Text className="text-4xl font-bold text-custom-tan font-spaceGrotesk">
             tasks
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab("calendar")}
-          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-yellow"
+          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-pink-200 ml-3"
         >
-          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk">
+          <Text className="text-4xl font-bold text-custom-tan font-spaceGrotesk">
             calendar
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* CORAL border */}
-      <Animated.View className="flex-1 items-center -mt-4 z-10">
+      {/* DARK BLUE border */}
+      <Animated.View className="flex-1 items-center border-t-8 border-custom-blue-200 z-10 bg-custom-tan">
         <View
-          className={`w-[92%] flex-1 border-[20px] ${
+          className={`w-[92%] flex-1 top-5 ${
             activeTab === "tasks"
-              ? "border-custom-pink-200"
+              ? "border-custom-blue-200"
               : activeTab === "calendar"
-              ? "border-custom-yellow"
+              ? "border-custom-blue-100"
               : "border-custom-blue-100"
           } rounded-t-3xl bg-custom-tan`}
         >
           <View className="flex-1 p-4">
-            <CustomModal
+            { /* don't need custom that adss tasks for now */}
+            {/* <CustomModal
               visible={modalVisible}
               onCancel={handleModalCancel}
               onSubmit={handleModalSubmit}
+            /> */}
+
+            {/* popup that shows everytime someone finishes a task */}
+            <PointsModal 
+              visible={modalVisible}
+              onCancel={() => setModalVisible(false)}
+              taskName={completedTaskName}
+              totalPoints={totalPoints}
             />
             {activeTab === "tasks" ? (
               <FlatList
@@ -356,8 +374,8 @@ export default function TaskScreen({ user }) {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item, index }) =>
                   item === "upcoming" ? (
-                    <View className="flex-row justify-between items-center my-4 mx-1">
-                      <Text className="text-3xl font-bold font-spaceGrotesk text-custom-blue-200">
+                    <View className="flex-row justify-between items-center mx-1">
+                      <Text className="text-4xl mb-4 font-bold font-spaceGrotesk text-custom-blue-200">
                         upcoming
                       </Text>
                       <TouchableOpacity onPress={() => setActiveTab("addTask")}>
@@ -369,7 +387,7 @@ export default function TaskScreen({ user }) {
                       </TouchableOpacity>
                     </View>
                   ) : item === "completed" ? (
-                    <Text className="text-3xl font-spaceGrotesk font-bold text-custom-blue-200 my-4 mx-1">
+                    <Text className="text-4xl font-spaceGrotesk font-bold text-custom-blue-200 my-4 mx-1">
                       completed
                     </Text>
                   ) : (
