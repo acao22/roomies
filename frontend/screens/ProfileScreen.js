@@ -83,7 +83,7 @@ const ProfileScreen = ({ setUser }) => {
             onPress={() => console.log("edit profile picture")}
             className="absolute bottom-2 right-0 w-8 h-8 rounded-ful items-center justify-center"
           >
-            <Ionicons name="pencil" size={16} color="#788ABF" />
+            <Ionicons name="pencil" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
         <Text className="font-spaceGrotesk text-white mt-6 text-4xl font-bold"> {userData ? `${userData.firstName} ${userData.lastName}` : "first last"}</Text>
