@@ -13,7 +13,7 @@ import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { addTask } from "../api/tasks.api.js";
-import face1 from '../assets/face1.png';
+import face1 from "../assets/face1.png";
 
 import { getUserGroup, fetchAvatar } from "../api/users.api.js";
 // hardcoded stuff for now
@@ -51,8 +51,6 @@ const recurrenceOptions = [
   "Custom",
 ];
 
-
-
 const AddTaskScreen = ({ setActiveTab, user }) => {
   const [title, setTitle] = useState("");
   const [selectedIcon, setSelectedIcon] = useState(null);
@@ -79,7 +77,10 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                   const avatarData = await fetchAvatar(member.uid);
                   return { ...member, avatar: avatarData.uri };
                 } catch (err) {
-                  console.error(`Error fetching avatar for ${member.uid}:`, err);
+                  console.error(
+                    `Error fetching avatar for ${member.uid}:`,
+                    err
+                  );
                   // Use a default avatar if fetching fails
                   return { ...member, avatar: null };
                 }
@@ -91,7 +92,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
           console.error("Failed to fetch group data", err);
         }
       };
-  
+
       fetchGroupAndAvatars();
     }, [])
   );
@@ -108,13 +109,25 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   };
 
   const handleAddTask = async () => {
-    const groupId =
-    user && Array.isArray(user.roomieGroup) && user.roomieGroup.length > 0
-      ? `/roomiesGroup/${user.roomieGroup[0]}`  // adjust collection name as needed
-      : null;   
     try {
-      await addTask(title, selectedIcon, date.toISOString().split('T')[0], time.toISOString().split('T')[1].substring(0, 8), 
-      members.filter(m => m.selected).map(m => m.firstName), recurrence, description, groupId); // need to add assignedTo
+      const groupData = await getUserGroup();
+      console.log(groupData);
+      const groupId = groupData.id;
+      /*
+      user && Array.isArray(user.roomieGroup) && user.roomieGroup.length > 0
+        ? `/roomiesGroup/${user.roomieGroup[0]}`  // adjust collection name as needed
+        : null; */
+      console.log(groupId);
+      await addTask(
+        title,
+        selectedIcon,
+        date.toISOString().split("T")[0],
+        time.toISOString().split("T")[1].substring(0, 8),
+        members.filter((m) => m.selected).map((m) => m.firstName),
+        recurrence,
+        description,
+        groupId
+      ); // need to add assignedTo
       setActiveTab("tasks");
     } catch (error) {
       console.error(error);
@@ -264,9 +277,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                       }}
                     >
                       <Image
-                        source={
-                          getAvatarSource(item)
-                        }
+                        source={getAvatarSource(item)}
                         className="h-full w-full"
                         resizeMode="cover"
                       />
@@ -345,9 +356,10 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
           />
 
           {/* DONE BUTTON */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleAddTask}
-            className="self-center w-36 bg-custom-pink-200 py-4 rounded-lg mt-4 shadow-sm">
+            className="self-center w-36 bg-custom-pink-200 py-4 rounded-lg mt-4 shadow-sm"
+          >
             <Text className="text-center text-white text-xl font-bold font-spaceGrotesk">
               Done
             </Text>
