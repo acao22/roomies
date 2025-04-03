@@ -9,10 +9,7 @@ import {
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { getUserGroup, getUserInfo, fetchAvatar } from "../api/users.api";
-
-import { getUserGroup } from "../api/users.api";
 import face1 from "../assets/face1.png";
-import crown from "../assets/crown.png";
 import questionIcon from "../assets/question.png";
 import crown from "../assets/crown.png";
 import { doc, onSnapshot } from "firebase/firestore";
