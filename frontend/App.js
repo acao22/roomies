@@ -155,7 +155,7 @@ function MainTabs({ user, setUser }) {
     >
       <Tab.Screen name="HomePage" component={HomeStackScreen} />
       <Tab.Screen name="TaskPage">
-        {() => <TaskScreen user={user} />}
+        {() => <TaskScreen user={user} setUser={setUser}/>}
       </Tab.Screen>
       <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
       <Tab.Screen name="ProfilePage">
@@ -238,23 +238,15 @@ export default function App() {
     );
   }
 
-  // return (
-  //   <NavigationContainer>
-  //     <RootStack.Navigator screenOptions={{ headerShown: false }}>
-  //       <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
-  //       <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
-  //       <RootStack.Screen name="Login" component={LoginScreenWrapper} />
-  //       <RootStack.Screen name="Main" component={MainTabs} />
-  //     </RootStack.Navigator>
-  //   </NavigationContainer>
-  // );
+  // pass in user into main tabs so uid can be consistent
 
   return (
     <NavigationContainer>
+      
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {user && user.roomieGroup ? (
           <RootStack.Screen name="Main">
-            {() => <MainTabs setUser={setUser} />}
+            {() => <MainTabs user={user} setUser={setUser} />} 
           </RootStack.Screen>
         ) : (
           <>
