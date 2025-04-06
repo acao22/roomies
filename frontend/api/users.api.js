@@ -111,7 +111,7 @@ export const registerUser = async (email, password, firstName, lastName, display
           headers: { "Content-Type": "application/json" },
         }
       );
-      
+  
       console.log("Signup response:", response.data);
 
       // store firebase id token for session management
