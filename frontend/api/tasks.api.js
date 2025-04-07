@@ -15,15 +15,12 @@ export const getAllTasks = async () => {
   }
 };
 
-export const addTask = async (title, selectedIcon, date, time, members, recurrence, description, assignedTo, groupId) => {
+// add assignedTo later
+export const addTask = async (title, selectedIcon, date, time, members, recurrence, description, groupId, selectedPoints) => {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
     const userId = user ? user.uid : null;
-    const groupId =
-      user && Array.isArray(user.roomieGroup) && user.roomieGroup.length > 0
-        ? `/roomieGroups/${user.roomieGroup[0].id}`
-        : null;
       await axios.post(`${API_USER_BASE_URL}/addTask`, 
         JSON.stringify({ 
           title, 
@@ -35,13 +32,14 @@ export const addTask = async (title, selectedIcon, date, time, members, recurren
           description, 
           createdAt: (new Date()).toISOString(), 
           createdBy: userId,
-          assignedTo,
-          groupId
+          updatedAt: (new Date()).toISOString(),
+          groupId,
+          selectedPoints
       }),
       {
         headers: { "Content-Type": "application/json" },
       });
-      console.log(title, selectedIcon, date, time, members, recurrence, description, assignedTo);
+      console.log(title, selectedIcon, date, time, members, recurrence, description, groupId);
   } catch (error) {
       console.error(error);
       
@@ -61,4 +59,3 @@ export const updateTask = async (taskId, updatedData) => {
     throw error;
   }
 };
-

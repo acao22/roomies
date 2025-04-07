@@ -3,23 +3,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from "@env";
 import { auth, db } from "../firebaseConfig";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore';
 
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
 
-export const fetchAvatar = async (targetUid) => {
-  // If a targetUid is provided, use that; otherwise, use the current user's uid
-  let uid = targetUid;
-  if (!uid) {
-    const { uid: sessionUid } = await verifyUserSession();
-    uid = sessionUid;
-  }
-  
+
+export const fetchAvatar = async () => {
+  const {uid, email, message} = await verifyUserSession(); 
   if (uid) {
-    const response = await axios.post(`${API_USER_BASE_URL}/fetchAvatar`, { uid });
+    const response = await axios.post(`${API_USER_BASE_URL}/fetchAvatar`, {
+      uid
+    });
     return response.data;
   }
 }
+
 // save an avatar 
 export const saveAvatar = async (uri) => {
   const {uid, email, message} = await verifyUserSession(); 
@@ -111,7 +109,7 @@ export const registerUser = async (email, password, firstName, lastName, display
           headers: { "Content-Type": "application/json" },
         }
       );
-  
+      
       console.log("Signup response:", response.data);
 
       // store firebase id token for session management
@@ -202,3 +200,31 @@ export const joinGroup = async ({ uid, groupName, passcode }) => {
       throw error;
     }
   };
+
+
+// pass uid explicitly
+export const addPointsToUser = async (uid, pointsToAdd) => {
+  if (!uid || !pointsToAdd) return;
+
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+
+  if (snap.exists()) {
+    const current = snap.data().totalPoints || 0;
+    await updateDoc(userRef, { totalPoints: current + pointsToAdd });
+  } else {
+    await setDoc(userRef, { totalPoints: pointsToAdd });
+  }
+};
+
+
+// export const listenToUserDoc = (uid, callback) => {
+//   const userRef = doc(db, "users", uid);
+//   return onSnapshot(userRef, (snapshot) => {
+//     if (snapshot.exists()) {
+//       callback(snapshot.data());
+//     } else {
+//       callback(null);
+//     }
+//   });
+// };

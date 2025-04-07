@@ -8,96 +8,115 @@ import {
   Animated,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { getUserGroup, getUserInfo, fetchAvatar } from "../api/users.api";
+import { doc, onSnapshot } from "firebase/firestore";
+
+import { getUserGroup, fetchAvatar } from "../api/users.api";
+import { db } from "../firebaseConfig";
+
 import face1 from "../assets/face1.png";
 import questionIcon from "../assets/question.png";
 import crown from "../assets/crown.png";
-import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "../firebaseConfig";
 
 const LeaderBoardScreen = () => {
   const [roomies, setRoomies] = useState([]);
+  const [showInfo, setShowInfo] = useState(false);
+
+  // For the animated bar chart
+  const firstHeight = useRef(new Animated.Value(0)).current;
+  const secondHeight = useRef(new Animated.Value(0)).current;
+  const thirdHeight = useRef(new Animated.Value(0)).current;
+  const [cardOpacities, setCardOpacities] = useState([]);
+
+  // 1) On first load, fetch the group + set up real-time listeners for each user
   useFocusEffect(
     React.useCallback(() => {
-      const fetchGroupAndAvatars = async () => {
+      let unsubscribes = []; // to clean up snapshot listeners on unmount
+
+      const fetchGroupAndSubscribe = async () => {
         try {
+          // fetch group data once
           const groupData = await getUserGroup();
           if (groupData && groupData.members) {
-            // For each member, fetch the avatar using their uid.
-            const membersWithAvatars = await Promise.all(
+            // For each member, fetch avatar + set up user doc listener
+            const withAvatars = await Promise.all(
               groupData.members.map(async (member) => {
+                // fetch avatar
                 try {
-                  // Pass the uid as an argument to fetchAvatar
                   const avatarData = await fetchAvatar(member.uid);
                   return { ...member, avatar: avatarData.uri };
-                } catch (err) {
-                  console.error(
-                    `Error fetching avatar for ${member.uid}:`,
-                    err
-                  );
-                  // Use a default avatar if fetching fails
+                } catch {
                   return { ...member, avatar: null };
                 }
               })
             );
-            setRoomies(membersWithAvatars);
+
+            setRoomies(withAvatars);
+
+            // Now set up a snapshot listener for each user's doc
+            unsubscribes = withAvatars.map((roomie) => {
+              const userRef = doc(db, "users", roomie.uid);
+              // whenever the doc changes, update that roomie's totalPoints in local state
+              return onSnapshot(userRef, (snap) => {
+                if (snap.exists()) {
+                  const newPoints = snap.data().totalPoints || 0;
+                  // update local state for just that user
+                  setRoomies((prev) =>
+                    prev.map((m) =>
+                      m.uid === roomie.uid
+                        ? { ...m, totalPoints: newPoints }
+                        : m
+                    )
+                  );
+                }
+              });
+            });
           }
         } catch (err) {
-          console.error("Failed to fetch group data", err);
+          console.error("Failed to fetch group data and subscribe", err);
         }
       };
 
-      fetchGroupAndAvatars();
+      fetchGroupAndSubscribe();
+
+      // Cleanup: unsubscribe from all user doc listeners
+      return () => {
+        unsubscribes.forEach((unsub) => unsub && unsub());
+      };
     }, [])
   );
 
-  // Sort roomies so the highest score is first
-  const [showInfo, setShowInfo] = useState(false);
-
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        const groupData = await getUserGroup();
-        if (groupData && groupData.members) {
-          setRoomies(groupData.members);
-        }
-      } catch (err) {
-        console.error("Failed to fetch group data");
-      }
-    };
-    fetchGroup();
-  }, []);
-
+  // 2) Recompute sorted data whenever roomies changes
   const sortedRoomies = [...roomies].sort(
-    (a, b) => b.totalPoints - a.totalPoints
+    (a, b) => (b.totalPoints || 0) - (a.totalPoints || 0)
   );
+
+  // The top three
   const [first, second, third] = sortedRoomies;
   const maxScore = Math.max(...sortedRoomies.map((r) => r.totalPoints || 1), 1);
 
-  const firstHeight = useRef(new Animated.Value(0)).current;
-  const secondHeight = useRef(new Animated.Value(0)).current;
-  const thirdHeight = useRef(new Animated.Value(0)).current;
-
-  const cardOpacities = useMemo(
-    () => sortedRoomies.map(() => new Animated.Value(0)),
-    [sortedRoomies]
-  );
-
+  // For the fade-in on the bottom cards
   useEffect(() => {
+    // Create a new array of Animated Values for each roomie
+    const newOpacities = sortedRoomies.map(() => new Animated.Value(0));
+    setCardOpacities(newOpacities);
+
+    // Re-run the bar chart animations (for first/second/third)
     firstHeight.setValue(0);
     secondHeight.setValue(0);
     thirdHeight.setValue(0);
-    cardOpacities.forEach((opacity) => opacity.setValue(0));
 
     Animated.timing(firstHeight, {
-      toValue: Math.max(35, (first?.totalPoints / maxScore) * 180),
+      toValue: Math.max(35, ((first?.totalPoints || 0) / maxScore) * 180),
       duration: 800,
       useNativeDriver: false,
     }).start();
 
     if (second) {
       Animated.timing(secondHeight, {
-        toValue: Math.max(35, (second?.totalPoints / maxScore) * 180),
+        toValue: Math.max(
+          35,
+          ((second.totalPoints || 0) / maxScore) * 180
+        ),
         duration: 800,
         useNativeDriver: false,
       }).start();
@@ -105,15 +124,19 @@ const LeaderBoardScreen = () => {
 
     if (third) {
       Animated.timing(thirdHeight, {
-        toValue: Math.max(35, (third?.totalPoints / maxScore) * 180),
+        toValue: Math.max(
+          35,
+          ((third.totalPoints || 0) / maxScore) * 180
+        ),
         duration: 800,
         useNativeDriver: false,
       }).start();
     }
 
+    // Stagger the fade-in for all rank cards
     Animated.stagger(
       200,
-      cardOpacities.map((opacity) =>
+      newOpacities.map((opacity) =>
         Animated.timing(opacity, {
           toValue: 1,
           duration: 400,
@@ -121,7 +144,7 @@ const LeaderBoardScreen = () => {
         })
       )
     ).start();
-  }, [first, second, third, sortedRoomies]);
+  }, [roomies]);
 
   const getAvatarSource = (member) =>
     member.avatar ? { uri: member.avatar } : face1;
@@ -168,7 +191,9 @@ const LeaderBoardScreen = () => {
           </View>
         )}
 
+        {/* The top 3 bar chart area */}
         <View className="relative w-full h-[270px] flex items-center justify-end mt-6">
+          {/* 2nd place */}
           {second && (
             <View
               className="absolute items-center bottom-0"
@@ -209,6 +234,7 @@ const LeaderBoardScreen = () => {
             </View>
           )}
 
+          {/* 1st place */}
           {first && (
             <View className="absolute items-center bottom-0">
               <Animated.View
@@ -255,6 +281,7 @@ const LeaderBoardScreen = () => {
             </View>
           )}
 
+          {/* 3rd place */}
           {third && (
             <View
               className="absolute items-center bottom-0"
@@ -297,6 +324,7 @@ const LeaderBoardScreen = () => {
         </View>
       </View>
 
+      {/* Remainder of the list */}
       <View className="items-center w-full">
         <View className="mt-2 w-[100%] max-w-[320px]">
           {sortedRoomies.map((roomie, index) => (
@@ -327,7 +355,7 @@ const LeaderBoardScreen = () => {
                   </Text>
                 </View>
                 <Text className="text-2xl text-custom-tan font-spaceGrotesk">
-                  {roomie.totalPoints}
+                  {roomie.totalPoints ?? 0}
                 </Text>
               </TouchableOpacity>
             </Animated.View>

@@ -7,10 +7,14 @@ import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
-import { getUserGroup, getUserInfo } from "../api/users.api";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, doc } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
 import PointsModal from "./PointsModal";
+import {
+  getUserGroup,
+  getUserInfo,
+  addPointsToUser,
+} from "../api/users.api";
 
 
 
@@ -101,45 +105,45 @@ export default function TaskScreen({ user }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [completedTaskName, setCompletedTaskName] = useState("");
   const [totalPoints, setTotalPoints] = useState(0); // total points of user, need to adjust
-
+  const [taskPoints, setTaskPoints] = useState(0);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+  
+  
+  // Subscribe to user doc for live updates of totalPoints
+  useEffect(() => {
+    if (!user || !user.uid) return;
+    const userRef = doc(db, "users", user.uid);
+    const unsubscribe = onSnapshot(userRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setTotalPoints(data.totalPoints || 0);
+      }
+    });
+    return () => unsubscribe();
+  }, [user]);
 
-  // const filteredTasks = tasks.filter(task =>
-  //   task.groupId &&
-  //   user.roomieGroup &&
-  //   task.groupId.toString() === `/roomieGroups/${user.roomieGroup.id}`
-  // );
-  
-  
-  // update screen irl
+
+  // 2) Subscribe to tasks
   useEffect(() => {
     const q = query(collection(db, "task"));
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const tasksArray = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          // Process assignedTo if it's an array of DocumentReferences
-          if (data.assignedTo && Array.isArray(data.assignedTo)) {
-            // For now, we assume these references have been stored as strings or processed already.
-            // If they're still DocumentReferences, you'll need additional logic.
-            // Here, we assume they are strings.
-          }
-          return {
-            id: doc.id,
-            ...data,
-            completedAt: data.completedAt
-              ? data.completedAt.toDate().toISOString()
-              : null,
-          };
-        });
-        setTasks(tasksArray);
-      },
-      (error) => {
-        console.error("Error fetching tasks with onSnapshot:", error);
-      }
-    );
-    return () => unsubscribe();
+    const unsubscribeTasks = onSnapshot(q, (querySnapshot) => {
+      const tasksArray = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          completedAt: data.completedAt
+            ? data.completedAt.toDate().toISOString()
+            : null,
+        };
+      });
+      setTasks(tasksArray);
+    },
+    (error) => {
+      console.error("Error fetching tasks:", error);
+    });
+
+    return () => unsubscribeTasks();
   }, []);
 
   
@@ -174,10 +178,22 @@ export default function TaskScreen({ user }) {
 
     // Open modal if marking as completed
     if (taskToUpdate.status === "completed") {
+      const points = taskToUpdate.selectedPoints || 0;
+      console.log("Task selectedPoints:", taskToUpdate.selectedPoints, "Converted to number:", points);
+
+
+      setTaskPoints(points);
       setSelectedTaskId(taskId);
       setCompletedTaskName(taskToUpdate.title);
-      setModalVisible(true);
-      setTotalPoints(prev => prev + 5); // change to specific task's points once implemented function
+      setModalVisible(true);      
+
+      try {
+        await addPointsToUser(user.uid, points);
+      } catch (err) {
+        console.error("Failed to add points to user:", err);
+      }
+      
+
       setTimeout(() => {
         setModalVisible(false);
         setSelectedTaskId(null);
@@ -347,6 +363,7 @@ export default function TaskScreen({ user }) {
               onCancel={() => setModalVisible(false)}
               taskName={completedTaskName}
               totalPoints={totalPoints}
+              taskPoints={taskPoints}
             />
             {activeTab === "tasks" ? (
               <FlatList
