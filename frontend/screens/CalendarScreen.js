@@ -3,9 +3,7 @@ import { Calendar } from "react-native-calendars";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
-  SafeAreaView,
   View,
-  ScrollView,
   Text,
   TouchableOpacity,
   FlatList,
@@ -16,7 +14,8 @@ import { getUserGroup } from "../api/users.api";
 import { formatDueDate } from "./TaskScreen.js";
 
 export default function CalendarScreen() {
-  const navigation = useNavigation();
+  const [tasks, setTasks] = useState([]);
+  const [visibleMonth, setVisibleMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState("");
   const [eventsByDate, setEventsByDate] = useState({});
 
