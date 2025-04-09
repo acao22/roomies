@@ -217,6 +217,29 @@ export const addPointsToUser = async (uid, pointsToAdd) => {
   }
 };
 
+export const shouldAddLoginPoint = async (uid) => {
+  if (!uid) return false;
+
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
+
+  if (!snap.exists()) return true; // first-time login, grant point
+
+  const lastLoginDate = snap.data().lastLoginDate;
+  const today = new Date().toDateString(); // e.g., "Mon Apr 08 2025"
+
+  return lastLoginDate !== today;
+};
+
+export const updateLastLoginDate = async (uid) => {
+  if (!uid) return;
+
+  const userRef = doc(db, "users", uid);
+  const today = new Date().toDateString();
+
+  await updateDoc(userRef, { lastLoginDate: today });
+};
+
 
 // export const listenToUserDoc = (uid, callback) => {
 //   const userRef = doc(db, "users", uid);
