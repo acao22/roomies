@@ -11,7 +11,6 @@ import {
 import { db } from "../firebaseConfig.js";
 import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { getUserGroup } from "../api/users.api";
-import { formatDueDate } from "./TaskScreen.js";
 
 export default function CalendarScreen() {
   const [tasks, setTasks] = useState([]);
