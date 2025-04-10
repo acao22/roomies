@@ -11,6 +11,7 @@ import {
 import { loginUser, verifyUserSession, getUserGroup } from "../api/users.api.js";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { addPointsToUser, shouldAddLoginPoint, updateLastLoginDate } from "../api/users.api.js";
 
 const LoginScreen = ({ setUser }) => {
   const [email, setEmail] = useState("");
@@ -30,18 +31,27 @@ const LoginScreen = ({ setUser }) => {
     }).start();
   }, []);
 
+  
+
   const handleLogin = async () => {
     try {
       const userCredential = await loginUser(email, password);
       const sessionData = await verifyUserSession();
       const groupData = await getUserGroup();
-
+      
+      //should only add a point if its user first time login tdy!!
+      const shouldAddPoint = await shouldAddLoginPoint(userCredential.uid);
+      if (shouldAddPoint) {
+        await addPointsToUser(userCredential.uid, 1);
+        await updateLastLoginDate(userCredential.uid);
+      }
+  
       const fullUser = {
         ...sessionData,
         roomieGroup: groupData,
         members: groupData.members,
       };
-
+  
       if (fullUser) {
         setUser(fullUser);
         Alert.alert("Login successful", "", [{ text: "OK" }]);
