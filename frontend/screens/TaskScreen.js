@@ -7,9 +7,14 @@ import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
-import { getUserGroup, getUserInfo, verifyUserSession} from "../api/users.api";
-import { collection, query, onSnapshot, where } from "firebase/firestore";
+import { collection, query, onSnapshot, doc } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
+import PointsModal from "./PointsModal";
+import {
+  getUserGroup,
+  getUserInfo,
+  addPointsToUser,
+} from "../api/users.api";
 
 
 
@@ -98,61 +103,53 @@ export default function TaskScreen({ user }) {
   const [tasks, setTasks] = useState([]); // tasks will be set from API
   const [activeTab, setActiveTab] = useState("tasks");
   const [modalVisible, setModalVisible] = useState(false);
+  const [completedTaskName, setCompletedTaskName] = useState("");
+  const [totalPoints, setTotalPoints] = useState(0); // total points of user, need to adjust
+  const [taskPoints, setTaskPoints] = useState(0);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
-
-  // const filteredTasks = tasks.filter(task =>
-  //   task.groupId &&
-  //   user.roomieGroup &&
-  //   task.groupId.toString() === `/roomieGroups/${user.roomieGroup.id}`
-  // );
   
   
-  // update screen irl
+  // Subscribe to user doc for live updates of totalPoints
   useEffect(() => {
-    let unsubscribe;
-    async function fetchUserId() {
-      try {
-        const groupData = await getUserGroup();
-        const groupId = groupData.id;
-        const q = query(collection(db, "task"), where("groupId", "==", groupId));
-        unsubscribe = onSnapshot(
-          q,
-          (querySnapshot) => {
-            const tasksArray = querySnapshot.docs.map((doc) => {
-              const data = doc.data();
-              // Process assignedTo if it's an array of DocumentReferences
-              if (data.assignedTo && Array.isArray(data.assignedTo)) {
-                // For now, we assume these references have been stored as strings or processed already.
-                // If they're still DocumentReferencess, you'll need additional logic.
-                // Here, we assume they are strings.
-              }
-              return {
-                id: doc.id,
-                ...data,
-                completedAt: data.completedAt
-                  ? data.completedAt.toDate().toISOString()
-                  : null,
-              };
-            });
-            setTasks(tasksArray);
-          },
-          (error) => {
-            console.error("Error fetching tasks with onSnapshot:", error);
-          }
-        );
-      } catch (error) {
-        console.error("Error fetching group data:", error);
+    if (!user || !user.uid) return;
+    const userRef = doc(db, "users", user.uid);
+    const unsubscribe = onSnapshot(userRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setTotalPoints(data.totalPoints || 0);
       }
-    }
-    fetchUserId();
-    return () => {if (unsubscribe) unsubscribe()};
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+
+  // 2) Subscribe to tasks
+  useEffect(() => {
+    const q = query(collection(db, "task"));
+    const unsubscribeTasks = onSnapshot(q, (querySnapshot) => {
+      const tasksArray = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          completedAt: data.completedAt
+            ? data.completedAt.toDate().toISOString()
+            : null,
+        };
+      });
+      setTasks(tasksArray);
+    },
+    (error) => {
+      console.error("Error fetching tasks:", error);
+    });
+
+    return () => unsubscribeTasks();
   }, []);
 
   
 
   // Toggle task completion status and open modal if marking as completed
   const toggleTaskCompletion = async (taskId) => {
-    const {uid, email, message} = await verifyUserSession();
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
         const newStatus = task.status === "completed" ? "open" : "completed";
@@ -160,8 +157,6 @@ export default function TaskScreen({ user }) {
           ...task,
           status: newStatus,
           completedAt: newStatus === "completed" ? new Date() : null,
-          completedBy: newStatus === "completed" ? uid : null,
-          updatedAt: new Date()
         };
         return updatedTask;
       }
@@ -176,8 +171,6 @@ export default function TaskScreen({ user }) {
       await updateTask(taskId, {
         status: taskToUpdate.status,
         completedAt: taskToUpdate.completedAt,
-        updatedAt: taskToUpdate.updatedAt,
-        completedBy: taskToUpdate.completedBy
       });
     } catch (error) {
       console.error("Error updating task in firebase:", error);
@@ -185,8 +178,27 @@ export default function TaskScreen({ user }) {
 
     // Open modal if marking as completed
     if (taskToUpdate.status === "completed") {
+      const points = taskToUpdate.selectedPoints || 0;
+      console.log("Task selectedPoints:", taskToUpdate.selectedPoints, "Converted to number:", points);
+
+
+      setTaskPoints(points);
       setSelectedTaskId(taskId);
-      setModalVisible(true);
+      setCompletedTaskName(taskToUpdate.title);
+      setModalVisible(true);      
+
+      try {
+        await addPointsToUser(user.uid, points);
+      } catch (err) {
+        console.error("Failed to add points to user:", err);
+      }
+      
+
+      setTimeout(() => {
+        setModalVisible(false);
+        setSelectedTaskId(null);
+      }, 3000);
+
     }
   };
   // Modal handlers
@@ -220,20 +232,18 @@ export default function TaskScreen({ user }) {
   const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";
     const backgroundColor = isCompleted
-      ? "bg-custom-pink-100"
-      : index % 2 === 0
-      ? "bg-custom-yellow"
-      : "bg-custom-blue-100";
+      ? "bg-[#fdddb3]"
+      : "bg-custom-yellow";
     const textColor = isCompleted
-      ? "text-custom-tan line-through"
+      ? "text-custom-blue-100 line-through"
       : index % 2 === 0
       ? "text-custom-blue-200"
-      : "text-custom-tan";
+      : "text-custom-blue-200";
     const iconColor = isCompleted
-      ? "#FEF9E5"
+      ? "#9CABD8"
       : index % 2 === 0
-      ? "#788ABF"
-      : "#FEF9E5";
+      ? "#495BA2"
+      : "#495BA2";
 
     return (
       <Animatable.View
@@ -301,49 +311,59 @@ export default function TaskScreen({ user }) {
   };
 
   return (
-    <View className="flex-1 bg-custom-tan">
+    <View className="flex-1 bg-custom-yellow">
       {/* TABS */}
       <View className="flex-row mt-16 ml-5">
         <TouchableOpacity
           onPress={() => setActiveTab("tasks")}
           className={`${
             activeTab === "tasks"
-              ? "bg-custom-pink-200"
+              ? "bg-custom-blue-200"
               : activeTab === "addTask"
-              ? "bg-custom-blue-100"
-              : "bg-custom-pink-200"
-          } px-5 py-2 rounded-t-[20px] z-10`}
+              ? "bg-custom-blue-100" // code for birder of add tasks???
+              : "bg-custom-blue-200"
+          } px-5 py-2 rounded-t-[20px] z-10 ml-4`}
         >
-          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk">
+          <Text className="text-4xl font-bold text-custom-tan font-spaceGrotesk">
             tasks
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab("calendar")}
-          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-yellow"
+          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-pink-200 ml-3"
         >
-          <Text className="text-2xl font-bold mb-2 text-custom-tan font-spaceGrotesk">
+          <Text className="text-4xl font-bold text-custom-tan font-spaceGrotesk">
             calendar
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* CORAL border */}
-      <Animated.View className="flex-1 items-center -mt-4 z-10">
+      {/* DARK BLUE border */}
+      <Animated.View className="flex-1 items-center border-t-8 border-custom-blue-200 z-10 bg-custom-tan">
         <View
-          className={`w-[92%] flex-1 border-[20px] ${
+          className={`w-[92%] flex-1 top-5 ${
             activeTab === "tasks"
-              ? "border-custom-pink-200"
+              ? "border-custom-blue-200"
               : activeTab === "calendar"
-              ? "border-custom-yellow"
+              ? "border-custom-blue-100"
               : "border-custom-blue-100"
           } rounded-t-3xl bg-custom-tan`}
         >
           <View className="flex-1 p-4">
-            <CustomModal
+            { /* don't need custom that adss tasks for now */}
+            {/* <CustomModal
               visible={modalVisible}
               onCancel={handleModalCancel}
               onSubmit={handleModalSubmit}
+            /> */}
+
+            {/* popup that shows everytime someone finishes a task */}
+            <PointsModal 
+              visible={modalVisible}
+              onCancel={() => setModalVisible(false)}
+              taskName={completedTaskName}
+              totalPoints={totalPoints}
+              taskPoints={taskPoints}
             />
             {activeTab === "tasks" ? (
               <FlatList
@@ -356,8 +376,8 @@ export default function TaskScreen({ user }) {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item, index }) =>
                   item === "upcoming" ? (
-                    <View className="flex-row justify-between items-center my-4 mx-1">
-                      <Text className="text-3xl font-bold font-spaceGrotesk text-custom-blue-200">
+                    <View className="flex-row justify-between items-center mx-1">
+                      <Text className="text-4xl mb-4 font-bold font-spaceGrotesk text-custom-blue-200">
                         upcoming
                       </Text>
                       <TouchableOpacity onPress={() => setActiveTab("addTask")}>
@@ -369,7 +389,7 @@ export default function TaskScreen({ user }) {
                       </TouchableOpacity>
                     </View>
                   ) : item === "completed" ? (
-                    <Text className="text-3xl font-spaceGrotesk font-bold text-custom-blue-200 my-4 mx-1">
+                    <Text className="text-4xl font-spaceGrotesk font-bold text-custom-blue-200 my-4 mx-1">
                       completed
                     </Text>
                   ) : (

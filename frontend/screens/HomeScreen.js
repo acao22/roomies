@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 // needed for real time updates
 import { collection, query, onSnapshot, where, orderBy } from "firebase/firestore";
-import { getUserInfo, getUserGroup } from "../api/users.api.js";
+import { getUserInfo, getUserGroup, fetchAvatar } from "../api/users.api.js";
 import face1 from "../images/avatar1.png";
 import { db } from "../firebaseConfig.js";
 
@@ -59,77 +59,111 @@ export default function GroupFeedScreen() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
   const [userMap, setUsersMap] = useState([]);
+  const [groupName, setGroupName] = useState('your group');
+  const [groupMembers, setGroupMembers] = useState([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchGroup() {
+        try {
+          const groupData = await getUserGroup();
+          if (groupData && groupData.members) {
+            const membersWithAvatars = await Promise.all(
+              groupData.members.map(async (member) => {
+                try {
+                  const avatarData = await fetchAvatar(member.uid);
+                  return { ...member, avatar: avatarData.uri };
+                } catch (error) {
+                  console.error(`Error fetching avatar for ${member.uid}:`, error);
+                  return { ...member, avatar: null };
+                }
+              })
+            );
+            setGroupMembers(membersWithAvatars);
+          }
+        } catch (error) {
+          console.error("Error fetching group data:", error);
+        }
+      }
+      fetchGroup();
+    }, [])
+  );
 
   useEffect(() => {
-    let unsubscribe;
-    async function fetchAndSubscribe() {
-      try {
-        const groupData = await getUserGroup();
-        const groupId = groupData.id;
-
-        // Build a query filtering by groupId and ordering by updatedAt descending.
-        const tasksRef = collection(db, "task");
-        const q = query(
-          tasksRef,
-          where("groupId", "==", groupId),
-          //where("status","==", "completed"),
-          orderBy("updatedAt", "desc") 
-        );
-
-        unsubscribe = onSnapshot(q, snapshot => {
-          const tasksData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          setTasks(tasksData);
-        }, error => {
-          console.error("Error listening to tasks:", error);
-        });
-      } catch (error) {
-        console.error("Error fetching group data:", error);
-      }
-    }
-    fetchAndSubscribe();
-    return () => {if (unsubscribe) unsubscribe()};
+    const tasksRef = collection(db, "task");
+    const q = query(tasksRef);
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const tasksData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setTasks(tasksData);
+    }, error => {
+      console.error("Error listening to tasks:", error);
+    });
+    return () => unsubscribe();
   }, []);
 
 
   // find only completed ones
-  //const completedTasks = tasks.filter(task => task.status === "completed");
-  const completedTasks = tasks;
+  const completedTasks = tasks.filter(task => task.status === "completed");
 
 
   // find users of completed tasks
-  useEffect(() => {
-    const fetchUsersForCompletedTasks = async () => {
-      //const uids = [...new Set(completedTasks.map(task => task.completedBy))];
-      const uids = [
-        ...new Set(
-          tasks
-            .map((task) => task.createdBy)
-            .concat(tasks.map((task) => task.completedBy))
-            .filter(Boolean)
-        ),
-      ];
-      const tempUsers = {};
-      for (const uid of uids) {
-        try {
-          const userData = await getUserInfo({ uid });
-          tempUsers[uid] = userData;
-        } catch (error) {
-          console.error("Error fetching user for uid:", uid, error);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchUsersForCompletedTasks = async () => {
+        const uids = [
+          ...new Set(
+            tasks
+              .map((task) => task.createdBy)
+              .concat(tasks.map((task) => task.completedBy))
+              .filter(Boolean)
+          ),
+        ];
+        const tempUsers = {};
+        for (const uid of uids) {
+          try {
+            // Fetch basic user info
+            const userData = await getUserInfo({ uid });
+            // Then fetch the user's avatar
+            try {
+              const avatarData = await fetchAvatar(uid);
+              // Merge the avatar URI into the userData object
+              tempUsers[uid] = { ...userData, avatar: avatarData.uri };
+            } catch (avatarError) {
+              console.error("Error fetching avatar for uid:", uid, avatarError);
+              tempUsers[uid] = { ...userData, avatar: null };
+            }
+          } catch (error) {
+            console.error("Error fetching user for uid:", uid, error);
+          }
         }
+        setUsersMap(tempUsers);
+      };
+  
+      if (completedTasks.length > 0) {
+        fetchUsersForCompletedTasks();
       }
-      setUsersMap(tempUsers);
+    }, [completedTasks, tasks])
+  );
+
+
+  useEffect(() => {
+    const fetchGroupName = async () => {
+      try {
+        const groupData = await getUserGroup();
+        setGroupName(groupData.groupName);
+      } catch (error) {
+        console.error('Error fetching group name:', error);
+      }
     };
 
-    if (completedTasks.length > 0) {
-      fetchUsersForCompletedTasks();
-    }
-  }, [completedTasks]);
+    fetchGroupName();
+  }, []);
 
-
-
+  const getAvatarSource = (member) =>
+    member.avatar ? { uri: member.avatar } : face1;
 
   return (
     <View className="flex-1 bg-[#FEF9E5]">
@@ -146,18 +180,17 @@ export default function GroupFeedScreen() {
 
         {/* avatars row, need to fix this spacing later */}
         <View className="flex-row justify-between px-24 mt-40">
-          {avatars.map((avatar, index) => (
-            <View
-              key={index}
-              className="rounded-full overflow-hidden h-16 w-16 bg-[#FEF9E5] shadow-md"
-            >
-              <Image source={avatar} className="h-16 w-16" resizeMode="cover" />
-            </View>
+            {Object.values(groupMembers).map((user, index) => (
+              <View
+                key={index}
+                className="rounded-full overflow-hidden h-16 w-16 bg-[#FEF9E5] shadow-md">
+                <Image source={getAvatarSource(user)} className="h-16 w-16" resizeMode="cover" />
+              </View>
           ))}
         </View>
         {/* group name section */}
         <View className="mt-4 items-center">
-          <Text className="text-4xl font-bold text-[#788ABF]">group name</Text>
+          <Text className="text-4xl font-bold text-[#788ABF]">{groupName}</Text>
           <TouchableOpacity>
             <Text className="text-sm text-[#9CABD8]">edit group</Text>
           </TouchableOpacity>
@@ -165,16 +198,7 @@ export default function GroupFeedScreen() {
         {/* feed list */}
         <View className="mt-6 px-4">
           {completedTasks.map((task) => {
-            // Determine which user to display
-            // For completed tasks, use completedBy, for open tasks, use createdBy
-            const userUid = task.status === "completed" ? task.completedBy : task.createdBy;
-            const user = userMap[userUid] || {};
-
-            // Conditionally create the message based on task status
-            const message =
-              task.status === "completed"
-                ? `${user.firstName} completed "${task.title}"!`
-                : `${user.firstName} created "${task.title}"!`;
+            const user = userMap[task.completedBy] || {};
             const imageSource = task.image ? task.image : getTaskImage(task.id);
             return (
 
@@ -184,7 +208,7 @@ export default function GroupFeedScreen() {
             >
               {/* user & task info */}
               <Text className="text-[#FEF9E5] font-bold text-lg">
-                {message}
+                {user.firstName} completed “{task.title}”!
               </Text>
 
               {/* image if input */}
@@ -199,19 +223,20 @@ export default function GroupFeedScreen() {
               {/* msg & time */}
               <View className="flex-row items-center space-x-2 mt-3">
                 <Image
-                  source={user.avatarURL ? { uri: user.avatarURL } : face1}
+                  source={getAvatarSource(user)}
                   className="h-10 w-10 rounded-full bg-gray-300"
                 />
                 <Text className="mx-2 text-[#FEF9E5] text-lg">
                   {task.description}
                 </Text>
               </View>
-              {task.completedAt && (
+              {(task.completedAt && (
                 <Text className="text-[#FEF9E5] font-bold text-xs mt-1">
                 {new Date(task.completedAt.seconds * 1000).toLocaleString()}
                 </Text>
                 
-              )}
+              )) || <Text className="text-[#FEF9E5] font-bold text-xs mt-1">
+                {new Date(task.createdAt).toLocaleString()} </Text>}
 
             </View>
           );
