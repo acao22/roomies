@@ -8,6 +8,7 @@ import {
   FlatList,
   SafeAreaView
 } from "react-native";
+
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { saveAvatar } from "../api/users.api";
 import ViewShot from "react-native-view-shot";
