@@ -31,7 +31,6 @@ import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import PasswordScreen from "./screens/PasswordScreen";
 
-
 // for verifying user, user session management
 import { verifyUserSession } from "./api/users.api.js";
 import GroupScreen from "./screens/GroupScreen";
@@ -93,7 +92,6 @@ function ProfileStackScreen({ setUser }) {
   );
 }
 
-
 function MainTabs({ user, setUser }) {
   return (
     <Tab.Navigator
@@ -109,7 +107,7 @@ function MainTabs({ user, setUser }) {
             iconName = "trophy";
           } else if (route.name === "ProfilePage") {
             iconName = "person";
-          } 
+          }
 
           return <Ionicons name={iconName} size={size + 4} color={"#ffffff"} />;
         },
@@ -157,7 +155,7 @@ function MainTabs({ user, setUser }) {
     >
       <Tab.Screen name="HomePage" component={HomeStackScreen} />
       <Tab.Screen name="TaskPage">
-        {() => <TaskScreen user={user} />}
+        {() => <TaskScreen user={user} setUser={setUser}/>}
       </Tab.Screen>
       <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
       <Tab.Screen name="ProfilePage">
@@ -171,12 +169,12 @@ function LandingScreenWrapper() {
   return <LandingScreen />;
 }
 
-function AvatarCreationWrapper () {
-    return <AvatarCreation />
+function AvatarCreationWrapper() {
+  return <AvatarCreation />;
 }
 
-function ProfileScreenWrapper () {
-  return <ProfileScreen />
+function ProfileScreenWrapper() {
+  return <ProfileScreen />;
 }
 
 function SignupScreenWrapper({ navigation }) {
@@ -240,23 +238,15 @@ export default function App() {
     );
   }
 
-  // return (
-  //   <NavigationContainer>
-  //     <RootStack.Navigator screenOptions={{ headerShown: false }}>
-  //       <RootStack.Screen name="Landing" component={LandingScreenWrapper} />
-  //       <RootStack.Screen name="Signup" component={SignupScreenWrapper} />
-  //       <RootStack.Screen name="Login" component={LoginScreenWrapper} />
-  //       <RootStack.Screen name="Main" component={MainTabs} />
-  //     </RootStack.Navigator>
-  //   </NavigationContainer>
-  // );
+  // pass in user into main tabs so uid can be consistent
 
   return (
     <NavigationContainer>
+      
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {user && user.roomieGroup ? (
           <RootStack.Screen name="Main">
-            {() => <MainTabs setUser={setUser} />}
+            {() => <MainTabs user={user} setUser={setUser} />} 
           </RootStack.Screen>
         ) : (
           <>
@@ -270,7 +260,10 @@ export default function App() {
             <RootStack.Screen name="Signup">
               {() => <SignUpScreen setUser={setUser} />}
             </RootStack.Screen>
-            <RootStack.Screen name="Group" options={{ animation: "slide_from_left" }}>
+            <RootStack.Screen
+              name="Group"
+              options={{ animation: "slide_from_left" }}
+            >
               {() => <GroupScreen setUser={setUser} />}
             </RootStack.Screen>
             <RootStack.Screen name="Login">
@@ -278,8 +271,14 @@ export default function App() {
             </RootStack.Screen>
           </>
         )}
-        <RootStack.Screen name="AvatarCreation" component={AvatarCreationWrapper} />
-        <RootStack.Screen name="ProfileScreen" component={ProfileScreenWrapper} />
+        <RootStack.Screen
+          name="AvatarCreation"
+          component={AvatarCreationWrapper}
+        />
+        <RootStack.Screen
+          name="ProfileScreen"
+          component={ProfileScreenWrapper}
+        />
       </RootStack.Navigator>
     </NavigationContainer>
   );

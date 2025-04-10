@@ -49,9 +49,9 @@ export const getUserByUid = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const { firstName, lastName } = userDoc.data();
+    const { firstName, lastName, totalPoints } = userDoc.data();
 
-    res.status(200).json({ firstName, lastName });
+    res.status(200).json({ firstName, lastName, totalPoints });
   } catch (error) {
     console.error("Error retrieving user data:", error);
     res.status(500).json({ error: "Error retrieving user data" });
@@ -104,6 +104,7 @@ export const registerUser = async (req, res) => {
         firstName,
         lastName,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        totalPoints: 0,
       };
       await db.collection("users").doc(user.uid).set(userData);
 

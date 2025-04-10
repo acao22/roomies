@@ -16,7 +16,7 @@ export const getAllTasks = async () => {
 };
 
 // add assignedTo later
-export const addTask = async (title, selectedIcon, date, time, members, recurrence, description, groupId) => {
+export const addTask = async (title, selectedIcon, date, time, members, recurrence, description, groupId, selectedPoints) => {
   try {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -33,7 +33,8 @@ export const addTask = async (title, selectedIcon, date, time, members, recurren
           createdAt: (new Date()).toISOString(), 
           createdBy: userId,
           updatedAt: (new Date()).toISOString(),
-          groupId
+          groupId,
+          selectedPoints
       }),
       {
         headers: { "Content-Type": "application/json" },
@@ -58,4 +59,3 @@ export const updateTask = async (taskId, updatedData) => {
     throw error;
   }
 };
-
