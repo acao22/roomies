@@ -14,7 +14,7 @@ import home from "../assets/HomeSample.png";
 import { Ionicons } from "@expo/vector-icons";
 import history from "../assets/history.png";
 import CustomModal from "./AddGroupModal";
-import { getUserInfo, getUserGroup, fetchAvatar } from "../api/users.api.js";
+import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession } from "../api/users.api.js";
 
 import { logoutUser } from "../api/users.api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,8 +29,8 @@ const ProfileScreen = ({ setUser }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { firstName, lastName } = await getUserInfo();
-        setUserData({ firstName: firstName, lastName: lastName });
+        const { firstName, lastName, uid } = await getUserInfo();
+        setUserData({ firstName: firstName, lastName: lastName, uid: uid});
 
         const { groupName, members } = await getUserGroup();
         setUserGroup({ groupName: groupName, members: members });
@@ -45,7 +45,8 @@ const ProfileScreen = ({ setUser }) => {
     // Fetch the user's avatar URI from your API
     const loadAvatar = async () => {
       try {
-        const uri = await fetchAvatar();
+        const {uid, email, message} = await verifyUserSession();
+        const uri = await fetchAvatar(uid);
         console.log(uri.uri);
         setAvatarUri(uri.uri);
       } catch (error) {

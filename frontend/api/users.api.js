@@ -8,12 +8,13 @@ import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } fro
 const API_USER_BASE_URL = `${API_BASE_URL}/users`;
 
 
-export const fetchAvatar = async () => {
-  const {uid, email, message} = await verifyUserSession(); 
+export const fetchAvatar = async (uid) => {
+  console.log("fetching avatar for: ", uid);
   if (uid) {
     const response = await axios.post(`${API_USER_BASE_URL}/fetchAvatar`, {
       uid
     });
+    console.log(response.data);
     return response.data;
   }
 }

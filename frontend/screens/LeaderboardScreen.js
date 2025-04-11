@@ -42,7 +42,9 @@ const LeaderBoardScreen = () => {
               groupData.members.map(async (member) => {
                 // fetch avatar
                 try {
+                  console.log("Fetching avatar for:", member.uid);
                   const avatarData = await fetchAvatar(member.uid);
+                  console.log(member.uid, avatarData.uri);
                   return { ...member, avatar: avatarData.uri };
                 } catch {
                   return { ...member, avatar: null };
@@ -51,7 +53,6 @@ const LeaderBoardScreen = () => {
             );
 
             setRoomies(withAvatars);
-
             // Now set up a snapshot listener for each user's doc
             unsubscribes = withAvatars.map((roomie) => {
               const userRef = doc(db, "users", roomie.uid);
