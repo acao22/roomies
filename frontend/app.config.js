@@ -8,6 +8,13 @@ export default () => ({
     owner: "nanyucao",
     ios: {
       bundleIdentifier: "com.nanyucao.roomies",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
+      googleServicesFile: "./GoogleService-Info.plist",
+    },
+    android: {
+      package: "com.angiecao.roomies",
     },
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
