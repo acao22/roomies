@@ -12,6 +12,8 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { saveAvatar } from "../api/users.api";
 import ViewShot from "react-native-view-shot";
 import * as FileSystem from "expo-file-system";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 
 const AvatarCreation = ({ }) => {
   const [isToggled, setIsToggled] = useState(false);
@@ -122,15 +124,15 @@ const AvatarCreation = ({ }) => {
   );
 
   return (
-    <View className="flex-1 bg-[#788ABF]">
-      <View className="items-center pt-10">
+    <View className="flex-1 bg-custom-blue-200">
+      <View className="items-center pt-20">
         <Text className="text-white text-4xl font-bold font-spaceGrotesk">
           my avatar
         </Text>
 
         {/* Avatar Preview */}
         <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
-          <View className="w-72 h-72 my-6 bg-[#FFD49B] rounded-full items-center justify-center overflow-hidden relative">
+          <View className="w-72 h-72 my-6 bg-[#FFE7C0] rounded-full items-center justify-center overflow-hidden relative">
             <Image
               source={require("../../frontend/assets/head/base-head.png")}
               className="h-96 w-96"
@@ -199,21 +201,21 @@ const AvatarCreation = ({ }) => {
         
 
          {/* < button */}
-         <View className="w-full bg-[#f6b59d] flex-row justify-between items-center px-6 py-4">
+         <View className="w-full bg-[#FFE7C0] flex-row justify-between items-center px-6 py-4">
           {/* < button */}
           <TouchableOpacity onPress={() => setShowFaces(false)}>
-            <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${!showFaces ? "opacity-50" : ""}`}>
+            <Text className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk ${!showFaces ? "opacity-50" : ""}`}>
               {"<"}
             </Text>
           </TouchableOpacity>
 
-          <Text className={`text-white text-4xl font-bold font-spaceGrotesk`}>
-            {showFaces ? "Faces" : "Hair"}
+          <Text className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk`}>
+            {showFaces ? "face" : "hair"}
           </Text>
 
           {/* > button */}
           <TouchableOpacity onPress={() => setShowFaces(true)}>
-            <Text className={`text-white text-4xl font-bold font-spaceGrotesk ${showFaces ? "opacity-50" : ""}`}>
+            <Text className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk ${showFaces ? "opacity-50" : ""}`}>
               {">"}
             </Text>
           </TouchableOpacity>
@@ -221,7 +223,7 @@ const AvatarCreation = ({ }) => {
       </View> 
 
       <View className="flex-1 bg-white">
-        <View className="flex-1 w-full bg-[#F5A58C]">
+        <View className="flex-1 w-full bg-custom-yellow">
           <FlatList
             data={displayedImages}
             renderItem={renderRow}

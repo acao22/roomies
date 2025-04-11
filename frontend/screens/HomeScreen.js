@@ -58,7 +58,7 @@ const getTaskImage = (taskId) => {
 export default function GroupFeedScreen() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
-  const [userMap, setUsersMap] = useState([]);
+  const [userMap, setUsersMap] = useState({});
   const [groupName, setGroupName] = useState('your group');
   const [groupMembers, setGroupMembers] = useState([]);
 
@@ -198,7 +198,7 @@ export default function GroupFeedScreen() {
         {/* feed list */}
         <View className="mt-6 px-4">
           {completedTasks.map((task) => {
-            const user = userMap[task.completedBy] || {};
+            const user = task.completedBy ? userMap[task.completedBy] : userMap[task.createdBy] || {};
             const imageSource = task.image ? task.image : getTaskImage(task.id);
             return (
 

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, Image, TextInput } from 'react-native';
 import tail from '../assets/PointModal.png';
+import face1 from "../assets/face1.png";
 
-const PointsModal = ({ visible, onCancel, taskName, totalPoints, taskPoints }) => {
+
+const PointsModal = ({ visible, onCancel, taskName, totalPoints, taskPoints, avatarUri }) => {
   return (
         <Modal
           animationType="slide"
@@ -25,6 +27,18 @@ const PointsModal = ({ visible, onCancel, taskName, totalPoints, taskPoints }) =
               </View>
             </View>
             <Image source={tail} style={styles.tail} className="w-12 h-14 mr-0 left-0" />
+          </View>
+          <View className="absolute bottom-0 left-0">
+            <Image
+              source={
+                avatarUri &&
+                typeof avatarUri === "string" &&
+                avatarUri.trim().length > 0
+                  ? { uri: avatarUri }
+                  : face1
+              }
+              className="w-48 h-48"
+            />
           </View>
         </Modal>
 
