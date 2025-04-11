@@ -5,9 +5,9 @@ export default () => ({
     name: "frontend",
     slug: "roomies",
     version: "1.0.0",
-    owner: "angiecao",
+    owner: "nanyucao",
     ios: {
-      bundleIdentifier: "com.angiecao.frontend",
+      bundleIdentifier: "com.nanyucao.roomies",
     },
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
@@ -19,7 +19,7 @@ export default () => ({
       firebaseAppId: process.env.FIREBASE_APP_ID,
       firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
       eas: {
-        projectId: "21ef61e9-9616-406e-a914-95025415e27b",
+        projectId: "6f3998f8-ed0e-43ad-af01-0e4b8215d853",
       },
     },
   },
