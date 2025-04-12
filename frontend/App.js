@@ -153,10 +153,10 @@ function MainTabs({ user, setUser }) {
         },
       })}
     >
-      <Tab.Screen name="HomePage" component={HomeStackScreen} />
       <Tab.Screen name="TaskPage">
-        {() => <TaskScreen user={user} setUser={setUser}/>}
+        {() => <TaskScreen user={user} setUser={setUser} />}
       </Tab.Screen>
+      <Tab.Screen name="HomePage" component={HomeStackScreen} />
       <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
       <Tab.Screen name="ProfilePage">
         {() => <ProfileStackScreen user={user} setUser={setUser} />}
@@ -242,11 +242,10 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {user && user.roomieGroup ? (
           <RootStack.Screen name="Main">
-            {() => <MainTabs user={user} setUser={setUser} />} 
+            {() => <MainTabs user={user} setUser={setUser} />}
           </RootStack.Screen>
         ) : (
           <>
