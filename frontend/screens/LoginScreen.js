@@ -11,6 +11,7 @@ import {
 import { loginUser, verifyUserSession, getUserGroup } from "../api/users.api.js";
 import { CommonActions, useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { addPointsToUser, shouldAddLoginPoint, updateLastLoginDate } from "../api/users.api.js";
 
 const LoginScreen = ({ setUser }) => {
   const [email, setEmail] = useState("");
@@ -30,27 +31,28 @@ const LoginScreen = ({ setUser }) => {
     }).start();
   }, []);
 
+  
+
   const handleLogin = async () => {
     try {
       const userCredential = await loginUser(email, password);
       const sessionData = await verifyUserSession();
-      let groupData = null;
 
-      try {
-        groupData = await getUserGroup();
-      } catch (err) {
-        if (err?.response?.status !== 404) throw err;
-      }
+      
+      const groupData = await getUserGroup();
 
-      if (groupData) {
-        setUser({
-          ...sessionData,
-          roomieGroup: groupData.groupName,
-          members: groupData.members,
-        });
-        navigation.dispatch(
-          CommonActions.reset({ index: 0, routes: [{ name: "Main" }] })
-        );
+      const fullUser = {
+        ...sessionData,
+        roomieGroup: groupData,
+        members: groupData.members,
+      };
+      navigation.dispatch(
+        CommonActions.reset({ index: 0, routes: [{ name: "Main" }] })
+      );
+
+      if (fullUser) {
+        setUser(fullUser);
+        Alert.alert("Login successful", "", [{ text: "OK" }]);
       } else {
         setUser({ ...sessionData, roomieGroup: null, members: [] });
         navigation.dispatch(

@@ -7,7 +7,8 @@ import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
 import { getAllTasks, updateTask } from "../api/tasks.api.js";
-import { collection, query, onSnapshot, doc } from "firebase/firestore";
+import { verifyUserSession } from "../api/users.api.js";
+import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
 import PointsModal from "./PointsModal";
 import {
@@ -174,25 +175,58 @@ export default function TaskScreen({ user }) {
 
   // 2) Subscribe to tasks
   useEffect(() => {
-    const q = query(collection(db, "task"));
-    const unsubscribeTasks = onSnapshot(q, (querySnapshot) => {
-      const tasksArray = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          completedAt: data.completedAt
-            ? data.completedAt.toDate().toISOString()
-            : null,
-        };
-      });
-      setTasks(tasksArray);
-    },
-    (error) => {
-      console.error("Error fetching tasks:", error);
-    });
-
-    return () => unsubscribeTasks();
+    let unsubscribe; // To hold the unsubscribe function for cleanup
+  
+    // Async function to fetch the user group, then subscribe to tasks
+    async function fetchUserTasks() {
+      try {
+        // Fetch the user group data; assumes getUserGroup returns an object with an id property
+        const groupData = await getUserGroup();
+        const groupId = groupData.id;
+  
+        // Create a query that fetches tasks only for this specific groupId
+        const q = query(
+          collection(db, "task"),
+          where("groupId", "==", groupId)
+        );
+  
+        // Subscribe to real-time updates from Firestore using onSnapshot
+        unsubscribe = onSnapshot(
+          q,
+          (querySnapshot) => {
+            const tasksArray = querySnapshot.docs.map((doc) => {
+              const data = doc.data();
+  
+              // Process the assignedTo field here if needed, e.g., when it's an array of DocumentReferences.
+              // Currently, it assumes they have been processed to strings or are already in the desired format.
+  
+              return {
+                id: doc.id,
+                ...data,
+                completedAt: data.completedAt
+                  ? data.completedAt.toDate().toISOString()
+                  : null,
+              };
+            });
+            // Update the component state with the fetched tasks
+            setTasks(tasksArray);
+          },
+          (error) => {
+            console.error("Error fetching tasks with onSnapshot:", error);
+          }
+        );
+      } catch (error) {
+        console.error("Error fetching group data:", error);
+      }
+    }
+  
+    // Initiate fetching of tasks by the user's group
+    fetchUserTasks();
+  
+    // Cleanup: Unsubscribe from the snapshot listener when the component unmounts
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // load user's avatar to pass into modal
@@ -214,6 +248,7 @@ export default function TaskScreen({ user }) {
 
   // Toggle task completion status and open modal if marking as completed
   const toggleTaskCompletion = async (taskId) => {
+    const {uid, email, message} = await verifyUserSession();
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
         const newStatus = task.status === "completed" ? "open" : "completed";
@@ -221,6 +256,8 @@ export default function TaskScreen({ user }) {
           ...task,
           status: newStatus,
           completedAt: newStatus === "completed" ? new Date() : null,
+          completedBy: newStatus === "completed" ? uid : null,
+          updatedAt: new Date()
         };
         return updatedTask;
       }
@@ -235,6 +272,8 @@ export default function TaskScreen({ user }) {
       await updateTask(taskId, {
         status: taskToUpdate.status,
         completedAt: taskToUpdate.completedAt,
+        updatedAt: taskToUpdate.updatedAt,
+        completedBy: taskToUpdate.completedBy
       });
     } catch (error) {
       console.error("Error updating task in firebase:", error);

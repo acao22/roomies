@@ -4,14 +4,27 @@
       "bundler": "metro"
     },
     "developmentClient": {
-      "fastRefresh": false  
+      "fastRefresh": false
     },
     "name": "frontend",
-    "slug": "frontend",
+    "slug": "roomies",
     "version": "1.0.0",
     "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "extra": {
+      "firebaseApiKey": "AIzaSyBeNRngvpb5VA0srqiiN_GwmvNk0FgBxMQ",
+      "firebaseAuthDomain": "spark-roomies.firebaseapp.com",
+      "firebaseDatabaseUrl": "https://spark-roomies-default-rtdb.firebaseio.com",
+      "firebaseProjectId": "spark-roomies",
+      "firebaseStorageBucket": "spark-roomies.firebasestorage.app",
+      "firebaseMessagingSenderId": "832127189891",
+      "firebaseAppId": "1:832127189891:web:c967dcaed8fc253cafecb6",
+      "firebaseMeasurementId": "G-3D7KV0KEVM",
+      "eas": {
+        "projectId": "21ef61e9-9616-406e-a914-95025415e27b"
+      }
+    }
   }
 }

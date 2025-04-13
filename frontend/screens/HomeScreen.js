@@ -90,18 +90,36 @@ export default function GroupFeedScreen() {
   );
 
   useEffect(() => {
-    const tasksRef = collection(db, "task");
-    const q = query(tasksRef);
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const tasksData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setTasks(tasksData);
-    }, error => {
-      console.error("Error listening to tasks:", error);
-    });
-    return () => unsubscribe();
+    let unsubscribe;
+    async function fetchAndSubscribe() {
+      try {
+        const groupData = await getUserGroup();
+        const groupId = groupData.id;
+
+        // Build a query filtering by groupId and ordering by updatedAt descending.
+        const tasksRef = collection(db, "task");
+        const q = query(
+          tasksRef,
+          where("groupId", "==", groupId),
+          //where("status","==", "completed"),
+          orderBy("updatedAt", "desc") 
+        );
+
+        unsubscribe = onSnapshot(q, snapshot => {
+          const tasksData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setTasks(tasksData);
+        }, error => {
+          console.error("Error listening to tasks:", error);
+        });
+      } catch (error) {
+        console.error("Error fetching group data:", error);
+      }
+    }
+    fetchAndSubscribe();
+    return () => {if (unsubscribe) unsubscribe()};
   }, []);
 
 
