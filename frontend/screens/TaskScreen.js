@@ -6,7 +6,7 @@ import AddTaskScreen from "./AddTaskScreen";
 import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
-import { getAllTasks, updateTask } from "../api/tasks.api.js";
+import { getAllTasks, updateTask, deleteTask } from "../api/tasks.api.js";
 import { verifyUserSession } from "../api/users.api.js";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
@@ -265,6 +265,19 @@ export default function TaskScreen({ user }) {
       return dateA - dateB;
     });
 
+  // Delete task
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await deleteTask(taskId);
+      console.log("Task deleted successfully");
+  
+      // Optionally filter the task out immediately
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+    }
+  };
+
   // Get completed tasks
   const completedTasks = tasks.filter((t) => t.status === "completed");
 
@@ -299,6 +312,12 @@ export default function TaskScreen({ user }) {
             color={iconColor}
             className="mr-3"
           />
+        </TouchableOpacity>
+
+        {/* Delete Icon */}
+        <TouchableOpacity onPress={() => handleDeleteTask(item.id)}
+          style={{ position: "absolute", top: 10, right: 10, zIndex: 10 }} >
+          <Ionicons name="close-outline" size={24} color="#DC2626" />
         </TouchableOpacity>
 
         {/* Task details */}
