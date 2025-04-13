@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -18,6 +19,7 @@ export default function EditProfile() {
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigation = useNavigation();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -29,23 +31,25 @@ export default function EditProfile() {
           &lt; profile
         </Text>
 
-        {/* Avatar Section */}
-        <View className="w-96 h-44 rounded-3xl bg-[#495BA2] items-center justify-center mb-12">
-          <View className="flex-row items-center gap-12">
+        <Pressable
+        onPress={() => navigation.navigate("AvatarCreation")}
+        className="w-96 h-44 rounded-3xl bg-[#495BA2] items-center justify-center mb-12"
+        >
+        <View className="flex-row items-center gap-12">
             <View className="w-28 h-28 rounded-full bg-[#FFE7C0] overflow-hidden items-center justify-center">
-              <Image
+            <Image
                 source={require("../assets/face1.png")}
                 className="w-28 h-28"
                 resizeMode="contain"
-              />
+            />
             </View>
             <Text className="text-3xl font-semibold text-[#FEF9E5]">edit avatar</Text>
-          </View>
         </View>
+        </Pressable>
 
         {/* Password Section */}
         <View className="w-96 h-128 rounded-3xl bg-[#495BA2] items-start justify-center px-6 mb-12 gap-4">
-          <Text className="ml-32 mt-8 text-3xl font-semibold text-[#FEF9E5] mb-4">edit password</Text>
+          <Text className="ml-32 mt-8 text-3xl font-semibold text-[#FEF9E5]">edit password</Text>
 
           {/* Current Password */}
           <TextInput
