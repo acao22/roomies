@@ -11,7 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
 
 // hardcoded stuff for now
 const userAvatars = {
@@ -48,7 +47,7 @@ const recurrenceOptions = [
   "Custom",
 ];
 
-const AddTaskScreen = ({ setActiveTab }) => {
+const AddTaskScreen = ({ setActiveTab, currentUser }) => {
   const [title, setTitle] = useState("");
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [date, setDate] = useState(new Date());
@@ -68,32 +67,45 @@ const AddTaskScreen = ({ setActiveTab }) => {
     );
   };
 
+  const handleIconPress = (item) => {
+    setSelectedIcon(item.id);
+    setTitle(item.name);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setDate(tomorrow);
+    setTime(new Date());
+
+    setMembers(
+      groupMembers.map((member) =>
+        member.name === currentUser
+          ? { ...member, selected: true }
+          : { ...member, selected: false }
+      )
+    );
+
+    setRecurrence("Does not repeat");
+    setDescription("");
+  };
+
   return (
     <FlatList
-      // flatlist requires data, so just using single empty object
-      // scrollview makes it start tweaking :(
       data={[{}]}
       keyExtractor={(_, index) => index.toString()}
       showsVerticalScrollIndicator={false}
       renderItem={() => (
         <View className="flex-1 bg-custom-tan p-5">
           {/* BACK BUTTON */}
-          <TouchableOpacity
-            // switch back to tasks tab
-            onPress={() => setActiveTab("tasks")}
-            className="mb-4"
-          >
+          <TouchableOpacity onPress={() => setActiveTab("tasks")} className="mb-4">
             <Text className="text-xl text-custom-blue-200 font-bold underline font-spaceGrotesk">
               ← back
             </Text>
           </TouchableOpacity>
 
           {/* TASK TITLE */}
-          <Text className="text-2xl font-bold font-spaceGrotesk">
-            Add title
-          </Text>
+          <Text className="text-2xl font-bold font-spaceGrotesk">Add title</Text>
           <TextInput
-            className="border-b border-gray-400 text-lg py-2 mb-4 font-spaceGrotesk "
+            className="border-b border-gray-400 text-lg py-2 mb-4 font-spaceGrotesk"
             placeholder="Enter task title"
             value={title}
             onChangeText={setTitle}
@@ -112,7 +124,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
             className="max-h-[160px] my-4"
             renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={() => setSelectedIcon(item.id)}
+                onPress={() => handleIconPress(item)}
                 className={`m-1 p-4 rounded-full ${
                   selectedIcon === item.id
                     ? "border-2 border-blue-500"
@@ -177,11 +189,9 @@ const AddTaskScreen = ({ setActiveTab }) => {
             />
           )}
 
+          {/* WHO SECTION */}
           <Text className="text-xl font-bold my-2 font-spaceGrotesk">Who:</Text>
-
-          {/* need to add this wrapper for flatlist & fading edges */}
           <View className="relative w-full">
-            {/* WHO SECTION */}
             <FlatList
               data={members}
               horizontal
@@ -189,7 +199,6 @@ const AddTaskScreen = ({ setActiveTab }) => {
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <Animatable.View
-                  // pulse on select, zoom on enter
                   animation={item.selected ? "pulse" : "zoomIn"}
                   duration={300}
                 >
@@ -222,8 +231,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
                 </Animatable.View>
               )}
             />
-
-            {/* left fading edge */}
+            {/* Fading Edges */}
             <View className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none">
               <LinearGradient
                 colors={["#FEF9E5", "rgba(254, 249, 229, 0)"]}
@@ -232,8 +240,6 @@ const AddTaskScreen = ({ setActiveTab }) => {
                 style={{ width: "100%", height: "100%" }}
               />
             </View>
-
-            {/* right fading edge */}
             <View className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none">
               <LinearGradient
                 colors={["rgba(254, 249, 229, 0)", "#FEF9E5"]}
@@ -256,10 +262,9 @@ const AddTaskScreen = ({ setActiveTab }) => {
             </TouchableOpacity>
           </Animatable.View>
 
-          {/* dropdown menu */}
           {showRecurrenceDropdown && (
             <Animatable.View
-              animation={showRecurrenceDropdown ? "pulse" : "zoomOut"}
+              animation="pulse"
               duration={300}
               className="bg-gray-200 p-2 rounded-xl shadow-md z-10"
             >
@@ -280,7 +285,7 @@ const AddTaskScreen = ({ setActiveTab }) => {
             </Animatable.View>
           )}
 
-          {/* TASK DESCRIPTION */}
+          {/* DESCRIPTION */}
           <Text className="text-xl font-bold my-2 font-spaceGrotesk">
             Add description
           </Text>
