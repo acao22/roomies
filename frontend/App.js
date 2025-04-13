@@ -9,6 +9,7 @@ import LeaderboardScreen from "./screens/LeaderboardScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import LandingScreen from "./screens/LandingScreen";
+import EditProfile from "./screens/EditProfile";
 import ProfileDrawer from "./screens/ProfileDrawer";
 import { Platform, UIManager, TouchableOpacity, View } from "react-native";
 import "./global.css";
@@ -154,6 +155,7 @@ export default function App() {
         <RootStack.Screen name="Main" component={MainTabs} />
         <RootStack.Screen name="AvatarCreation" component={AvatarCreationWrapper} />
         <RootStack.Screen name="ProfileScreen" component={ProfileScreenWrapper} />
+        <RootStack.Screen name="EditProfile" component={EditProfile} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

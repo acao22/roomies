@@ -5,6 +5,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Pressable
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
@@ -55,6 +56,12 @@ const ProfileScreen = () => {
         <Text className="text-lg font-bold text-[#00B8B6] mt-3">
           first last
         </Text>
+            {/* clickable text link */}
+        <Pressable onPress={() => navigation.navigate('EditProfile')}>
+          <Text className="text-sm text-blue-500 underline mt-1">
+            stand in for edit profile
+          </Text>
+        </Pressable>
         {/* rating + star */}
         <View className="flex-row items-center mt-1">
           <Text className="text-base text-[#BFBFBF] mr-1">201,885</Text>
