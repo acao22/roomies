@@ -113,7 +113,7 @@ export default function TaskScreen({ user }) {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [avatarUri, setAvatarUri] = useState(null);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
-  const [userMap, setUsersMap] = useState([]);
+  const [userMap, setUsersMap] = useState({});
 
 
 
@@ -153,7 +153,7 @@ export default function TaskScreen({ user }) {
         if (completedTasks.length > 0) {
           fetchUsersForCompletedTasks();
         }
-      }, [completedTasks, tasks])
+      }, [tasks])
     );
   
   
@@ -234,9 +234,9 @@ export default function TaskScreen({ user }) {
       // Fetch the user's avatar URI from your API
       const loadAvatar = async () => {
         try {
-          const uri = await fetchAvatar();
-          console.log(uri.uri);
-          setAvatarUri(uri.uri);
+          const { uid } = await verifyUserSession();
+          const { uri } = await fetchAvatar(uid);
+          setAvatarUri(uri);
         } catch (error) {
           console.error("Error fetching avatar:", error);
         }
@@ -331,6 +331,20 @@ export default function TaskScreen({ user }) {
   // Get completed tasks
   const completedTasks = tasks.filter((t) => t.status === "completed");
 
+  const getAvatarSource = (uidOrName) => {
+    // 1) if we fetched a custom avatar for this uid, use it
+    if (userMap[uidOrName]?.avatar) {
+      return { uri: userMap[uidOrName].avatar };
+    }
+    // 2) fallback to hard‑coded name → local image
+    if (userAvatars[uidOrName]) {
+      return userAvatars[uidOrName];
+    }
+    // 3) ultimate fallback
+    return userAvatars["Default"];
+  };
+  
+
   const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";
     const backgroundColor = isCompleted
@@ -388,7 +402,7 @@ export default function TaskScreen({ user }) {
 
         {/* Avatars */}
         <View className="flex-row justify-between z-10">
-          {(item.assignedTo || []).map((user, i) => ( // need to make assignedTo correctly
+          {(item.assignedTo || []).map((user, i) => ( 
             <View
               key={i}
               style={{
@@ -401,7 +415,7 @@ export default function TaskScreen({ user }) {
               }}
             >
               <Image
-                source={userAvatars[user] || userAvatars["Default"]}
+                source={getAvatarSource(item.completedBy)}
                 className="h-full w-full"
                 resizeMode="cover"
               />
