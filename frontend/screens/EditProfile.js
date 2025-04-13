@@ -27,9 +27,11 @@ export default function EditProfile() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 items-center justify-center bg-[#FFE7C0]"
       >
-        <Text className="ml-8 self-start text-2xl mb-12 font-bold text-[#495BA2]">
-          &lt; profile
+        <Pressable onPress={() => navigation.navigate("ProfileScreen")}>
+        <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
+            &lt; profile
         </Text>
+        </Pressable>
 
         <Pressable
         onPress={() => navigation.navigate("AvatarCreation")}
@@ -121,3 +123,5 @@ export default function EditProfile() {
     </TouchableWithoutFeedback>
   );
 }
+
+
