@@ -9,7 +9,7 @@ import {
   Animated,
 } from "react-native";
 import { loginUser, verifyUserSession, getUserGroup } from "../api/users.api.js";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { CommonActions, useNavigation, useRoute } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 const LoginScreen = ({ setUser }) => {
@@ -34,22 +34,31 @@ const LoginScreen = ({ setUser }) => {
     try {
       const userCredential = await loginUser(email, password);
       const sessionData = await verifyUserSession();
-      const groupData = await getUserGroup();
+      let groupData = null;
 
-      const fullUser = {
-        ...sessionData,
-        roomieGroup: groupData,
-        members: groupData.members,
-      };
+      try {
+        groupData = await getUserGroup();
+      } catch (err) {
+        if (err?.response?.status !== 404) throw err;
+      }
 
-      if (fullUser) {
-        setUser(fullUser);
-        Alert.alert("Login successful", "", [{ text: "OK" }]);
+      if (groupData) {
+        setUser({
+          ...sessionData,
+          roomieGroup: groupData.groupName,
+          members: groupData.members,
+        });
+        navigation.dispatch(
+          CommonActions.reset({ index: 0, routes: [{ name: "Main" }] })
+        );
       } else {
-        Alert.alert("Missing group", "Please join or create a group.");
+        setUser({ ...sessionData, roomieGroup: null, members: [] });
+        navigation.dispatch(
+          CommonActions.reset({ index: 0, routes: [{ name: "Group" }]})
+        );
       }
     } catch (error) {
-      Alert.alert("Error", error.message || "An unexpected error occurred.");
+      Alert.alert("Login failed", error.message || "Unexpected error");
     }
   };
 

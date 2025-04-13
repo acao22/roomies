@@ -66,7 +66,7 @@ const TaskNotificationsModal = ({ visible, onClose, completedTasks, userMap }) =
                     />
                     <View className="flex-col">
                         <Text className=" text-custom-blue-200 text-xl font-bold">
-                            {user.firstName}
+                            {(user && user.firstName ? user.firstName : "Anonymous")}
                         </Text>
                         <Text className="text-custom-blue-200 text-m font-spaceGrotesk">
                             completed {task.title}

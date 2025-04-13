@@ -163,7 +163,7 @@ export default function GroupFeedScreen() {
   }, []);
 
   const getAvatarSource = (member) =>
-    member.avatar ? { uri: member.avatar } : face1;
+    member && member.avatar ? { uri: member.avatar } : face1;
 
   return (
     <View className="flex-1 bg-[#FEF9E5]">
@@ -208,7 +208,7 @@ export default function GroupFeedScreen() {
             >
               {/* user & task info */}
               <Text className="text-[#FEF9E5] font-bold text-lg">
-                {user.firstName} completed “{task.title}”!
+                {(user && user.firstName ? user.firstName : "Anonymous")} completed “{task.title}”!
               </Text>
 
               {/* image if input */}

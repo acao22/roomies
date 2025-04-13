@@ -217,6 +217,21 @@ export const addPointsToUser = async (uid, pointsToAdd) => {
   }
 };
 
+// leave group, removes user from current group
+export const leaveGroupAPI = async (uid, groupId) => {
+  try {
+    const response = await axios.post(`${API_USER_BASE_URL}/leaveGroup`, {
+      uid,
+      groupId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error leaving group:", error.response?.data || error.message);
+    throw error;
+  }
+
+};
+
 
 // export const listenToUserDoc = (uid, callback) => {
 //   const userRef = doc(db, "users", uid);
