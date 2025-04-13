@@ -37,22 +37,23 @@ const LoginScreen = ({ setUser }) => {
     try {
       const userCredential = await loginUser(email, password);
       const sessionData = await verifyUserSession();
+      let groupData = null;
+      try {
+        groupData = await getUserGroup();
+      } catch (err) {
+        if (err?.response?.status !== 404) throw err;
+      }
 
+      if (groupData) {
+        setUser({
+          ...sessionData,
+          roomieGroup: groupData.groupName,
+          members: groupData.members,
+        });
       
-      const groupData = await getUserGroup();
-
-      const fullUser = {
-        ...sessionData,
-        roomieGroup: groupData,
-        members: groupData.members,
-      };
-      navigation.dispatch(
-        CommonActions.reset({ index: 0, routes: [{ name: "Main" }] })
-      );
-
-      if (fullUser) {
-        setUser(fullUser);
-        Alert.alert("Login successful", "", [{ text: "OK" }]);
+        // navigation.dispatch(
+        //   CommonActions.reset({ index: 0, routes: [{ name: "Main" }] })
+        // );
       } else {
         setUser({ ...sessionData, roomieGroup: null, members: [] });
         navigation.dispatch(

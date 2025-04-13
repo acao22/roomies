@@ -67,7 +67,7 @@ export default function GroupFeedScreen() {
       async function fetchGroup() {
         try {
           const groupData = await getUserGroup();
-          if (groupData && groupData.members) {
+          if (groupData?.members?.length) {
             const membersWithAvatars = await Promise.all(
               groupData.members.map(async (member) => {
                 try {
@@ -80,6 +80,9 @@ export default function GroupFeedScreen() {
               })
             );
             setGroupMembers(membersWithAvatars);
+          } else {
+            setGroupMembers([]);
+            setGroupName("you loner roomie");
           }
         } catch (error) {
           console.error("Error fetching group data:", error);
@@ -94,6 +97,7 @@ export default function GroupFeedScreen() {
     async function fetchAndSubscribe() {
       try {
         const groupData = await getUserGroup();
+        if (!groupData) return;
         const groupId = groupData.id;
 
         // Build a query filtering by groupId and ordering by updatedAt descending.
@@ -171,7 +175,7 @@ export default function GroupFeedScreen() {
     const fetchGroupName = async () => {
       try {
         const groupData = await getUserGroup();
-        setGroupName(groupData.groupName);
+        setGroupName(groupData ? groupData.groupName : "you loner roomie");
       } catch (error) {
         console.error('Error fetching group name:', error);
       }
@@ -209,9 +213,6 @@ export default function GroupFeedScreen() {
         {/* group name section */}
         <View className="mt-4 items-center">
           <Text className="text-4xl font-bold text-[#788ABF]">{groupName}</Text>
-          <TouchableOpacity>
-            <Text className="text-sm text-[#9CABD8]">edit group</Text>
-          </TouchableOpacity>
         </View>
         {/* feed list */}
         <View className="mt-6 px-4">
