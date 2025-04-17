@@ -99,4 +99,44 @@ export const updateTask = async (req, res) => {
       res.status(500).json({ error: "Error updating task: " + error.message });
   }
 };
+
+export const deleteTask = async (req, res) => {
+
+  const { taskId } = req.params;
+
+  try {
+    const taskRef = db.collection("task").doc(taskId);
+    const taskDoc = await taskRef.get();
+
+    if (!taskDoc.exists) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    const taskData = taskDoc.data();
+    const completedBy = taskData.completedBy;
+    const selectedPoints = taskData.selectedPoints || 0;
+
+    // If the task was completed, deduct points from user
+    if (completedBy) {
+      const userRef = db.collection("users").doc(completedBy);
+      const userDoc = await userRef.get();
+
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        const currPoints = userData.totalPoints || 0;
+        await userRef.update({
+          totalPoints: Math.max(0, currPoints - selectedPoints),
+        });
+      }
+    }
+
+    // Delete the task
+    await taskRef.delete();
+
+    res.status(200).json({ message: "Task deleted and user points updated (if applicable)" });
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting task: " + error.message });
+  }
+
+}
   
