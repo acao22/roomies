@@ -1,22 +1,27 @@
 import { StatusBar } from "expo-status-bar";
 import {
   ImageBackground,
-  StyleSheet,
   Text,
   View,
   Image,
   TouchableOpacity,
   Animated,
 } from "react-native";
-import face1 from "../assets/face1.png";
-import face2 from "../assets/face2.png";
-import face3 from "../assets/face3.png";
-import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef } from "react";
+import { useNavigation } from "@react-navigation/native";
+
+import face1 from "../assets/faces/face-2.png";
+import hair1 from "../assets/dark_hair/hair-f8-dark.png";
+import face2 from "../assets/faces/face-1.png";
+import hair2 from "../assets/dark_hair/hair-m3-dark.png";
+import face3 from "../assets/faces/face-5.png";
+import hair3 from "../assets/dark_hair/hair-f5-dark.png";
+
+
 
 const gridImage = require("../assets/grid.png");
 
-const LandingScreen = ({}) => {
+const LandingScreen = () => {
   const navigation = useNavigation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -29,44 +34,94 @@ const LandingScreen = ({}) => {
   }, []);
 
   return (
-    <ImageBackground source={gridImage} className="bg-custom-tan flex-1 bg-bg">
-      <View className="absolute right-20 top-52">
-        <Image source={face1} className="w-52 h-52 -ml-12 -mb-8" />
-        <Image source={face2} className="w-52 h-52 -mt-20 -mb-20 -ml-36" />
-        <Image source={face3} className="w-44 h-44 -mt-7" />
-      </View>
-
-      <Animated.View className="flex-1 justify-end pb-40 items-center bg-transparent" style={{ opacity: fadeAnim }}>
-        <View className="flex-row">
-          <Text
-            className="font-bold text-custom-blue-200 text-7xl font-spaceGrotesk"
-            style={{ width: "100%", textAlign: "center" }}
-          >
-            roomies
-          </Text>
+    <ImageBackground
+      source={gridImage}
+      className="bg-custom-tan flex-1 bg-bg"
+    >
+      {/* Group the overlapped face and hair into a relative container */}
+      <View className="flex-row pt-72 ml-6">
+        <View className="relative">
+          {/* face image */}
+          <Image source={face1} className="w-48 h-48" />
+          {/* hair image  */}
+          <Image
+            source={hair1}
+            className="absolute top-0 left-0 w-48 h-48"
+          />
+        </View>
+        <View className="relative">
+          {/* face image */}
+          <Image source={face2} className="right-20  w-48 h-48" />
+          {/* hair image  */}
+          <Image
+            source={hair2}
+            className="absolute top-0 right-20 w-48 h-48"
+          />
+        </View>
+        <View className="relative">
+          {/* face image */}
+          <Image source={face3} className="right-40 w-48 h-48" />
+          {/* hair image  */}
+          <Image
+            source={hair3}
+            className="absolute top-0 right-40 w-48 h-48"
+          />
         </View>
 
-        <TouchableOpacity
-          className="bg-custom-red items-center p-3 rounded-full mt-10 w-44"
-          onPress={() => navigation.navigate("Signup", { origin: "Landing" })}
-        >
-          <Text
-            className=" text-white font-bold font-spaceGrotesk text-2xl"
-            style={{ width: "100%", textAlign: "center" }}
-          >
-            sign up
+      </View>
+
+      <Animated.View
+        className="flex-1 justify-end pb-36 items-center bg-transparent"
+        style={{ opacity: fadeAnim }}
+      >
+        <View className="flex-row">
+          <Text className="font-bold text-custom-blue-200 text-8xl font-spaceGrotesk">
+            room
           </Text>
-        </TouchableOpacity>
+          <Text className="font-bold text-custom-pink-200 text-8xl font-spaceGrotesk">
+            i
+          </Text>
+          <Text className="font-bold text-custom-blue-200 text-8xl font-spaceGrotesk">
+            es
+          </Text>
+        </View>
+        <View className="bg-custom-yellow">
+          
+        </View>
+
+        <View className="relative mt-24 items-center justify-center">
+          {/* Yellow box behind the sign-up button */}
+            <View
+              className="absolute top-12 h-80 w-full bg-custom-yellow rounded-lg"
+              style={{ transform: [{ translateY: -20 }] }}
+            />
+
+          <TouchableOpacity
+            className="relative z-10 bg-custom-blue-200 items-center p-3 rounded-full w-64"
+            onPress={() => navigation.navigate("Signup", { origin: "Landing" })}
+          >
+            <Text
+              className="text-white font-bold font-spaceGrotesk text-4xl"
+              style={{ width: "100%", textAlign: "center" }}
+            >
+              sign up
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <Text
-          className="text-2xl mt-4 font-spaceGrotesk"
+          className="text-3xl font-spaceGrotesk text-custom-blue-100 font-semibold pt-8"
           style={{ width: "100%", textAlign: "center" }}
         >
           already have an account?
         </Text>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Login", { origin: "Landing" })}>
-          <Text className="underline text-2xl">log in</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Login", { origin: "Landing" })}
+        >
+          <Text className="underline text-3xl font-spaceGrotesk text-custom-blue-100 font-semibold">
+            log in
+          </Text>
         </TouchableOpacity>
 
         <StatusBar style="auto" />

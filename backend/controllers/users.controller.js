@@ -171,6 +171,9 @@ export const loginUser = async (req, res) => {
       const expandedMembers = (await Promise.all(memberDataPromises)).filter((user) => user !== null);
       res.status(200).json({ id: groupData.id, groupName: groupData.groupName, members: expandedMembers });
     } catch (error) {
+      if (error.code === 404) {
+        return res.status(404).json({ error: error.message });
+      }
       console.error("Error retrieving user data:", error);
       res.status(500).json({ error: "Error retrieving user data" });
     }
@@ -294,5 +297,43 @@ export const createGroup = async (req, res) => {
     } catch (error) {
       console.error("Error creating group:", error);
       res.status(500).json({ error: "Failed to create group" });
+    }
+  };
+
+  // leave group
+  export const leaveGroup = async (req, res) => {
+    const { uid, groupId } = req.body;
+    if (!uid || !groupId) {
+      return res.status(400).json({ error: "Missing uid or group id"});
+    }
+
+    try {
+      const userRef = db.collection("users").doc(uid);
+      const groupRef = db.collection("roomieGroups").doc(groupId);
+
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userData = userDoc.data();
+      let updateGroups = [];
+      if (userData.roomieGroup && Array.isArray(userData.roomieGroup)) {
+        updateGroups = userData.roomieGroup.filter(
+          (groupRefItem) => {return groupRefItem.id !== groupId}
+        );
+      }
+
+      await userRef.update({
+        roomieGroup: updateGroups,
+      });
+
+      await groupRef.update({
+        members: admin.firestore.FieldValue.arrayRemove(userRef),
+      });
+      res.status(200).json({ message: "Successfully left group" });
+    } catch (error) {
+      console.error("Error leaving group:", error);
+      res.status(500).json({ error: "Failed to leave group" });
     }
   };

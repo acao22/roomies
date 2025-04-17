@@ -8,13 +8,13 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import face1 from "../assets/face1.png";
 import home from "../assets/HomeSample.png";
 import { Ionicons } from "@expo/vector-icons";
 import history from "../assets/history.png";
 import CustomModal from "./AddGroupModal";
-import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession } from "../api/users.api.js";
+import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI } from "../api/users.api.js";
 
 import { logoutUser } from "../api/users.api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,11 +29,12 @@ const ProfileScreen = ({ setUser }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { firstName, lastName, uid } = await getUserInfo();
+        const { uid } = await verifyUserSession();
+        const { firstName, lastName } = await getUserInfo();
         setUserData({ firstName: firstName, lastName: lastName, uid: uid});
 
-        const { groupName, members } = await getUserGroup();
-        setUserGroup({ groupName: groupName, members: members });
+        const { id, groupName, members } = await getUserGroup();
+        setUserGroup({ id, groupName: groupName, members: members });
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -46,9 +47,9 @@ const ProfileScreen = ({ setUser }) => {
     const loadAvatar = async () => {
       try {
         const {uid, email, message} = await verifyUserSession();
-        const uri = await fetchAvatar(uid);
+        const { uri } = await fetchAvatar(uid) || { uri: null };
         console.log(uri.uri);
-        setAvatarUri(uri.uri);
+        setAvatarUri(uri);
       } catch (error) {
         console.error("Error fetching avatar:", error);
       }
@@ -66,6 +67,33 @@ const ProfileScreen = ({ setUser }) => {
     } catch (error) {
       console.error("Logout failed:", error);
       Alert.alert("Error", "Failed to log out. Try again.");
+    }
+  };
+
+  // user leaves group
+  const handleLeaveGroup = async () => {
+    if (!userData || !userGroup) {
+      Alert.alert("Error", "No group to leave.");
+      return;
+    }
+
+    const userId = userData.uid;
+    const groupId = userGroup.id;
+
+    if (!groupId) {
+      Alert.alert("Error", "Group id not found.");
+      return;
+    }
+
+    try {
+      await leaveGroupAPI(userId, groupId);
+
+      setUser(prev => ({ ...prev, roomieGroup: null, members: [] }));
+      Alert.alert("Left Group", "You have succesfully left the group");
+
+    } catch (error) {
+      console.error("Leave group failed:", error);
+      Alert.alert("Error", "Failed to leave group. Try again");
     }
   };
 
@@ -205,6 +233,11 @@ const ProfileScreen = ({ setUser }) => {
             <TouchableOpacity onPress={handleLogout}>
               <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">
                 Logout
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLeaveGroup}>
+              <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">
+                Leave group
               </Text>
             </TouchableOpacity>
           </View>
