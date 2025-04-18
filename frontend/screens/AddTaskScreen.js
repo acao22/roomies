@@ -127,7 +127,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
         selectedIcon,
         date.toISOString().split("T")[0],
         time.toISOString().split("T")[1].substring(0, 8),
-        members.filter((m) => m.selected).map((m) => m.firstName),
+        members.filter((m) => m.selected).map((m) => m.uid),
         recurrence,
         description,
         // assignedTo,
