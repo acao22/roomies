@@ -81,10 +81,17 @@ const ProfileScreen = ({ setUser }) => {
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
       <ScrollView>
-        <View className="absolute top-0 left-0 right-0 bg-custom-yellow h-72 rounded-b-3xl z-0 items-center">
+        <TouchableOpacity onPress={() => {
+            console.log("going to prev edit profile screen");
+              navigation.navigate("EditProfile", {
+              origin: "ProfileScreen",
+            });
+          }}
+        className="absolute top-0 left-0 right-0 bg-custom-yellow h-72 rounded-b-3xl z-0 items-center">
           <View className="items-center pt-10">
             <View className="relative">
               <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
+                
                 <Image
                   source={
                     avatarUri &&
@@ -120,7 +127,7 @@ const ProfileScreen = ({ setUser }) => {
           <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">
             87 pts
           </Text>
-        </View>
+        </TouchableOpacity>
 
         {/* roomies list */}
 
