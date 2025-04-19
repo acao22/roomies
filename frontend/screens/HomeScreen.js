@@ -58,7 +58,7 @@ const getTaskImage = (taskId) => {
 export default function GroupFeedScreen() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
-  const [userMap, setUsersMap] = useState({});
+  const [userMap, setUsersMap] = useState([]);
   const [groupName, setGroupName] = useState('your group');
   const [groupMembers, setGroupMembers] = useState([]);
 
@@ -67,7 +67,7 @@ export default function GroupFeedScreen() {
       async function fetchGroup() {
         try {
           const groupData = await getUserGroup();
-          if (groupData?.members?.length) {
+          if (groupData && groupData.members) {
             const membersWithAvatars = await Promise.all(
               groupData.members.map(async (member) => {
                 try {
@@ -80,9 +80,6 @@ export default function GroupFeedScreen() {
               })
             );
             setGroupMembers(membersWithAvatars);
-          } else {
-            setGroupMembers([]);
-            setGroupName("you loner roomie");
           }
         } catch (error) {
           console.error("Error fetching group data:", error);
@@ -97,7 +94,6 @@ export default function GroupFeedScreen() {
     async function fetchAndSubscribe() {
       try {
         const groupData = await getUserGroup();
-        if (!groupData) return;
         const groupId = groupData.id;
 
         // Build a query filtering by groupId and ordering by updatedAt descending.
@@ -145,9 +141,11 @@ export default function GroupFeedScreen() {
         ];
         const tempUsers = {};
         for (const uid of uids) {
+          console.log("=====");
+          console.log(uid);
           try {
             // Fetch basic user info
-            const userData = await getUserInfo({ uid });
+            const userData = await getUserInfo({uid});
             // Then fetch the user's avatar
             try {
               const avatarData = await fetchAvatar(uid);
@@ -161,13 +159,14 @@ export default function GroupFeedScreen() {
             console.error("Error fetching user for uid:", uid, error);
           }
         }
+        console.log(tempUsers);
         setUsersMap(tempUsers);
       };
   
       if (completedTasks.length > 0) {
         fetchUsersForCompletedTasks();
       }
-    }, [completedTasks, tasks])
+    }, [completedTasks.length])
   );
 
 
@@ -175,7 +174,7 @@ export default function GroupFeedScreen() {
     const fetchGroupName = async () => {
       try {
         const groupData = await getUserGroup();
-        setGroupName(groupData ? groupData.groupName : "you loner roomie");
+        setGroupName(groupData.groupName);
       } catch (error) {
         console.error('Error fetching group name:', error);
       }
@@ -185,7 +184,7 @@ export default function GroupFeedScreen() {
   }, []);
 
   const getAvatarSource = (member) =>
-    member && member.avatar ? { uri: member.avatar } : face1;
+    member.avatar ? { uri: member.avatar } : face1;
 
   return (
     <View className="flex-1 bg-[#FEF9E5]">
@@ -213,11 +212,14 @@ export default function GroupFeedScreen() {
         {/* group name section */}
         <View className="mt-4 items-center">
           <Text className="text-4xl font-bold text-[#788ABF]">{groupName}</Text>
+          <TouchableOpacity>
+            <Text className="text-sm text-[#9CABD8]">edit group</Text>
+          </TouchableOpacity>
         </View>
         {/* feed list */}
         <View className="mt-6 px-4">
           {completedTasks.map((task) => {
-            const user = task.completedBy ? userMap[task.completedBy] : userMap[task.createdBy] || {};
+            const user = userMap[task.completedBy] || {};
             const imageSource = task.image ? task.image : getTaskImage(task.id);
             return (
 
@@ -227,7 +229,7 @@ export default function GroupFeedScreen() {
             >
               {/* user & task info */}
               <Text className="text-[#FEF9E5] font-bold text-lg">
-                {(user && user.firstName ? user.firstName : "Anonymous")} completed “{task.title}”!
+                {user.firstName} completed “{task.title}”!
               </Text>
 
               {/* image if input */}
