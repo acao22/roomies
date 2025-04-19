@@ -421,7 +421,7 @@ export default function TaskScreen({ user }) {
 
         {/* Avatars */}
         <View className="flex-row justify-between z-10">
-          {(item.assignedTo || []).map((user, i) => ( 
+          {(item.members || []).map((user, i) => ( 
             <View
               key={i}
               style={{
@@ -434,7 +434,7 @@ export default function TaskScreen({ user }) {
               }}
             >
               <Image
-                source={getAvatarSource(item.completedBy)}
+                source={getAvatarSource(user)}
                 className="h-full w-full"
                 resizeMode="cover"
               />
