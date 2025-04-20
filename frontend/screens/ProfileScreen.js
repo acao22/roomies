@@ -74,7 +74,7 @@ const ProfileScreen = ({ setUser }) => {
   };
 
   const handleModalSubmit = () => {
-    // Optionally, add logic to save profile changes here
+    // Optionally, add logifc to save profile changes here
     setModalVisible(false);
   };
 
@@ -92,7 +92,7 @@ const ProfileScreen = ({ setUser }) => {
             <View className="relative">
               <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
                 
-                <Image
+              <Image
                   source={
                     avatarUri &&
                     typeof avatarUri === "string" &&

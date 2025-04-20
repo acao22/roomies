@@ -174,6 +174,14 @@ const AvatarCreation = ({ }) => {
                 resizeMode="contain"
               />
              )}
+
+             {selectedFace && (
+              <Image
+                source={selectedFace.image}
+                className="h-96 w-96 absolute"
+                resizeMode="contain"
+              />
+             )}
           </View>
         </ViewShot>
 
@@ -210,7 +218,7 @@ const AvatarCreation = ({ }) => {
               if (from === "group") {
                 navigation.replace("Main"); // redirect to MainTabs if from group
               } else {
-                navigation.replace("ProfileDrawer"); // go back to ProfileDrawer
+                navigation.replace("ProfilePage"); // go back to ProfileDrawer
     }
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"

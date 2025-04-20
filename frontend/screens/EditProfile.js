@@ -12,6 +12,10 @@ import {
   Pressable,
 } from "react-native";
 import face1 from "../assets/face1.png";
+import { fetchAvatar, verifyUserSession } from "../api/users.api";
+import { useEffect } from "react";
+
+
 
 export default function EditProfile() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -23,6 +27,20 @@ export default function EditProfile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const navigation = useNavigation();
   const [avatarUri, setAvatarUri] = useState(null);
+
+  useEffect(() => {
+    const loadAvatar = async () => {
+      try {
+        const { uid } = await verifyUserSession();
+        const uri = await fetchAvatar(uid);
+        setAvatarUri(uri.uri);
+      } catch (error) {
+        console.error("Error fetching avatar in EditProfile:", error);
+      }
+    };
+
+    loadAvatar();
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -41,21 +59,21 @@ export default function EditProfile() {
         className="w-96 h-44 rounded-3xl bg-[#495BA2] items-center justify-center mb-12"
         >
         <View className="flex-row items-center gap-12">
-            <View className="w-28 h-28 rounded-full bg-[#FFE7C0] overflow-hidden items-center justify-center">
-            <Image
-                  source={
-                    avatarUri &&
-                    typeof avatarUri === "string" &&
-                    avatarUri.trim().length > 0
-                      ? { uri: avatarUri }
-                      : face1
-                  }
-                  className="w-32 h-32"
-                />
-            </View>
-            <Text className="text-3xl font-semibold text-[#FEF9E5]">edit avatar</Text>
+        <View className="w-28 h-28 rounded-full bg-[#FEF9E5] overflow-hidden items-center justify-center">
+          <Image
+            source={
+              avatarUri &&
+              typeof avatarUri === "string" &&
+              avatarUri.trim().length > 0
+                ? { uri: avatarUri }
+                : face1
+            }
+            className="w-32 h-32"
+          />
         </View>
-        </Pressable>
+        <Text className="text-3xl font-semibold text-[#FEF9E5]">edit avatar</Text>
+      </View>
+      </Pressable>
 
         {/* Password Section */}
         <View className="w-96 h-128 rounded-3xl bg-[#495BA2] items-start justify-center px-6 mb-12 gap-4">
