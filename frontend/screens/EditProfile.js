@@ -16,8 +16,12 @@ import {
 import face1 from "../assets/face1.png";
 import { fetchAvatar, verifyUserSession } from "../api/users.api";
 import { useEffect } from "react";
-import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updatePassword } from "firebase/auth";
-
+import {
+  EmailAuthProvider,
+  getAuth,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth";
 
 export default function EditProfile() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -39,28 +43,31 @@ export default function EditProfile() {
 
   const handlePasswordChange = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-        Alert.alert("Missing Info", "Please fill in all fields.");
-        return;
+      Alert.alert("Missing Info", "Please fill in all fields.");
+      return;
     }
 
     if (newPassword !== confirmPassword) {
-        Alert.alert("Password Mismatch", "New passwords do not match.");
-        return;
+      Alert.alert("Password Mismatch", "New passwords do not match.");
+      return;
     }
 
     try {
-        const credential = EmailAuthProvider.credential(user.email, currentPassword);
-        await reauthenticateWithCredential(user, credential);
-        await updatePassword(user, newPassword);
-        Alert.alert("Success", "Password updated succesfully!");
-        navigation.goBack();
+      const credential = EmailAuthProvider.credential(
+        user.email,
+        currentPassword
+      );
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
+      Alert.alert("Success", "Password updated succesfully!");
+      navigation.goBack();
     } catch (error) {
-        console.error("Password change error:", error);
-        if (error.code === "auth/wrong-password") {
-            Alert.alert("Error", "Your current password is incorrect.");
-        } else {
-            Alert.alert("Error", error.message);
-        }
+      console.error("Password change error:", error);
+      if (error.code === "auth/wrong-password") {
+        Alert.alert("Error", "Your current password is incorrect.");
+      } else {
+        Alert.alert("Error", error.message);
+      }
     }
   };
 
@@ -82,38 +89,42 @@ export default function EditProfile() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1 items-center justify-center bg-[#FFE7C0]"
+        className="flex-1 items-center justify-center bg-[#FEF9E5]"
       >
         <Pressable onPress={() => navigation.navigate("ProfileScreen")}>
-        <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
+          <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
             &lt; profile
-        </Text>
+          </Text>
         </Pressable>
 
         <Pressable
-        onPress={() => navigation.navigate("AvatarCreation")}
-        className="w-96 h-44 rounded-3xl bg-[#495BA2] items-center justify-center mb-12"
+          onPress={() => navigation.navigate("AvatarCreation")}
+          className="w-96 h-44 rounded-3xl bg-[#495BA2] items-center justify-center mb-12"
         >
-        <View className="flex-row items-center gap-12">
-        <View className="w-28 h-28 rounded-full bg-[#FEF9E5] overflow-hidden items-center justify-center">
-          <Image
-            source={
-              avatarUri &&
-              typeof avatarUri === "string" &&
-              avatarUri.trim().length > 0
-                ? { uri: avatarUri }
-                : face1
-            }
-            className="w-32 h-32"
-          />
-        </View>
-        <Text className="text-3xl font-semibold text-[#FEF9E5]">edit avatar</Text>
-      </View>
-      </Pressable>
+          <View className="flex-row items-center gap-12">
+            <View className="w-28 h-28 rounded-full bg-[#FEF9E5] overflow-hidden items-center justify-center">
+              <Image
+                source={
+                  avatarUri &&
+                  typeof avatarUri === "string" &&
+                  avatarUri.trim().length > 0
+                    ? { uri: avatarUri }
+                    : face1
+                }
+                className="w-32 h-32"
+              />
+            </View>
+            <Text className="text-3xl font-semibold text-[#FEF9E5]">
+              edit avatar
+            </Text>
+          </View>
+        </Pressable>
 
         {/* Password Section */}
         <View className="w-96 h-128 rounded-3xl bg-[#495BA2] items-start justify-center px-6 mb-12 gap-4">
-          <Text className="ml-32 mt-8 text-3xl font-semibold text-[#FEF9E5]">edit password</Text>
+          <Text className="ml-32 mt-8 text-3xl font-semibold text-[#FEF9E5]">
+            edit password
+          </Text>
 
           {/* Current Password */}
           <View className="flex-row items-center mt-8 border-b border-[#FEF9E5] pb-1 w-full">
@@ -125,7 +136,9 @@ export default function EditProfile() {
               onChangeText={setCurrentPassword}
               className="flex-1 text-xl font-semibold text-[#FEF9E5]"
             />
-            <Pressable onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+            <Pressable
+              onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+            >
               <Image
                 source={
                   showCurrentPassword
@@ -137,7 +150,6 @@ export default function EditProfile() {
               />
             </Pressable>
           </View>
-          
 
           {/* New Password */}
           <View className="flex-row items-center mt-8 border-b border-[#FEF9E5] pb-1 w-full">
@@ -172,7 +184,9 @@ export default function EditProfile() {
               onChangeText={setConfirmPassword}
               className="flex-1 text-xl font-semibold text-[#FEF9E5]"
             />
-            <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+            <Pressable
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
               <Image
                 source={
                   showConfirmPassword
@@ -186,16 +200,19 @@ export default function EditProfile() {
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity 
-           onPress={handlePasswordChange}
-          className="m-8 ml-56 w-28 h-10 rounded-3xl bg-[#FFB95C] items-center justify-center">
+          <TouchableOpacity
+            onPress={handlePasswordChange}
+            className="m-8 ml-56 w-28 h-10 rounded-3xl bg-[#FFB95C] items-center justify-center"
+          >
             <Text className="text-2xl font-semibold text-[#FEF9E5]">save</Text>
           </TouchableOpacity>
         </View>
 
         {/* Leave Room Section */}
         <View className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center">
-          <Text className="text-2xl font-semibold text-[#FEF9E5]">leave my room</Text>
+          <Text className="text-xl font-semibold text-[#FEF9E5]">
+            leave my room
+          </Text>
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
