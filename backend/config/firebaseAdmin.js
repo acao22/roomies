@@ -2,8 +2,6 @@ import admin from "firebase-admin";
 import fs from "fs";
 import path from "path";
 
-const admin = require("firebase-admin");
-
 let credentials;
 
 // Prefer environment variable (Render, production)
