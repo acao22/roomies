@@ -33,15 +33,18 @@ export const saveAvatar = async (uri) => {
 
 
 // get first name and last name from database
-export const getUserInfo = async () => {
-  const {uid, email, message} = await verifyUserSession();
+export const getUserInfo = async ({ uid } = {}) => {
+  console.log("Provided uid:", uid);
+  const { uid: verifiedUid, email, message } = await verifyUserSession();
+  console.log("Verified uid:", verifiedUid);
+  uid = uid || verifiedUid;
+
   if (uid) {
-    const response = await axios.post(`${API_USER_BASE_URL}/getInfo`, {
-      uid
-    });
+    const response = await axios.post(`${API_USER_BASE_URL}/getInfo`, { uid });
     return response.data;
   }
-}
+};
+  
 
 // get user's roommate group members, group name
 export const getUserGroup = async () => {
@@ -239,6 +242,21 @@ export const updateLastLoginDate = async (uid) => {
   const today = new Date().toDateString();
 
   await updateDoc(userRef, { lastLoginDate: today });
+};
+
+// leave group, removes user from current group
+export const leaveGroupAPI = async (uid, groupId) => {
+  try {
+    const response = await axios.post(`${API_USER_BASE_URL}/leaveGroup`, {
+      uid,
+      groupId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error leaving group:", error.response?.data || error.message);
+    throw error;
+  }
+
 };
 
 

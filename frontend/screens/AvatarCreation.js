@@ -85,6 +85,8 @@ const accessories = [
   { id: "8", image: require("../../frontend/assets/accessories/accessory-8.png") },
   { id: "9", image: require("../../frontend/assets/accessories/accessory-9.png") },
 ]
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 
 const AvatarCreation = ({ }) => {
   const [isToggled, setIsToggled] = useState(false);

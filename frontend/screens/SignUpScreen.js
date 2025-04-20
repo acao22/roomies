@@ -65,42 +65,42 @@ const SignUpScreen = ({ setUser }) => {
           }}
           className="absolute top-16 left-5 p-3 z-10"
         >
-          <Ionicons name="arrow-back" size={28} color="#F4A261" />
+          <Ionicons name="arrow-back" size={28} color="#495BA2" />
         </TouchableOpacity>
 
         <Animated.View style={{ opacity: fadeAnim }}>
           <View className="justify-start items-start flex-col pl-[43px] pt-[174px]">
-            <Text className="text-5xl font-bold text-custom-pink-200 font-spaceGrotesk">
+            <Text className="text-5xl font-bold text-custom-blue-200 font-spaceGrotesk">
               hey, roomie!
             </Text>
-            <Text className="text-base text-custom-blue-200 font-spaceGrotesk mt-[6px]">
+            <Text className="text-base text-custom-blue-100 font-spaceGrotesk mt-[6px]">
               sign up to start creating your room
             </Text>
           </View>
 
-          <View className="justify-center items-center flex-col pt-[45px] shadow-sm">
+          <View className="justify-center items-center flex-col pt-[45px]">
             <TextInput
               placeholder="first name"
               placeholderTextColor="#788ABF"
               onChangeText={setFirstName}
-              className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+              className="w-5/6 h-[40px] border-b-2 border-custom-blue-100 font-spaceGrotesk text-2xl"
             />
           </View>
 
-          <View className="justify-center items-center flex-col pt-[16px] shadow-sm">
+          <View className="justify-center items-center flex-col pt-[24px]">
             <TextInput
               placeholder="last name"
               placeholderTextColor="#788ABF"
-              className="w-5/6 h-[56px] bg-custom-gray text-large text-custom-blue-200 py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+              className="w-5/6 h-[40px] border-b-2 border-custom-blue-100 font-spaceGrotesk text-2xl"
               onChangeText={setLastName}
             />
           </View>
 
-          <View className="justify-center items-center flex-col pt-[16px] shadow-sm">
+          <View className="justify-center items-center flex-col pt-[24px]">
             <TextInput
               placeholder="email"
-              placeholderTextColor="#FEF9E5"
-              className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+              placeholderTextColor="#788ABF"
+              className="w-5/6 h-[40px] border-b-2 border-custom-blue-100 font-spaceGrotesk text-2xl"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -108,11 +108,11 @@ const SignUpScreen = ({ setUser }) => {
             />
           </View>
 
-          <View className="justify-center items-center flex-col pt-[16px] shadow-sm">
+          <View className="justify-center items-center flex-col pt-[24px]">
             <TextInput
               placeholder="password"
-              placeholderTextColor="#FEF9E5"
-              className="w-5/6 h-[56px] bg-custom-pink-100 text-custom-tan py-4 px-6 rounded-3xl font-spaceGrotesk text-2xl"
+              placeholderTextColor="#788ABF"
+              className="w-5/6 h-[40px] border-b-2 border-custom-blue-100 font-spaceGrotesk text-2xl"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
@@ -122,18 +122,18 @@ const SignUpScreen = ({ setUser }) => {
           <View className="justify-center items-center flex-col pt-[16px]">
             <TouchableOpacity
               onPress={handleRegister}
-              className="w-5/6 h-[56px] bg-custom-teal justify-center items-center rounded-3xl shadow-sm"
+              className="w-2/6 h-[56px] bg-custom-blue-200 justify-center items-center rounded-full shadow-sm"
             >
-              <Text className="text-black font-spaceGrotesk text-2xl font-bold">
-                Create Account
+              <Text className="text-white font-spaceGrotesk text-2xl font-bold">
+                sign up
               </Text>
             </TouchableOpacity>
 
-            <Text className="text-xl font-spaceGrotesk text-[#504E4D] mt-6">
+            <Text className="text-xl font-spaceGrotesk text-custom-blue-200 mt-6">
               already have an account?
             </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Login", { origin: "Signup" })}>
-              <Text className="underline text-xl text-[#504E4D]">login</Text>
+              <Text className="underline text-xl text-custom-blue-200">login</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

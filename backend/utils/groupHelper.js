@@ -8,7 +8,9 @@ export const getUserGroupData = async (uid) => {
     
     const { roomieGroup } = userDoc.data();
     if (!roomieGroup || roomieGroup.length === 0) {
-      throw new Error("User does not belong to any roomieGroup");
+      const e = new Error("User has no roomieGroup");
+      e.code = 404;
+      throw e;
     }
     
     // Assuming the user is in one group.
@@ -16,7 +18,9 @@ export const getUserGroupData = async (uid) => {
     const groupDoc = await groupRef.get();
     
     if (!groupDoc.exists) {
-      throw new Error("Roomie group not found");
+      const e = new Error("User has no roomieGroup");
+      e.code = 404;
+      throw e;
     }
     
     const { groupName, members } = groupDoc.data();

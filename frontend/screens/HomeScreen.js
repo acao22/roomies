@@ -141,9 +141,11 @@ export default function GroupFeedScreen() {
         ];
         const tempUsers = {};
         for (const uid of uids) {
+          console.log("=====");
+          console.log(uid);
           try {
             // Fetch basic user info
-            const userData = await getUserInfo({ uid });
+            const userData = await getUserInfo({uid});
             // Then fetch the user's avatar
             try {
               const avatarData = await fetchAvatar(uid);
@@ -157,13 +159,14 @@ export default function GroupFeedScreen() {
             console.error("Error fetching user for uid:", uid, error);
           }
         }
+        console.log(tempUsers);
         setUsersMap(tempUsers);
       };
   
       if (completedTasks.length > 0) {
         fetchUsersForCompletedTasks();
       }
-    }, [completedTasks, tasks])
+    }, [completedTasks.length])
   );
 
 

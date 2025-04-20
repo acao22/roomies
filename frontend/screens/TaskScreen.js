@@ -6,7 +6,7 @@ import AddTaskScreen from "./AddTaskScreen";
 import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
-import { getAllTasks, updateTask } from "../api/tasks.api.js";
+import { getAllTasks, updateTask, deleteTask } from "../api/tasks.api.js";
 import { verifyUserSession } from "../api/users.api.js";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
@@ -15,7 +15,10 @@ import {
   getUserGroup,
   getUserInfo,
   addPointsToUser,
+  fetchAvatar,
 } from "../api/users.api";
+import TaskNotificationsModal from "./TaskNotificationsModal";
+import { useFocusEffect } from "@react-navigation/native";
 
 
 
@@ -108,6 +111,52 @@ export default function TaskScreen({ user }) {
   const [totalPoints, setTotalPoints] = useState(0); // total points of user, need to adjust
   const [taskPoints, setTaskPoints] = useState(0);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [avatarUri, setAvatarUri] = useState(null);
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
+  const [userMap, setUsersMap] = useState({});
+
+
+
+    // find users of completed tasks
+    useFocusEffect(
+      React.useCallback(() => {
+        const fetchUsersForCompletedTasks = async () => {
+          const uids = [
+            ...new Set(
+              tasks
+                .map((task) => task.createdBy)
+                .concat(tasks.map((task) => task.completedBy))
+                .filter(Boolean)
+            ),
+          ];
+          const tempUsers = {};
+          for (const uid of uids) {
+            try {
+              // Fetch basic user info
+              const userData = await getUserInfo({ uid });
+              // Then fetch the user's avatar
+              try {
+                const avatarData = await fetchAvatar(uid);
+                // Merge the avatar URI into the userData object
+                tempUsers[uid] = { ...userData, avatar: avatarData.uri };
+              } catch (avatarError) {
+                console.error("Error fetching avatar for uid:", uid, avatarError);
+                tempUsers[uid] = { ...userData, avatar: null };
+              }
+            } catch (error) {
+              console.error("Error fetching user for uid:", uid, error);
+            }
+          }
+          setUsersMap(tempUsers);
+        };
+    
+        if (completedTasks.length > 0) {
+          fetchUsersForCompletedTasks();
+        }
+      }, [tasks])
+    );
+  
+  
   
   
   // Subscribe to user doc for live updates of totalPoints
@@ -180,6 +229,21 @@ export default function TaskScreen({ user }) {
     };
   }, []);
 
+  // load user's avatar to pass into modal
+  useEffect(() => {
+      // Fetch the user's avatar URI from your API
+      const loadAvatar = async () => {
+        try {
+          const { uid } = await verifyUserSession();
+          const { uri } = await fetchAvatar(uid);
+          setAvatarUri(uri);
+        } catch (error) {
+          console.error("Error fetching avatar:", error);
+        }
+      };
+      loadAvatar();
+    }, []);
+
   
 
   // Toggle task completion status and open modal if marking as completed
@@ -232,11 +296,10 @@ export default function TaskScreen({ user }) {
         console.error("Failed to add points to user:", err);
       }
       
-
       setTimeout(() => {
         setModalVisible(false);
         setSelectedTaskId(null);
-      }, 3000);
+      }, 1000);
 
     }
   };
@@ -265,8 +328,35 @@ export default function TaskScreen({ user }) {
       return dateA - dateB;
     });
 
+  // Delete task
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await deleteTask(taskId);
+      console.log("Task deleted successfully");
+  
+      // Optionally filter the task out immediately
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+    }
+  };
+
   // Get completed tasks
   const completedTasks = tasks.filter((t) => t.status === "completed");
+
+  const getAvatarSource = (uidOrName) => {
+    // 1) if we fetched a custom avatar for this uid, use it
+    if (userMap[uidOrName]?.avatar) {
+      return { uri: userMap[uidOrName].avatar };
+    }
+    // 2) fallback to hard‑coded name → local image
+    if (userAvatars[uidOrName]) {
+      return userAvatars[uidOrName];
+    }
+    // 3) ultimate fallback
+    return userAvatars["Default"];
+  };
+  
 
   const renderTaskItem = ({ item, index, toggleTaskCompletion }) => {
     const isCompleted = item.status === "completed";
@@ -301,6 +391,12 @@ export default function TaskScreen({ user }) {
           />
         </TouchableOpacity>
 
+        {/* Delete Icon */}
+        <TouchableOpacity onPress={() => handleDeleteTask(item.id)}
+          style={{ position: "absolute", top: 10, right: 10, zIndex: 10 }} >
+          <Ionicons name="close-outline" size={24} color="#DC2626" />
+        </TouchableOpacity>
+
         {/* Task details */}
         <View className="flex-1">
           <Text className={`text-2xl font-spaceGrotesk font-bold ${textColor}`}>
@@ -325,7 +421,7 @@ export default function TaskScreen({ user }) {
 
         {/* Avatars */}
         <View className="flex-row justify-between z-10">
-          {(item.assignedTo || []).map((user, i) => ( // need to make assignedTo correctly
+          {(item.members || []).map((user, i) => ( 
             <View
               key={i}
               style={{
@@ -338,7 +434,7 @@ export default function TaskScreen({ user }) {
               }}
             >
               <Image
-                source={userAvatars[user] || userAvatars["Default"]}
+                source={getAvatarSource(user)}
                 className="h-full w-full"
                 resizeMode="cover"
               />
@@ -369,9 +465,9 @@ export default function TaskScreen({ user }) {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab("calendar")}
-          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-pink-200 ml-3"
+          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-blue-100 ml-3"
         >
-          <Text className="text-4xl font-bold text-custom-tan font-spaceGrotesk">
+          <Text className="text-4xl font-bold text-custom-yellow font-spaceGrotesk">
             calendar
           </Text>
         </TouchableOpacity>
@@ -389,12 +485,6 @@ export default function TaskScreen({ user }) {
           } rounded-t-3xl bg-custom-tan`}
         >
           <View className="flex-1 p-4">
-            { /* don't need custom that adss tasks for now */}
-            {/* <CustomModal
-              visible={modalVisible}
-              onCancel={handleModalCancel}
-              onSubmit={handleModalSubmit}
-            /> */}
 
             {/* popup that shows everytime someone finishes a task */}
             <PointsModal 
@@ -403,6 +493,7 @@ export default function TaskScreen({ user }) {
               taskName={completedTaskName}
               totalPoints={totalPoints}
               taskPoints={taskPoints}
+              avatarUri={avatarUri}
             />
             {activeTab === "tasks" ? (
               <FlatList
@@ -415,17 +506,40 @@ export default function TaskScreen({ user }) {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item, index }) =>
                   item === "upcoming" ? (
-                    <View className="flex-row justify-between items-center mx-1">
-                      <Text className="text-4xl mb-4 font-bold font-spaceGrotesk text-custom-blue-200">
-                        upcoming
-                      </Text>
-                      <TouchableOpacity onPress={() => setActiveTab("addTask")}>
-                        <Ionicons
-                          name="add-circle-outline"
-                          size={30}
-                          color="#788ABF"
+                    <View>
+                    
+                      <View className="flex-row justify-between items-center mx-1">
+                        <Text className="text-4xl font-bold font-spaceGrotesk text-custom-blue-200">
+                          upcoming
+                        </Text>
+                        <TaskNotificationsModal 
+                          visible={notificationsVisible}
+                          onClose={() => setNotificationsVisible(false)}
+                          completedTasks={completedTasks} 
+                          userMap={userMap}        
                         />
-                      </TouchableOpacity>
+
+
+                        <TouchableOpacity onPress={() => setNotificationsVisible(true)}>
+                          <Ionicons 
+                            name="notifications" 
+                            size={40}
+                            color="#495BA2"
+                          />
+                        </TouchableOpacity>
+                      
+                      </View>
+                        <TouchableOpacity className="flex-row">
+                          <Text className="font-spaceGrotesk text-xl text-custom-blue-100 mb-8">
+                            sort by {  }
+                          </Text>
+
+                          <Ionicons 
+                            name="arrow-down" 
+                            size={20}
+                            color="#495BA2"
+                          />
+                        </TouchableOpacity>
                     </View>
                   ) : item === "completed" ? (
                     <Text className="text-4xl font-spaceGrotesk font-bold text-custom-blue-200 my-4 mx-1">
@@ -448,6 +562,17 @@ export default function TaskScreen({ user }) {
           </View>
         </View>
       </Animated.View>
+      <View className="absolute bottom-20 right-4 z-40"> 
+        <TouchableOpacity onPress={() => setActiveTab("addTask")}>
+          <Ionicons
+            name="add-circle"
+            size={80}
+            color="#495BA2"
+            zIndex="9999"
+          />
+        </TouchableOpacity>
+
+      </View>
     </View>
   );
 }
