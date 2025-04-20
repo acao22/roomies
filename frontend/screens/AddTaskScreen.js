@@ -101,8 +101,9 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
     }, [])
   );
 
-  const getAvatarSource = (member) =>
+  const getAvatarSource = (member) => 
     member.avatar ? { uri: member.avatar } : face1;
+  
 
   const toggleMemberSelection = (id) => {
     setMembers((prev) =>
