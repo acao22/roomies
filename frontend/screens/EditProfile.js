@@ -8,13 +8,15 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
+  TouchableOpacity,
+  Alert,
   Platform,
   Pressable,
 } from "react-native";
 import face1 from "../assets/face1.png";
 import { fetchAvatar, verifyUserSession } from "../api/users.api";
 import { useEffect } from "react";
-
+import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 
 
 export default function EditProfile() {
@@ -27,6 +29,40 @@ export default function EditProfile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const navigation = useNavigation();
   const [avatarUri, setAvatarUri] = useState(null);
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  if (!user || !user.email) {
+    Alert.alert("Error", "Unable to get current user email.");
+    return;
+  }
+
+  const handlePasswordChange = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        Alert.alert("Missing Info", "Please fill in all fields.");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        Alert.alert("Password Mismatch", "New passwords do not match.");
+        return;
+    }
+
+    try {
+        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(user, newPassword);
+        Alert.alert("Success", "Password updated succesfully!");
+        navigation.goBack();
+    } catch (error) {
+        console.error("Password change error:", error);
+        if (error.code === "auth/wrong-password") {
+            Alert.alert("Error", "Your current password is incorrect.");
+        } else {
+            Alert.alert("Error", error.message);
+        }
+    }
+  };
 
   useEffect(() => {
     const loadAvatar = async () => {
@@ -150,9 +186,11 @@ export default function EditProfile() {
           </View>
 
           {/* Save Button */}
-          <View className="m-8 ml-56 w-28 h-10 rounded-3xl bg-[#FFB95C] items-center justify-center">
+          <TouchableOpacity 
+           onPress={handlePasswordChange}
+          className="m-8 ml-56 w-28 h-10 rounded-3xl bg-[#FFB95C] items-center justify-center">
             <Text className="text-2xl font-semibold text-[#FEF9E5]">save</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Leave Room Section */}
