@@ -11,6 +11,7 @@ import {
   Platform,
   Pressable,
 } from "react-native";
+import face1 from "../assets/face1.png";
 
 export default function EditProfile() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -21,6 +22,7 @@ export default function EditProfile() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const navigation = useNavigation();
+  const [avatarUri, setAvatarUri] = useState(null);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -41,10 +43,15 @@ export default function EditProfile() {
         <View className="flex-row items-center gap-12">
             <View className="w-28 h-28 rounded-full bg-[#FFE7C0] overflow-hidden items-center justify-center">
             <Image
-                source={require("../assets/face1.png")}
-                className="w-28 h-28"
-                resizeMode="contain"
-            />
+                  source={
+                    avatarUri &&
+                    typeof avatarUri === "string" &&
+                    avatarUri.trim().length > 0
+                      ? { uri: avatarUri }
+                      : face1
+                  }
+                  className="w-32 h-32"
+                />
             </View>
             <Text className="text-3xl font-semibold text-[#FEF9E5]">edit avatar</Text>
         </View>
