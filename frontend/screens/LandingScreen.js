@@ -11,13 +11,11 @@ import React, { useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import face1 from "../assets/faces/face-2.png";
-import hair1 from "../assets/dark_hair/hair-f8-dark.png";
+import hair1 from "../assets/dark_hair/hair-f8-dark-new.png";
 import face2 from "../assets/faces/face-1.png";
-import hair2 from "../assets/dark_hair/hair-m3-dark.png";
+import hair2 from "../assets/dark_hair/hair-m3-dark-new.png";
 import face3 from "../assets/faces/face-5.png";
-import hair3 from "../assets/dark_hair/hair-f5-dark.png";
-
-
+import hair3 from "../assets/dark_hair/hair-f5-dark-new.png";
 
 const gridImage = require("../assets/grid.png");
 
@@ -34,40 +32,27 @@ const LandingScreen = () => {
   }, []);
 
   return (
-    <ImageBackground
-      source={gridImage}
-      className="bg-custom-tan flex-1 bg-bg"
-    >
+    <ImageBackground source={gridImage} className="bg-custom-tan flex-1 bg-bg">
       {/* Group the overlapped face and hair into a relative container */}
       <View className="flex-row pt-72 ml-6">
         <View className="relative">
           {/* face image */}
           <Image source={face1} className="w-48 h-48" />
           {/* hair image  */}
-          <Image
-            source={hair1}
-            className="absolute top-0 left-0 w-48 h-48"
-          />
+          <Image source={hair1} className="absolute top-0 left-0 w-48 h-48" />
         </View>
         <View className="relative">
           {/* face image */}
           <Image source={face2} className="right-20  w-48 h-48" />
           {/* hair image  */}
-          <Image
-            source={hair2}
-            className="absolute top-0 right-20 w-48 h-48"
-          />
+          <Image source={hair2} className="absolute top-0 right-20 w-48 h-48" />
         </View>
         <View className="relative">
           {/* face image */}
           <Image source={face3} className="right-40 w-48 h-48" />
           {/* hair image  */}
-          <Image
-            source={hair3}
-            className="absolute top-0 right-40 w-48 h-48"
-          />
+          <Image source={hair3} className="absolute top-0 right-40 w-48 h-48" />
         </View>
-
       </View>
 
       <Animated.View
@@ -85,16 +70,14 @@ const LandingScreen = () => {
             es
           </Text>
         </View>
-        <View className="bg-custom-yellow">
-          
-        </View>
+        <View className="bg-custom-yellow"></View>
 
         <View className="relative mt-24 items-center justify-center">
           {/* Yellow box behind the sign-up button */}
-            <View
-              className="absolute top-12 h-80 w-full bg-custom-yellow rounded-lg"
-              style={{ transform: [{ translateY: -20 }] }}
-            />
+          <View
+            className="absolute top-12 h-80 w-full bg-custom-yellow rounded-lg"
+            style={{ transform: [{ translateY: -20 }] }}
+          />
 
           <TouchableOpacity
             className="relative z-10 bg-custom-blue-200 items-center p-3 rounded-full w-64"
