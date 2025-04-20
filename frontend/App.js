@@ -15,6 +15,7 @@ import ProfileScreen from "./screens/ProfileScreen";
 import LandingScreen from "./screens/LandingScreen";
 import AddTaskScreen from "./screens/AddTaskScreen";
 import ProfileDrawer from "./screens/ProfileDrawer";
+import EditProfile from "./screens/EditProfile";
 import {
   Platform,
   UIManager,
@@ -177,6 +178,7 @@ function ProfileScreenWrapper() {
   return <ProfileScreen />;
 }
 
+
 function SignupScreenWrapper({ navigation }) {
   return (
     <TouchableOpacity
@@ -278,6 +280,10 @@ export default function App() {
         <RootStack.Screen
           name="ProfileScreen"
           component={ProfileScreenWrapper}
+        />
+        <RootStack.Screen
+          name="EditProfile"
+          component={EditProfile}
         />
       </RootStack.Navigator>
     </NavigationContainer>

@@ -15,16 +15,90 @@ import * as FileSystem from "expo-file-system";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 
+const dark_hair = [
+  { id: "1", image: require("../../frontend/assets/dark_hair/hair-f1-dark-new.png") },
+  { id: "2", image: require("../../frontend/assets/dark_hair/hair-f2-dark-new.png") },
+  { id: "3", image: require("../../frontend/assets/dark_hair/hair-f3-dark-new.png") },
+  { id: "4", image: require("../../frontend/assets/dark_hair/hair-f4-dark-new.png") },
+  { id: "5", image: require("../../frontend/assets/dark_hair/hair-f5-dark-new.png") },
+  { id: "6", image: require("../../frontend/assets/dark_hair/hair-f6-dark-new.png") },
+  { id: "7", image: require("../../frontend/assets/dark_hair/hair-f7-dark-new.png") },
+  { id: "8", image: require("../../frontend/assets/dark_hair/hair-f8-dark-new.png") },
+  { id: "9", image: require("../../frontend/assets/dark_hair/hair-f9-dark-new.png") },
+  { id: "10", image: require("../../frontend/assets/dark_hair/hair-m1-dark-new.png") },
+  { id: "11", image: require("../../frontend/assets/dark_hair/hair-m2-dark-new.png") },
+  { id: "12", image: require("../../frontend/assets/dark_hair/hair-m3-dark-new.png") },
+  { id: "13", image: require("../../frontend/assets/dark_hair/hair-m4-dark-new.png") },
+  { id: "14", image: require("../../frontend/assets/dark_hair/hair-m5-dark-new.png") },
+];
+
+const light_hair = [
+  { id: "1", image: require("../../frontend/assets/light_hair/hair-f1-light-new.png") },
+  { id: "2", image: require("../../frontend/assets/light_hair/hair-f2-light-new.png") },
+  { id: "3", image: require("../../frontend/assets/light_hair/hair-f3-light-new.png") },
+  { id: "4", image: require("../../frontend/assets/light_hair/hair-f4-light-new.png") },
+  { id: "5", image: require("../../frontend/assets/light_hair/hair-f5-light-new.png") },
+  { id: "6", image: require("../../frontend/assets/light_hair/hair-f6-light-new.png") },
+  { id: "7", image: require("../../frontend/assets/light_hair/hair-f7-light-new.png") },
+  { id: "8", image: require("../../frontend/assets/light_hair/hair-f8-light-new.png") },
+  { id: "9", image: require("../../frontend/assets/light_hair/hair-f9-light-new.png") },
+  { id: "10", image: require("../../frontend/assets/light_hair/hair-m1-light-new.png") },
+  { id: "11", image: require("../../frontend/assets/light_hair/hair-m2-light-new.png") },
+  { id: "12", image: require("../../frontend/assets/light_hair/hair-m3-light-new.png") },
+  { id: "13", image: require("../../frontend/assets/light_hair/hair-m4-light-new.png") },
+  { id: "14", image: require("../../frontend/assets/light_hair/hair-m5-light-new.png") },
+];
+
+const faces = [
+  { id: "1", image: require("../../frontend/assets/faces/face-1.png") },
+  { id: "2", image: require("../../frontend/assets/faces/face-2.png") },
+  { id: "3", image: require("../../frontend/assets/faces/face-3.png") },
+  { id: "4", image: require("../../frontend/assets/faces/face-4.png") },
+  { id: "5", image: require("../../frontend/assets/faces/face-5.png") },
+  { id: "6", image: require("../../frontend/assets/faces/face-6.png") },
+  { id: "7", image: require("../../frontend/assets/faces/face-7.png") },
+  { id: "8", image: require("../../frontend/assets/faces/face-8.png") },
+  { id: "9", image: require("../../frontend/assets/faces/face-9.png") },
+  { id: "10", image: require("../../frontend/assets/faces/face-10.png") },
+  { id: "11", image: require("../../frontend/assets/faces/face-11.png") },
+  { id: "12", image: require("../../frontend/assets/faces/face-12.png") },
+  { id: "13", image: require("../../frontend/assets/faces/face-13.png") },
+  { id: "14", image: require("../../frontend/assets/faces/face-14.png") },
+  { id: "15", image: require("../../frontend/assets/faces/face-15.png") },
+];
+
+const skin_color = [
+  { id: "1", image: require("../../frontend/assets/skin_colors/skin-0.png") },
+  { id: "2", image: require("../../frontend/assets/skin_colors/skin-1.png") },
+  { id: "3", image: require("../../frontend/assets/skin_colors/skin-2.png") },
+  { id: "4", image: require("../../frontend/assets/skin_colors/skin-3.png") },
+]
+
+const accessories = [
+  { id: "1", image: require("../../frontend/assets/accessories/accessory-1.png") },
+  { id: "2", image: require("../../frontend/assets/accessories/accessory-2.png") },
+  { id: "3", image: require("../../frontend/assets/accessories/accessory-3.png") },
+  { id: "4", image: require("../../frontend/assets/accessories/accessory-4.png") },
+  { id: "5", image: require("../../frontend/assets/accessories/accessory-5.png") },
+  { id: "6", image: require("../../frontend/assets/accessories/accessory-6.png") },
+  { id: "7", image: require("../../frontend/assets/accessories/accessory-7.png") },
+  { id: "8", image: require("../../frontend/assets/accessories/accessory-8.png") },
+  { id: "9", image: require("../../frontend/assets/accessories/accessory-9.png") },
+]
+import Ionicons from "@expo/vector-icons/Ionicons";
+
+
 const AvatarCreation = ({ }) => {
   const [isToggled, setIsToggled] = useState(false);
-  const [selectedHair, setSelectedHair] = useState(null);
-  const [selectedFace, setSelectedFace] = useState(null);
-  const [showFaces, setShowFaces] = useState(false);
+  const [selectedHair, setSelectedHair] = useState(dark_hair[0]); // default: hair id "1"
+  const [selectedFace, setSelectedFace] = useState(faces[0]);     // default: face id "1"
+  const [selectedSkinColor, setSelectedSkinColor] = useState(null);
+  const [selectedAccessory, setSelectedAccessory] = useState(null);
   const navigation = useNavigation();
   const viewShotRef = useRef(null);
   const route = useRoute();
   const from = route.params?.from || "ProfileScreen";
-
+  const [whichScreen, setWhichScreen] = useState(0);
   
 
   const writeAvatar = async () => {
@@ -44,84 +118,47 @@ const AvatarCreation = ({ }) => {
     }
   };
 
-  const dark_hair = [
-    { id: "1", image: require("../../frontend/assets/dark_hair/hair-f1-dark.png") },
-    { id: "2", image: require("../../frontend/assets/dark_hair/hair-f2-dark.png") },
-    { id: "3", image: require("../../frontend/assets/dark_hair/hair-f3-dark.png") },
-    { id: "4", image: require("../../frontend/assets/dark_hair/hair-f4-dark.png") },
-    { id: "5", image: require("../../frontend/assets/dark_hair/hair-f5-dark.png") },
-    { id: "6", image: require("../../frontend/assets/dark_hair/hair-f6-dark.png") },
-    { id: "7", image: require("../../frontend/assets/dark_hair/hair-f7-dark.png") },
-    { id: "8", image: require("../../frontend/assets/dark_hair/hair-f8-dark.png") },
-    { id: "9", image: require("../../frontend/assets/dark_hair/hair-f9-dark.png") },
-    { id: "10", image: require("../../frontend/assets/dark_hair/hair-m1-dark.png") },
-    { id: "11", image: require("../../frontend/assets/dark_hair/hair-m2-dark.png") },
-    { id: "12", image: require("../../frontend/assets/dark_hair/hair-m3-dark.png") },
-    { id: "13", image: require("../../frontend/assets/dark_hair/hair-m4-dark.png") },
-    { id: "14", image: require("../../frontend/assets/dark_hair/hair-m5-dark.png") },
-  ];
+  const displayedImages = (() => {
+    if (whichScreen === 0) return isToggled ? light_hair : dark_hair;
+    if (whichScreen === 1) return faces;
+    if (whichScreen === 2) return skin_color;
+    if (whichScreen === 3) return accessories;
+    return [];
+  })();
 
-  const light_hair = [
-    { id: "1", image: require("../../frontend/assets/light_hair/hair-f1-light.png") },
-    { id: "2", image: require("../../frontend/assets/light_hair/hair-f2-light.png") },
-    { id: "3", image: require("../../frontend/assets/light_hair/hair-f3-light.png") },
-    { id: "4", image: require("../../frontend/assets/light_hair/hair-f4-light.png") },
-    { id: "5", image: require("../../frontend/assets/light_hair/hair-f5-light.png") },
-    { id: "6", image: require("../../frontend/assets/light_hair/hair-f6-light.png") },
-    { id: "7", image: require("../../frontend/assets/light_hair/hair-f7-light.png") },
-    { id: "8", image: require("../../frontend/assets/light_hair/hair-f8-light.png") },
-    { id: "9", image: require("../../frontend/assets/light_hair/hair-f9-light.png") },
-    { id: "10", image: require("../../frontend/assets/light_hair/hair-m1-light.png") },
-    { id: "11", image: require("../../frontend/assets/light_hair/hair-m2-light.png") },
-    { id: "12", image: require("../../frontend/assets/light_hair/hair-m3-light.png") },
-    { id: "13", image: require("../../frontend/assets/light_hair/hair-m4-light.png") },
-    { id: "14", image: require("../../frontend/assets/light_hair/hair-m5-light.png") },
-  ];
 
-  const faces = [
-    { id: "1", image: require("../../frontend/assets/faces/face-1.png") },
-    { id: "2", image: require("../../frontend/assets/faces/face-2.png") },
-    { id: "3", image: require("../../frontend/assets/faces/face-3.png") },
-    { id: "4", image: require("../../frontend/assets/faces/face-4.png") },
-    { id: "5", image: require("../../frontend/assets/faces/face-5.png") },
-    { id: "6", image: require("../../frontend/assets/faces/face-6.png") },
-    { id: "7", image: require("../../frontend/assets/faces/face-7.png") },
-    { id: "8", image: require("../../frontend/assets/faces/face-8.png") },
-    { id: "9", image: require("../../frontend/assets/faces/face-9.png") },
-    { id: "10", image: require("../../frontend/assets/faces/face-10.png") },
-    { id: "11", image: require("../../frontend/assets/faces/face-11.png") },
-    { id: "12", image: require("../../frontend/assets/faces/face-12.png") },
-    { id: "13", image: require("../../frontend/assets/faces/face-13.png") },
-    { id: "14", image: require("../../frontend/assets/faces/face-14.png") },
-    { id: "15", image: require("../../frontend/assets/faces/face-15.png") },
-  ];
-
-  const displayedImages = showFaces ? faces : isToggled ? light_hair : dark_hair;
-
-  const renderRow = ({ item }) => (
-    <Pressable
-      onPress={() =>
-        showFaces ? setSelectedFace(item) : setSelectedHair(item)
-      }
-      style={{alignItems: "center" }}
-    >
-      <View
-        style={{
-          backgroundColor:
-            (!showFaces && selectedHair && selectedHair.id === item.id) ||
-            (showFaces && selectedFace && selectedFace.id === item.id)
-              ? "#FEF9E5"
-              : "transparent",
-          borderRadius: 12,
-          resizeMode: "contain",
-          flex: 1
+  const renderRow = ({ item }) => {
+    const isSelected =
+      whichScreen === 0 && selectedHair?.id === item.id ||
+      whichScreen === 1 && selectedFace?.id === item.id ||
+      whichScreen === 2 && selectedSkinColor?.id === item.id ||
+      whichScreen === 3 && selectedAccessory?.id === item.id;
+  
+    return (
+      <Pressable
+        onPress={() => {
+          if (whichScreen === 0) setSelectedHair(item);
+          else if (whichScreen === 1) setSelectedFace(item);
+          else if (whichScreen === 2) setSelectedSkinColor(item);
+          else if (whichScreen === 3) setSelectedAccessory(item);
         }}
+        style={{ alignItems: "center" }}
       >
-        <Image source={item.image} style={{ width: 130, height: 130 }} />
-      </View>
-      
-    </Pressable>
-  );
+        <View
+          style={{
+            backgroundColor: isSelected ? "#FEF9E5" : "transparent",
+            borderRadius: 12,
+            resizeMode: "contain",
+            flex: 1,
+          }}
+        >
+          <Image source={item.image} style={{ width: 130, height: 130 }} />
+        </View>
+      </Pressable>
+    );
+  };
+  
+  
 
   return (
     <View className="flex-1 bg-custom-blue-200">
@@ -133,18 +170,8 @@ const AvatarCreation = ({ }) => {
         {/* Avatar Preview */}
         <ViewShot ref={viewShotRef} options={{ format: "png", quality: 1.0 }}>
           <View className="w-72 h-72 my-6 bg-[#FFE7C0] rounded-full items-center justify-center overflow-hidden relative">
-            <Image
-              source={require("../../frontend/assets/head/base-head.png")}
-              className="h-96 w-96"
-              resizeMode="contain"
-            />
-            {selectedFace && (
-              <Image
-                source={selectedFace.image}
-                className="h-96 w-96 absolute"
-                resizeMode="contain"
-              />
-            )}
+
+
             {selectedHair && (
               <Image
                 source={selectedHair.image}
@@ -152,6 +179,31 @@ const AvatarCreation = ({ }) => {
                 resizeMode="contain"
               />
             )}
+             
+             {selectedSkinColor && (
+              <Image
+                source={selectedSkinColor.image}
+                className="h-96 w-96 absolute"
+                resizeMode="contain"
+              />
+             )}
+
+             {selectedFace && (
+              <Image
+                source={selectedFace.image}
+                className="h-96 w-96 absolute"
+                resizeMode="contain"
+              />
+             )}
+
+            {selectedAccessory && (
+              <Image
+                source={selectedAccessory.image}
+                className="h-96 w-96 absolute"
+                resizeMode="contain"
+              />
+            )}
+
           </View>
         </ViewShot>
 
@@ -170,12 +222,12 @@ const AvatarCreation = ({ }) => {
               }}
             />
             <Image
-              source={require("../../frontend/assets/dark_hair/hair-m4-dark.png")}
+              source={require("../../frontend/assets/dark_hair/hair-m5-dark-new.png")}
               className="w-20 h-20 absolute left-0 -ml-[17%]"
               resizeMode="contain"
             />
             <Image
-              source={require("../../frontend/assets/light_hair/hair-m4-light.png")}
+              source={require("../../frontend/assets/light_hair/hair-m5-light-new.png")}
               className="w-20 h-20 absolute right-0 -mr-[15%]"
               resizeMode="contain"
             />
@@ -188,7 +240,7 @@ const AvatarCreation = ({ }) => {
               if (from === "group") {
                 navigation.replace("Main"); // redirect to MainTabs if from group
               } else {
-                navigation.replace("ProfileDrawer"); // go back to ProfileDrawer
+                navigation.replace("ProfilePage"); // go back to ProfileDrawer
     }
             }}
             className="w-28 h-12 rounded-full bg-[#FFB95C] items-center justify-center"
@@ -198,28 +250,42 @@ const AvatarCreation = ({ }) => {
             </Text>
           </TouchableOpacity>
         </View>
-        
+        {/* Navigation Buttons */}
 
-         {/* < button */}
-         <View className="w-full bg-[#FFE7C0] flex-row justify-between items-center px-6 py-4">
-          {/* < button */}
-          <TouchableOpacity onPress={() => setShowFaces(false)}>
-            <Text className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk ${!showFaces ? "opacity-50" : ""}`}>
+        <View className="w-full bg-[#FFE7C0] flex-row justify-between items-center px-6 py-4">
+          <TouchableOpacity
+            onPress={() => setWhichScreen(prev => Math.max(prev - 1, 0))}
+            disabled={whichScreen === 0}
+          >
+            <Text
+              className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk ${
+                whichScreen === 0 ? "opacity-50" : ""
+              }`}
+            >
               {"<"}
             </Text>
           </TouchableOpacity>
 
-          <Text className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk`}>
-            {showFaces ? "face" : "hair"}
+          <Text className="text-custom-blue-200 text-4xl font-bold font-spaceGrotesk">
+            {["hair", "face", "skin color", "accessories"][whichScreen]}
           </Text>
 
-          {/* > button */}
-          <TouchableOpacity onPress={() => setShowFaces(true)}>
-            <Text className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk ${showFaces ? "opacity-50" : ""}`}>
+
+          <TouchableOpacity
+            onPress={() => setWhichScreen(prev => Math.min(prev + 1, 3))}
+            disabled={whichScreen === 3}
+          >
+            <Text
+              className={`text-custom-blue-200 text-4xl font-bold font-spaceGrotesk ${
+                whichScreen === 3 ? "opacity-50" : ""
+              }`}
+            >
               {">"}
             </Text>
           </TouchableOpacity>
         </View>
+
+      
       </View> 
 
       <View className="flex-1 bg-white">
