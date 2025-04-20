@@ -20,7 +20,7 @@ const AvatarCreation = ({ }) => {
   const [selectedHair, setSelectedHair] = useState(null);
   const [selectedFace, setSelectedFace] = useState(null);
   const [selectedSkinColor, setSelectedSkinColor] = useState(null);
-  const [showFaces, setShowFaces] = useState(false);
+  const [selectedAccessory, setSelectedAccessory] = useState(null);
   const navigation = useNavigation();
   const viewShotRef = useRef(null);
   const route = useRoute();
@@ -58,8 +58,8 @@ const AvatarCreation = ({ }) => {
     { id: "10", image: require("../../frontend/assets/dark_hair/hair-m1-dark-new.png") },
     { id: "11", image: require("../../frontend/assets/dark_hair/hair-m2-dark-new.png") },
     { id: "12", image: require("../../frontend/assets/dark_hair/hair-m3-dark-new.png") },
-    { id: "13", image: require("../../frontend/assets/dark_hair/hair-m5-dark-new.png") },
-    { id: "14", image: require("../../frontend/assets/dark_hair/hair-m6-dark-new.png") },
+    { id: "13", image: require("../../frontend/assets/dark_hair/hair-m4-dark-new.png") },
+    { id: "14", image: require("../../frontend/assets/dark_hair/hair-m5-dark-new.png") },
   ];
 
   const light_hair = [
@@ -75,8 +75,8 @@ const AvatarCreation = ({ }) => {
     { id: "10", image: require("../../frontend/assets/light_hair/hair-m1-light-new.png") },
     { id: "11", image: require("../../frontend/assets/light_hair/hair-m2-light-new.png") },
     { id: "12", image: require("../../frontend/assets/light_hair/hair-m3-light-new.png") },
-    { id: "13", image: require("../../frontend/assets/light_hair/hair-m5-light-new.png") },
-    { id: "14", image: require("../../frontend/assets/light_hair/hair-m6-light-new.png") },
+    { id: "13", image: require("../../frontend/assets/light_hair/hair-m4-light-new.png") },
+    { id: "14", image: require("../../frontend/assets/light_hair/hair-m5-light-new.png") },
   ];
 
   const faces = [
@@ -104,20 +104,35 @@ const AvatarCreation = ({ }) => {
     { id: "4", image: require("../../frontend/assets/skin_colors/skin-3.png") },
   ]
 
+  const accessories = [
+    { id: "1", image: require("../../frontend/assets/accessories/accessory-1.png") },
+    { id: "2", image: require("../../frontend/assets/accessories/accessory-2.png") },
+    { id: "3", image: require("../../frontend/assets/accessories/accessory-3.png") },
+    { id: "4", image: require("../../frontend/assets/accessories/accessory-4.png") },
+    { id: "5", image: require("../../frontend/assets/accessories/accessory-5.png") },
+    { id: "6", image: require("../../frontend/assets/accessories/accessory-6.png") },
+    { id: "7", image: require("../../frontend/assets/accessories/accessory-7.png") },
+    { id: "8", image: require("../../frontend/assets/accessories/accessory-8.png") },
+    { id: "9", image: require("../../frontend/assets/accessories/accessory-9.png") },
+  ]
+
+
+
   const displayedImages = (() => {
     if (whichScreen === 0) return isToggled ? light_hair : dark_hair;
     if (whichScreen === 1) return faces;
     if (whichScreen === 2) return skin_color;
+    if (whichScreen === 3) return accessories;
     return [];
   })();
-  
-  
+
 
   const renderRow = ({ item }) => {
     const isSelected =
       whichScreen === 0 && selectedHair?.id === item.id ||
       whichScreen === 1 && selectedFace?.id === item.id ||
-      whichScreen === 2 && selectedSkinColor?.id === item.id;
+      whichScreen === 2 && selectedSkinColor?.id === item.id ||
+      whichScreen === 3 && selectedAccessory?.id === item.id;
   
     return (
       <Pressable
@@ -125,6 +140,7 @@ const AvatarCreation = ({ }) => {
           if (whichScreen === 0) setSelectedHair(item);
           else if (whichScreen === 1) setSelectedFace(item);
           else if (whichScreen === 2) setSelectedSkinColor(item);
+          else if (whichScreen === 3) setSelectedAccessory(item);
         }}
         style={{ alignItems: "center" }}
       >
@@ -182,6 +198,15 @@ const AvatarCreation = ({ }) => {
                 resizeMode="contain"
               />
              )}
+
+            {selectedAccessory && (
+              <Image
+                source={selectedAccessory.image}
+                className="h-96 w-96 absolute"
+                resizeMode="contain"
+              />
+            )}
+
           </View>
         </ViewShot>
 
@@ -245,12 +270,12 @@ const AvatarCreation = ({ }) => {
           </TouchableOpacity>
 
           <Text className="text-custom-blue-200 text-4xl font-bold font-spaceGrotesk">
-            {["hair", "face", "skin color"][whichScreen]}
+            {["hair", "face", "skin color", "accessories"][whichScreen]}
           </Text>
 
 
           <TouchableOpacity
-            onPress={() => setWhichScreen(prev => Math.min(prev + 1, 2))}
+            onPress={() => setWhichScreen(prev => Math.min(prev + 1, 3))}
             disabled={whichScreen === 3}
           >
             <Text
