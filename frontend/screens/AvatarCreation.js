@@ -156,46 +156,46 @@ const skin_color = [
   { id: "3", image: require("../../frontend/assets/skin_colors/skin-2.png") },
   { id: "4", image: require("../../frontend/assets/skin_colors/skin-3.png") },
 ];
-
+/*
 const accessories = [
   {
     id: "1",
-    image: require("../../frontend/assets/accessories/accessory-1.png"),
+    image: require("../../frontend/assets/accessories/accessory-1.PNG"),
   },
   {
     id: "2",
-    image: require("../../frontend/assets/accessories/accessory-2.png"),
+    image: require("../../frontend/assets/accessories/accessory-2.PNG"),
   },
   {
     id: "3",
-    image: require("../../frontend/assets/accessories/accessory-3.png"),
+    image: require("../../frontend/assets/accessories/accessory-3.PNG"),
   },
   {
     id: "4",
-    image: require("../../frontend/assets/accessories/accessory-4.png"),
+    image: require("../../frontend/assets/accessories/accessory-4.PNG"),
   },
   {
     id: "5",
-    image: require("../../frontend/assets/accessories/accessory-5.png"),
+    image: require("../../frontend/assets/accessories/accessory-5.PNG"),
   },
   {
     id: "6",
-    image: require("../../frontend/assets/accessories/accessory-6.png"),
+    image: require("../../frontend/assets/accessories/accessory-6.PNG"),
   },
   {
     id: "7",
-    image: require("../../frontend/assets/accessories/accessory-7.png"),
+    image: require("../../frontend/assets/accessories/accessory-7.PNG"),
   },
   {
     id: "8",
-    image: require("../../frontend/assets/accessories/accessory-8.png"),
+    image: require("../../frontend/assets/accessories/accessory-8.PNG"),
   },
   {
     id: "9",
-    image: require("../../frontend/assets/accessories/accessory-9.png"),
+    image: require("../../frontend/assets/accessories/accessory-9.PNG"),
   },
 ];
-
+*/
 const AvatarCreation = ({}) => {
   const [isToggled, setIsToggled] = useState(false);
   const [selectedHair, setSelectedHair] = useState(dark_hair[0]); // default: hair id "1"
