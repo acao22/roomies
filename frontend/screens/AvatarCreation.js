@@ -156,7 +156,7 @@ const skin_color = [
   { id: "3", image: require("../../frontend/assets/skin_colors/skin-2.png") },
   { id: "4", image: require("../../frontend/assets/skin_colors/skin-3.png") },
 ];
-/*
+
 const accessories = [
   {
     id: "1",
@@ -195,7 +195,7 @@ const accessories = [
     image: require("../../frontend/assets/accessories/accessory-9.PNG"),
   },
 ];
-*/
+
 const AvatarCreation = ({}) => {
   const [isToggled, setIsToggled] = useState(false);
   const [selectedHair, setSelectedHair] = useState(dark_hair[0]); // default: hair id "1"
