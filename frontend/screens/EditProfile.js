@@ -13,6 +13,7 @@ import {
   Platform,
   Pressable,
 } from "react-native";
+import Modal from "react-native-modal";
 import face1 from "../assets/face1.png";
 import { fetchAvatar, verifyUserSession } from "../api/users.api";
 import { useEffect } from "react";
@@ -35,6 +36,7 @@ export default function EditProfile() {
   const [avatarUri, setAvatarUri] = useState(null);
   const auth = getAuth();
   const user = auth.currentUser;
+  const [showPopup, setShowPopup] = useState(false);
 
   if (!user || !user.email) {
     Alert.alert("Error", "Unable to get current user email.");
@@ -70,6 +72,7 @@ export default function EditProfile() {
       }
     }
   };
+
 
   useEffect(() => {
     const loadAvatar = async () => {
@@ -209,11 +212,37 @@ export default function EditProfile() {
         </View>
 
         {/* Leave Room Section */}
-        <View className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center">
+        <TouchableOpacity 
+          onPress={() => setShowPopup(true)}
+          className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center"
+        >
           <Text className="text-xl font-semibold text-[#FEF9E5]">
             leave my room
           </Text>
-        </View>
+        </TouchableOpacity>
+
+        <Modal isVisible={showPopup} onBackdropPress={() => setShowPopup(false)}>
+          <View className="bg-custom-blue-200 h-64 p-6 rounded-2xl">
+            <Text className="text-3xl font-semibold text-[#FEF9E5]">confirm</Text>
+            <Text className="mb-4 text-xl text-[#FEF9E5] pt-4">Are you are you want to leave your room?</Text>
+          
+            <View className="flex-row items-center pt-4 justify-end">
+              <TouchableOpacity
+                onPress={() => setShowPopup(false)}
+                className="px-6 py-2 bg-white rounded-full m-4"
+              >
+                <Text className="text-custom-blue-200 text-xl font-semibold">no</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setShowPopup(false)}
+                className="px-6 py-2 bg-red-500 rounded-full"
+              >
+                <Text className="text-white text-xl font-semibold">yes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
