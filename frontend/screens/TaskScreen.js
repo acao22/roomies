@@ -449,36 +449,57 @@ export default function TaskScreen({ user }) {
     <View className="flex-1 bg-custom-yellow">
       {/* TABS */}
       <View className="flex-row mt-16 ml-5">
-        <TouchableOpacity
-          onPress={() => setActiveTab("tasks")}
-          className={`${
-            activeTab === "tasks"
-              ? "bg-custom-blue-200"
-              : activeTab === "addTask"
-              ? "bg-custom-blue-100" // code for birder of add tasks???
-              : "bg-custom-blue-200"
-          } px-5 py-2 rounded-t-[20px] z-10 ml-4`}
-        >
-          <Text className="text-4xl font-bold text-custom-tan font-spaceGrotesk">
-            tasks
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab("calendar")}
-          className="px-5 py-2 rounded-t-[20px] z-10 bg-custom-blue-100 ml-3"
-        >
-          <Text className="text-4xl font-bold text-custom-yellow font-spaceGrotesk">
-            calendar
-          </Text>
-        </TouchableOpacity>
-      </View>
+  <TouchableOpacity
+    onPress={() => setActiveTab("tasks")}
+    className={`px-5 py-2 rounded-t-[20px] z-10 ml-4
+      ${activeTab === "tasks"
+        ? "bg-custom-blue-200 opacity-100"
+        : "bg-custom-blue-100 opacity-50"
+      }`}
+  >
+    <Text
+      className={`text-4xl font-spaceGrotesk
+        ${activeTab === "tasks"
+          ? "font-bold text-custom-tan opacity-100"
+          : "font-normal text-custom-tan opacity-70"
+        }`}
+    >
+      tasks
+    </Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={() => setActiveTab("calendar")}
+    className={`px-5 py-2 rounded-t-[20px] z-10 ml-3
+      ${activeTab === "calendar"
+        ? "bg-custom-pink-200 opacity-100"
+        : "bg-custom-pink-200 opacity-80"
+      }`}
+  >
+    <Text
+      className={`text-4xl font-spaceGrotesk
+        ${activeTab === "calendar"
+          ? "font-bold text-custom-tan opacity-100"
+          : "font-normal text-custom-tan opacity-70"
+        }`}
+    >
+      calendar
+    </Text>
+  </TouchableOpacity>
+</View>
 
       {/* DARK BLUE border */}
-      <Animated.View className="flex-1 items-center border-t-8 border-custom-blue-200 z-10 bg-custom-tan">
+            <Animated.View
+        className={`flex-1 items-center border-t-8 ${
+          activeTab === 'tasks'
+            ? 'border-custom-blue-200'
+            : 'border-custom-pink-200'
+        } z-10 bg-custom-tan`}
+      >
         <View
           className={`w-[92%] flex-1 top-5 ${
             activeTab === "tasks"
-              ? "border-custom-blue-200"
+              ? "border-custom-pink-200"
               : activeTab === "calendar"
               ? "border-custom-blue-100"
               : "border-custom-blue-100"

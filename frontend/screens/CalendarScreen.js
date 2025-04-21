@@ -14,7 +14,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { updateTask } from "../api/tasks.api";
-import { format } from "date-fns";
+import { format, startOfWeek, addDays } from "date-fns";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -70,10 +70,15 @@ const formatDueDate = (dateVal) => {
 export default function CalendarScreen() {
   const [tasks, setTasks] = useState([]);
   const [visibleMonth, setVisibleMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState("");
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  // default selected to today
+  const [selectedDate, setSelectedDate] = useState(todayStr);
   const [expanded, setExpanded] = useState(true);
   const calendarHeight = useSharedValue(370);
-  const todayStr = new Date().toISOString().split("T")[0];
+
+  const scrollViewRef = useRef(null);
+  const [positions, setPositions] = useState({});
 
   useEffect(() => {
     const q = query(collection(db, "task"));
@@ -87,6 +92,19 @@ export default function CalendarScreen() {
     return () => unsubscribe();
   }, []);
 
+  // record layout positions
+  const onSectionLayout = (date) => (e) => {
+    const { y } = e.nativeEvent.layout;
+    setPositions((prev) => ({ ...prev, [date]: y }));
+  };
+
+  // scroll to selected date section
+  useEffect(() => {
+    if (scrollViewRef.current && positions[selectedDate] !== undefined) {
+      scrollViewRef.current.scrollTo({ y: positions[selectedDate], animated: true });
+    }
+  }, [selectedDate, positions]);
+
   const tasksByDate = {};
   tasks.forEach((task) => {
     const dateKey = computeDueDate(task).toISOString().split("T")[0];
@@ -94,14 +112,15 @@ export default function CalendarScreen() {
     tasksByDate[dateKey].push(task);
   });
 
-  const today = new Date();
-  const weekRange = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - 3 + i);
-    return d.toISOString().split("T")[0];
-  });
+  // compute current week (Sunday-Saturday)
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+  const weekRange = Array.from({ length: 7 }).map((_, i) =>
+    addDays(weekStart, i).toISOString().split("T")[0]
+  );
 
-  const displayedDates = expanded ? Object.keys(tasksByDate).sort() : weekRange;
+  const displayedDates = expanded
+    ? Object.keys(tasksByDate).sort()
+    : weekRange;
 
   const toggleCalendar = () => {
     setExpanded((prev) => {
@@ -177,13 +196,11 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
       {/* header */}
-      <View className="flex-row justify-between items-center px-4 pt-4 pb-1">
+      <View className="flex-row justify-between items-center px-4 pt-4 pb-1 text-custom-blue-200">
         <TouchableOpacity onPress={() => scrollMonth(-1)}>
           <Ionicons name="chevron-back" size={28} color="#495BA2" />
         </TouchableOpacity>
-        <Text className="text-3xl font-bold text-custom-blue-200">
-          {formattedMonth}
-        </Text>
+        <Text className="text-3xl font-bold text-custom-blue-200">{formattedMonth}</Text>
         <TouchableOpacity onPress={() => scrollMonth(1)}>
           <Ionicons name="chevron-forward" size={28} color="#495BA2" />
         </TouchableOpacity>
@@ -195,10 +212,6 @@ export default function CalendarScreen() {
         {...panResponder.panHandlers}
       >
         <Animated.View style={calendarStyle}>
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{ backgroundColor: "white" }}
-          >
             <CalendarList
               current={visibleMonth.toISOString().split("T")[0]}
               onDayPress={(day) => setSelectedDate(day.dateString)}
@@ -208,7 +221,7 @@ export default function CalendarScreen() {
               horizontal
               pagingEnabled
               scrollEnabled={false}
-              hideExtraDays
+              hideExtraDays={false}
               markedDates={{
                 [selectedDate]: {
                   selected: true,
@@ -226,9 +239,12 @@ export default function CalendarScreen() {
                 textMonthFontSize: 0,
                 textDayFontWeight: "500",
               }}
-              style={{ height: "100%" }}
+              style={{ width: "100%",
+                       height: "100%",
+                backgroundColor: "white",
+                borderRadius: 16,
+                overflow: "hidden",}}
             />
-          </View>
         </Animated.View>
       </View>
 
@@ -245,7 +261,8 @@ export default function CalendarScreen() {
 
       {/* animated task timeline */}
       <ScrollView
-        className="px-4 mt-3"
+        ref={scrollViewRef}
+        className={`px-4 ${expanded ? 'mt-3' : 'mt-1'}`}
         contentContainerStyle={{ paddingBottom: 80 }}
         showsVerticalScrollIndicator={false}
       >
@@ -256,7 +273,11 @@ export default function CalendarScreen() {
           const tasksForDate = tasksByDate[date] || [];
 
           return (
-            <View key={date} className="mb-4 flex-row items-start">
+            <View
+              key={date}
+              onLayout={onSectionLayout(date)}
+              className="mb-4 flex-row items-start"
+            >
               {/* left date */}
               <View style={{ width: 60, alignItems: "center" }}>
                 <Text className="text-2xl font-bold text-custom-blue-200 leading-none">
@@ -289,7 +310,7 @@ export default function CalendarScreen() {
                       >
                         <TouchableOpacity
                           onPress={() => toggleTaskCompletion(task.id)}
-                          className={`flex-row items-center ${background} rounded-xl p-4 mb-3`}
+                          className={`${background} rounded-xl p-4 mb-3 flex-row items-center`}
                         >
                           <Ionicons
                             name={isCompleted ? "checkbox" : "square-outline"}
