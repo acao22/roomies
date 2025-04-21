@@ -66,7 +66,6 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   const [description, setDescription] = useState("");
   const [selectedPoints, setSelectedPoints] = useState(1);
 
-
   useFocusEffect(
     React.useCallback(() => {
       const fetchGroupAndAvatars = async () => {
@@ -101,9 +100,8 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
     }, [])
   );
 
-  const getAvatarSource = (member) => 
+  const getAvatarSource = (member) =>
     member.avatar ? { uri: member.avatar } : face1;
-  
 
   const toggleMemberSelection = (id) => {
     setMembers((prev) =>
@@ -150,10 +148,12 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
         borderRadius: 8,
         backgroundColor: selectedPoints === item ? "#788ABF" : "#F5A58C",
         width: 52,
+        alignItems: "center",
+        justifyContent: "center",
       }}
-      >
-        <Text className="font-spaceGrotesk text-xl text-white">{`+${item}`}</Text>
-      </TouchableOpacity>
+    >
+      <Text className="font-spaceGrotesk text-lg text-white">{`+${item}`}</Text>
+    </TouchableOpacity>
   );
 
   return (
@@ -172,7 +172,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
             className="mb-4 flex-row"
           >
             <Ionicons name="arrow-back" size={28} color="#495BA2" />
-            
+
             <Text className="text-xl text-custom-blue-200 font-bold font-spaceGrotesk ml-5">
               add task
             </Text>
@@ -265,7 +265,9 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               />
             )}
 
-            <Text className="text-xl font-bold my-2 font-spaceGrotesk">Who:</Text>
+            <Text className="text-xl font-bold my-2 font-spaceGrotesk">
+              Who:
+            </Text>
 
             {/* need to add this wrapper for flatlist & fading edges */}
             <View className="relative w-full">
@@ -333,7 +335,9 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
             {/* RECURRENCE DROPDOWN */}
             <Animatable.View animation={"pulse"} duration={500}>
               <TouchableOpacity
-                onPress={() => setShowRecurrenceDropdown(!showRecurrenceDropdown)}
+                onPress={() =>
+                  setShowRecurrenceDropdown(!showRecurrenceDropdown)
+                }
                 className="p-4 rounded-xl bg-gray-200 my-2 shadow-sm"
               >
                 <Text className="text-lg font-spaceGrotesk text-custom-blue-200 font-semibold">
@@ -367,13 +371,23 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
             )}
 
             {/* add points*/}
-            <Text className="font-bold font-spaceGrotesk text-xl mt-4">add points: {selectedPoints} pts</Text>
+            <Text className="font-bold font-spaceGrotesk text-xl mt-4">
+              add points: {selectedPoints} pts
+            </Text>
+
             <FlatList
               data={pointOptions}
               horizontal
               keyExtractor={(item) => item.toString()}
               renderItem={renderPointOption}
-              contentContainerStyle={{ paddingVertical: 10}}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingHorizontal: 10,
+                alignItems: "center",
+              }}
+              style={{
+                marginTop: 10,
+              }}
             />
 
             {/* TASK DESCRIPTION */}
@@ -404,4 +418,3 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
 };
 
 export default AddTaskScreen;
-
