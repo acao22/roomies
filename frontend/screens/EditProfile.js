@@ -91,7 +91,7 @@ export default function EditProfile() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 items-center justify-center bg-[#FEF9E5]"
       >
-        <Pressable onPress={() => navigation.navigate("ProfileScreen")}>
+        <Pressable onPress={() => navigation.navigate("Main", { screen: "ProfilePage" })}>
           <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
             &lt; profile
           </Text>
