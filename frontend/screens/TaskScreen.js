@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, Image, TouchableWithoutFeedback } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import CalendarScreen from "./CalendarScreen";
 import AddTaskScreen from "./AddTaskScreen";
@@ -117,12 +117,11 @@ export default function TaskScreen({ user }) {
     React.useCallback(() => {
       const fetchUsersForTasks = async () => {
         const uids = [
-          ...new Set(
-            tasks
-              .map((task) => task.createdBy)
-              .concat(tasks.map((task) => task.completedBy))
-              .filter(Boolean)
-          ),
+          ...new Set([
+            ...tasks.map(t => t.createdBy),
+            ...tasks.map(t => t.completedBy),
+            ...tasks.flatMap(t => t.members || [])
+          ].filter(Boolean)),
         ];
         const tempUsers = {};
         for (const uid of uids) {
@@ -256,6 +255,9 @@ export default function TaskScreen({ user }) {
   // Toggle task completion status and open modal if marking as completed
   const toggleTaskCompletion = async (taskId) => {
     const { uid, email, message } = await verifyUserSession();
+    const originalTask = tasks.find((t) => t.id === taskId);
+    const originalCompletedBy = originalTask.completedBy;
+
     const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
         const newStatus = task.status === "completed" ? "open" : "completed";
@@ -287,8 +289,8 @@ export default function TaskScreen({ user }) {
     }
 
     // Open modal if marking as completed
+    const points = taskToUpdate.selectedPoints || 0;
     if (taskToUpdate.status === "completed") {
-      const points = taskToUpdate.selectedPoints || 0;
       console.log(
         "Task selectedPoints:",
         taskToUpdate.selectedPoints,
@@ -301,16 +303,16 @@ export default function TaskScreen({ user }) {
       setCompletedTaskName(taskToUpdate.title);
       setModalVisible(true);
 
-      try {
-        await addPointsToUser(user.uid, points);
-      } catch (err) {
-        console.error("Failed to add points to user:", err);
-      }
+      await addPointsToUser(user.uid, points);
 
       setTimeout(() => {
         setModalVisible(false);
         setSelectedTaskId(null);
       }, 1000);
+    } else {
+      if (originalCompletedBy) {
+        await addPointsToUser(originalCompletedBy, -points);
+      }
     }
   };
   // Modal handlers
@@ -330,22 +332,21 @@ export default function TaskScreen({ user }) {
   };
 
   //sort tasks by user
-  const filteredTasks =
-    sortOption === "myTasks"
-      ? tasks.filter((t) =>
-          Array.isArray(t.assignedTo)
-            ? t.assignedTo.includes(user.name)
-            : t.assignedTo === user.name
-        )
-      : tasks;
+  const isAssigned = task =>
+    Array.isArray(task.members) && task.members.includes(user.uid);
 
   // Sort upcoming tasks by dueDate
   const upcomingTasks = tasks
     .filter((t) => t.status === "open")
     .sort((a, b) => {
-      const dateA = new Date(a.dueDate);
-      const dateB = new Date(b.dueDate);
-      return dateA - dateB;
+      if (sortOption === "myTasks") {
+        const aIs = isAssigned(a), bIs = isAssigned(b);
+        if (aIs !== bIs) return aIs ? -1 : 1;
+      } else {
+        const dateA = new Date(a.dueDate);
+        const dateB = new Date(b.dueDate);
+        return dateA - dateB;
+      }
     });
 
   // Delete task
@@ -411,7 +412,7 @@ export default function TaskScreen({ user }) {
         {/* Delete Icon */}
         <TouchableOpacity
           onPress={() => handleDeleteTask(item.id)}
-          style={{ position: "absolute", top: 10, right: 10, zIndex: 10 }}
+          style={{ position: "absolute", top: 10, right: 10, zIndex: 999 }}
         >
           <Ionicons name="close-outline" size={24} color="#DC2626" />
         </TouchableOpacity>
@@ -467,6 +468,60 @@ export default function TaskScreen({ user }) {
 
   return (
     <View className="flex-1 bg-custom-yellow">
+
+      {/* sort by dropdown menu */}
+                          
+                          
+      {dropdownVisible && (
+        <>
+          {/* full‑screen invisible touch catcher */}
+          <TouchableWithoutFeedback onPress={() => setDropdownVisible(false)}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 49,           // keep it underneath the menu
+              }}
+            />
+          </TouchableWithoutFeedback>
+          <Animatable.View
+            animation={"pulse"}
+            duration={500}
+            className="absolute top-60 left-10 border-4 border-[#FFD49B] bg-[#FFE9C7] p-3 rounded-xl shadow-lg z-50 w-36"
+          >
+            <TouchableOpacity
+              className="py-1"
+              onPress={() => {
+                setSortOption("upcoming");
+                setDropdownVisible(false);
+              }}
+            >
+              <Text className="text-xl font-bold text-custom-blue-200">
+                upcoming
+              </Text>
+            </TouchableOpacity>
+            <View className="my-1 border-t-4 border-[#FFD49B]" />
+            <TouchableOpacity
+              className="py-1"
+              onPress={() => {
+                setSortOption("myTasks");
+                setDropdownVisible(false);
+              }}
+            >
+              <Text className="text-xl font-bold text-custom-blue-200">
+                my tasks
+              </Text>
+            </TouchableOpacity>
+          </Animatable.View>
+        </>
+      )}
+      
+
+
+
       {/* TABS */}
       <View className="flex-row mt-16 ml-5">
         <TouchableOpacity
@@ -579,38 +634,7 @@ export default function TaskScreen({ user }) {
                             </TouchableOpacity>
                           </View>
 
-                          {/* sort by dropdown menu */}
-                          {dropdownVisible && (
-                            <Animatable.View
-                              animation={"pulse"}
-                              duration={500}
-                              className="absolute top-14 left-0 border-4 border-[#FFD49B] bg-[#FFE9C7] p-3 rounded-xl shadow-lg z-50 w-36"
-                            >
-                              <TouchableOpacity
-                                className="py-1"
-                                onPress={() => {
-                                  setSortOption("upcoming");
-                                  setDropdownVisible(false);
-                                }}
-                              >
-                                <Text className="text-xl font-bold text-custom-blue-200">
-                                  upcoming
-                                </Text>
-                              </TouchableOpacity>
-                              <View className="my-1 border-t-4 border-[#FFD49B]" />
-                              <TouchableOpacity
-                                className="py-1"
-                                onPress={() => {
-                                  setSortOption("myTasks");
-                                  setDropdownVisible(false);
-                                }}
-                              >
-                                <Text className="text-xl font-bold text-custom-blue-200">
-                                  my tasks
-                                </Text>
-                              </TouchableOpacity>
-                            </Animatable.View>
-                          )}
+                          
                         </View>
                         <TaskNotificationsModal
                           visible={notificationsVisible}

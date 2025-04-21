@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { CalendarList } from "react-native-calendars";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { updateTask } from "../api/tasks.api";
 import { format, startOfWeek, addDays } from "date-fns";
@@ -21,6 +21,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
+import { getUserGroup } from "../api/users.api.js";
 
 const userAvatars = {
   Luna: require("../images/avatar1.png"),
@@ -81,15 +82,36 @@ export default function CalendarScreen() {
   const [positions, setPositions] = useState({});
 
   useEffect(() => {
-    const q = query(collection(db, "task"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const taskList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTasks(taskList);
-    });
-    return () => unsubscribe();
+    let unsubscribe;
+  
+    async function fetchGroupTasks() {
+      try {
+        // 1) figure out which group the current user is in
+        const { id: groupId } = await getUserGroup();
+  
+        // 2) only subscribe to the tasks whose groupId matches
+        const q = query(
+          collection(db, "task"),
+          where("groupId", "==", groupId)
+        );
+  
+        unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const taskList = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setTasks(taskList);
+        });
+      } catch (err) {
+        console.error("Failed to load group tasks in calendar:", err);
+      }
+    }
+  
+    fetchGroupTasks();
+  
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // record layout positions

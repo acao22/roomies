@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import {
   Pressable,
 } from "react-native";
 import face1 from "../assets/face1.png";
-import { fetchAvatar, verifyUserSession } from "../api/users.api";
+import { fetchAvatar, verifyUserSession, logoutUser } from "../api/users.api";
 import { useEffect } from "react";
 import {
   EmailAuthProvider,
@@ -23,7 +23,9 @@ import {
   updatePassword,
 } from "firebase/auth";
 
-export default function EditProfile() {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export default function EditProfile({ setUser }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -36,10 +38,39 @@ export default function EditProfile() {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  if (!user || !user.email) {
-    Alert.alert("Error", "Unable to get current user email.");
-    return;
-  }
+    useEffect(() => {
+      if (!user?.uid) return;
+      (async () => {
+        try {
+          const { uid } = await verifyUserSession();
+          const uri = await fetchAvatar(uid);
+          setAvatarUri(uri.uri);
+        } catch (error) {
+          console.error("Error fetching avatar in EditProfile:", error);
+        }
+      })();
+    }, [user]);
+
+    const handleLogout = async () => {
+    try {
+      await logoutUser(setUser);
+      Alert.alert("Logged Out", "You have been successfully logged out.");
+      const token = await AsyncStorage.getItem("idToken");
+      console.log("Token after logout:", token);
+
+      setTimeout(() => {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Landing' }],
+          })
+        );
+      }, 0);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Alert.alert("Error", "Failed to log out. Try again.");
+    }
+  };
 
   const handlePasswordChange = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -91,7 +122,7 @@ export default function EditProfile() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 items-center justify-center bg-[#FEF9E5]"
       >
-        <Pressable onPress={() => navigation.navigate("Main", { screen: "ProfilePage" })}>
+        <Pressable onPress={() => navigation.navigate("Main", { screen: "ProfileDrawer" })}>
           <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
             &lt; profile
           </Text>
@@ -209,11 +240,12 @@ export default function EditProfile() {
         </View>
 
         {/* Leave Room Section */}
-        <View className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center">
-          <Text className="text-xl font-semibold text-[#FEF9E5]">
-            leave my room
-          </Text>
-        </View>
+        <TouchableOpacity onPress={handleLogout} className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center">
+            <Text className="text-xl font-semibold text-[#FEF9E5]">
+              logout
+            </Text>
+
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

@@ -37,21 +37,21 @@ const LandingScreen = () => {
       <View className="flex-row pt-72 ml-6">
         <View className="relative">
           {/* face image */}
-          <Image source={face1} className="w-48 h-48" />
+          <Image source={face1} className="w-48 h-48 z-10" />
           {/* hair image  */}
-          <Image source={hair1} className="absolute top-0 left-0 w-48 h-48" />
+          <Image source={hair1} className="absolute top-0 left-0 w-48 h-48 z-0" />
         </View>
         <View className="relative">
           {/* face image */}
-          <Image source={face2} className="right-20  w-48 h-48" />
+          <Image source={face2} className="right-20  w-48 h-48 z-10" />
           {/* hair image  */}
-          <Image source={hair2} className="absolute top-0 right-20 w-48 h-48" />
+          <Image source={hair2} className="absolute top-0 right-20 w-48 h-48 z-0" />
         </View>
         <View className="relative">
           {/* face image */}
-          <Image source={face3} className="right-40 w-48 h-48" />
+          <Image source={face3} className="right-40 w-48 h-48 z-10" />
           {/* hair image  */}
-          <Image source={hair3} className="absolute top-0 right-40 w-48 h-48" />
+          <Image source={hair3} className="absolute top-0 right-40 w-48 h-48 z-0" />
         </View>
       </View>
 

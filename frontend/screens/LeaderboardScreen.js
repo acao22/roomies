@@ -151,8 +151,8 @@ const LeaderBoardScreen = () => {
     member.avatar ? { uri: member.avatar } : face1;
 
   return (
-    <ScrollView className="mt-6 px-4 bg-custom-tan flex-1">
-      <View className="mt-4 mb-2 items-center">
+    <ScrollView className="px-4 bg-custom-tan flex-1">
+      <View className="mt-12 mb-2 items-center">
         <Text className="text-custom-pink-200 text-5xl font-bold mt-6 font-spaceGrotesk text-center">
           leaderboard
         </Text>

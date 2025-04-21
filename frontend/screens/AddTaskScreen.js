@@ -48,7 +48,6 @@ const recurrenceOptions = [
   "Weekly",
   "Bi-weekly",
   "Monthly",
-  "Custom",
 ];
 
 const pointOptions = [1, 5, 10, 15, 20];

@@ -245,6 +245,7 @@ export default function App() {
             <RootStack.Screen name="Signup">
               {() => <SignUpScreen setUser={setUser} />}
             </RootStack.Screen>
+            
             <RootStack.Screen
               name="Group"
               options={{ animation: "slide_from_left" }}
@@ -264,7 +265,9 @@ export default function App() {
           name="ProfileScreen"
           component={ProfileScreenWrapper}
         />
-        <RootStack.Screen name="EditProfile" component={EditProfile} />
+        <RootStack.Screen name="EditProfile">
+          {() => <EditProfile setUser={setUser} />}
+        </RootStack.Screen>
       </RootStack.Navigator>
     </NavigationContainer>
   );
