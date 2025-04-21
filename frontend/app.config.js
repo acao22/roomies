@@ -8,6 +8,9 @@ export default () => ({
     owner: "nanyucao",
     ios: {
       bundleIdentifier: "com.nanyucao.roomies",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
