@@ -160,39 +160,39 @@ const skin_color = [
 const accessories = [
   {
     id: "1",
-    image: require("../../frontend/assets/accessories/accessory-1.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-1.png"),
   },
   {
     id: "2",
-    image: require("../../frontend/assets/accessories/accessory-2.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-2.png"),
   },
   {
     id: "3",
-    image: require("../../frontend/assets/accessories/accessory-3.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-3.png"),
   },
   {
     id: "4",
-    image: require("../../frontend/assets/accessories/accessory-4.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-4.png"),
   },
   {
     id: "5",
-    image: require("../../frontend/assets/accessories/accessory-5.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-5.png"),
   },
   {
     id: "6",
-    image: require("../../frontend/assets/accessories/accessory-6.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-6.png"),
   },
   {
     id: "7",
-    image: require("../../frontend/assets/accessories/accessory-7.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-7.png"),
   },
   {
     id: "8",
-    image: require("../../frontend/assets/accessories/accessory-8.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-8.png"),
   },
   {
     id: "9",
-    image: require("../../frontend/assets/accessories/accessory-9.PNG"),
+    image: require("../../frontend/assets/accessories/accessory-9.png"),
   },
 ];
 
