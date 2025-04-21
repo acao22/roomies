@@ -115,7 +115,7 @@ export default function TaskScreen({ user }) {
   // find users of completed tasks
   useFocusEffect(
     React.useCallback(() => {
-      const fetchUsersForCompletedTasks = async () => {
+      const fetchUsersForTasks = async () => {
         const uids = [
           ...new Set(
             tasks
@@ -145,8 +145,8 @@ export default function TaskScreen({ user }) {
         setUsersMap(tempUsers);
       };
 
-      if (completedTasks.length > 0) {
-        fetchUsersForCompletedTasks();
+      if (tasks.length > 0) {
+        fetchUsersForTasks();
       }
     }, [tasks])
   );

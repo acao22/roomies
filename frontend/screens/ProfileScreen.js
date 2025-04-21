@@ -61,7 +61,6 @@ const ProfileScreen = ({ setUser }) => {
     try {
       await logoutUser(setUser);
       Alert.alert("Logged Out", "You have been successfully logged out.");
-
       const token = await AsyncStorage.getItem("idToken");
       console.log("Token after logout:", token);
     } catch (error) {
@@ -136,7 +135,7 @@ const ProfileScreen = ({ setUser }) => {
               <TouchableOpacity
                 onPress={() => {
                   console.log("edit profile picture / go to AvatarCreation");
-                  navigation.navigate("AvatarCreation", {
+                  navigation.navigate("EditProfile", {
                     origin: "ProfileScreen",
                   });
                 }}
