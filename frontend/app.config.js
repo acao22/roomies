@@ -2,12 +2,15 @@ import "dotenv/config";
 
 export default () => ({
   expo: {
-    name: "frontend",
+    name: "roomies",
     slug: "roomies",
     version: "1.0.0",
     owner: "nanyucao",
     ios: {
       bundleIdentifier: "com.nanyucao.roomies",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
