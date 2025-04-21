@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import face1 from "../assets/face1.png";
-import { fetchAvatar, verifyUserSession } from "../api/users.api";
+import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI } from "../api/users.api.js";
 import { useEffect } from "react";
 import {
   EmailAuthProvider,
@@ -34,9 +34,48 @@ export default function EditProfile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const navigation = useNavigation();
   const [avatarUri, setAvatarUri] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [userGroup, setUserGroup] = useState(null);
   const auth = getAuth();
   const user = auth.currentUser;
   const [showPopup, setShowPopup] = useState(false);
+
+  // user leaves group
+  const handleLeaveGroup = async () => {
+    if (!userData || !userGroup) {
+      Alert.alert("Error", "No group to leave.");
+      return;
+    }
+
+    const userId = userData.uid;
+    const groupId = userGroup.id;
+
+    if (!groupId) {
+      Alert.alert("Error", "Group id not found.");
+      return;
+    }
+
+    try {
+      await leaveGroupAPI(userId, groupId);
+
+      setUser(prev => ({ ...prev, roomieGroup: null, members: [] }));
+      Alert.alert("Left Group", "You have succesfully left the group");
+
+    } catch (error) {
+      console.error("Leave group failed:", error);
+      Alert.alert("Error", "Failed to leave group. Try again");
+    }
+  };
+
+  const handleModalCancel = () => {
+    setModalVisible(false);
+  };
+
+  const handleModalSubmit = () => {
+    // Optionally, add logifc to save profile changes here
+    setModalVisible(false);
+  };
 
   if (!user || !user.email) {
     Alert.alert("Error", "Unable to get current user email.");
@@ -73,7 +112,26 @@ export default function EditProfile() {
     }
   };
 
+  //fetching user data
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { uid } = await verifyUserSession();
+        const { firstName, lastName } = await getUserInfo();
+        setUserData({ firstName: firstName, lastName: lastName, uid: uid});
+
+        const { id, groupName, members } = await getUserGroup();
+        setUserGroup({ id, groupName: groupName, members: members });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  //fetching avatar 
+  
   useEffect(() => {
     const loadAvatar = async () => {
       try {
@@ -234,7 +292,10 @@ export default function EditProfile() {
                 <Text className="text-custom-blue-200 text-xl font-semibold">no</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => setShowPopup(false)}
+                onPress={() => {
+                console.log("left group");
+                handleLeaveGroup();
+               }}
                 className="px-6 py-2 bg-red-500 rounded-full"
               >
                 <Text className="text-white text-xl font-semibold">yes</Text>
