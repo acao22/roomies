@@ -12,10 +12,7 @@ export default () => ({
         ITSAppUsesNonExemptEncryption: false,
       },
     },
-    splash: {
-      image: "./assets/splash.png",
-      resizeMode: "contain",
-    },
+    icon: "./assets/icon.png",
     extra: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
