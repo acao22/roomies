@@ -16,31 +16,23 @@ import { addTask } from "../api/tasks.api.js";
 import face1 from "../assets/face1.png";
 
 import { getUserGroup, fetchAvatar } from "../api/users.api.js";
-// hardcoded stuff for now
-const userAvatars = {
-  Luna: require("../images/avatar1.png"),
-  Andrew: require("../images/avatar2.png"),
-  Angie: require("../images/avatar3.png"),
-  Default: require("../images/avatar4.png"),
-};
+
+
+
+import TrashIcon from "../images/trash-icon.png";
+import DishesIcon from "../images/dishes-icon.png";
+import VacuumIcon from "../images/vacuum-icon.png";
+import CleanIcon from "../images/clean-icon.png";
+import ToiletIcon from "../images/toilet-paper-icon.png";
+import SoapIcon from "../images/soap-icon.png";
 
 const taskIcons = [
-  { id: 1, name: "trash", icon: "trash-outline" },
-  { id: 2, name: "dishes", icon: "fast-food-outline" },
-  { id: 3, name: "vacuum", icon: "home-outline" },
-  { id: 4, name: "clean", icon: "water-outline" },
-  { id: 5, name: "restock", icon: "cart-outline" },
-];
-
-const groupMembers = [
-  { id: 1, name: "Andrew", selected: false },
-  { id: 2, name: "Christian", selected: false },
-  { id: 3, name: "Luna", selected: false },
-  { id: 4, name: "Angie", selected: false },
-  { id: 5, name: "Kat", selected: false },
-  { id: 6, name: "Nat", selected: false },
-  { id: 7, name: "Hemo", selected: false },
-  { id: 8, name: "Meow", selected: false },
+  { id: 1, name: "trash", icon: TrashIcon },
+  { id: 2, name: "dishes", icon: DishesIcon },
+  { id: 3, name: "vacuum", icon: VacuumIcon },
+  { id: 4, name: "clean", icon: CleanIcon },
+  { id: 5, name: "restock", icon: ToiletIcon },
+  { id: 6, name: "soap", icon: SoapIcon },
 ];
 
 const recurrenceOptions = [
@@ -77,7 +69,10 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 try {
                   // Pass the uid as an argument to fetchAvatar
                   const avatarData = await fetchAvatar(member.uid);
-                  return { ...member, avatar: avatarData.uri };
+                  return { ...member,
+                    name: member.firstName || member.username || "unkown",
+                    avatar: avatarData.uri,
+                    selected: false };
                 } catch (err) {
                   console.error(
                     `Error fetching avatar for ${member.uid}:`,
@@ -196,17 +191,39 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               numColumns={3}
               nestedScrollEnabled={true}
               keyExtractor={(item) => item.id.toString()}
-              className="max-h-[160px] my-4"
+              className="max-h-[200px] my-4"
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  onPress={() => setSelectedIcon(item.id)}
+                  onPress={() => {
+                    setSelectedIcon(item.id);
+                    const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                    setDate(future);
+                    setTime(future);
+                    setRecurrence("Does not repeat");
+                    setSelectedPoints(5);
+                    setMembers((prev) =>
+                      prev.map((member) => ({
+                        ...member,
+                        selected: member.uid.trim() === user.uid.trim(),
+                      }))
+                    );
+                  }}
                   className={`m-1 p-4 rounded-full ${
                     selectedIcon === item.id
                       ? "border-2 border-blue-500"
                       : "border-[#F5D2C8]"
                   } bg-[#F5D2C8] bg-opacity-50 w-24 h-24 flex items-center justify-center`}
                 >
-                  <Ionicons name={item.icon} size={30} color="#788ABF" />
+                  <Image
+                    source={item.icon}
+                    style={{
+                      width:
+                        item.name === "vacuum" || item.name === "soap" ? 56 : 63,
+                      height:
+                        item.name === "vacuum" || item.name === "soap" ? 35 : 39,
+                      resizeMode: "contain",
+                    }}
+                  />
                   <Text className="text-center text-sm text-custom-blue-200 mt-1 font-spaceGrotesk">
                     {item.name}
                   </Text>
@@ -278,16 +295,14 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 keyExtractor={(item) => item.uid.toString()}
                 renderItem={({ item }) => (
                   <Animatable.View
-                    // pulse on select, zoom on enter
                     animation={item.selected ? "pulse" : "zoomIn"}
                     duration={300}
+                    className="items-center mx-2"
                   >
                     <TouchableOpacity
                       onPress={() => toggleMemberSelection(item.uid)}
-                      className={`m-1 rounded-full border-2 ${
-                        item.selected
-                          ? "bg-red-200 border-red-600"
-                          : "bg-gray-100 border-gray-200"
+                      className={`rounded-full border-2 ${
+                        item.selected ? "bg-red-200 border-red-600" : "bg-gray-100 border-gray-200"
                       }`}
                     >
                       <View
@@ -306,9 +321,17 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                         />
                       </View>
                     </TouchableOpacity>
+                    <Text
+                      className="text-xs text-center mt-1 font-spaceGrotesk text-custom-blue-200"
+                      style={{ maxWidth: 70 }}
+                      numberOfLines={1}
+                    >
+                      {item.name}
+                    </Text>
                   </Animatable.View>
                 )}
               />
+
 
               {/* left fading edge */}
               <View className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none">
