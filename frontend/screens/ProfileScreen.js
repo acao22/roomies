@@ -213,7 +213,7 @@ const ProfileScreen = ({ setUser }) => {
             </TouchableOpacity>
             <TouchableOpacity
               className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center"
-              onPress={() => navigation.navigate("Password")}
+              onPress={() => navigation.navigate("EditProfile")}
             >
               <Text className="text-white font-bold font-spaceGrotesk text-2xl">
                 Password

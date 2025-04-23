@@ -46,11 +46,12 @@ if (
 }
 
 const Tab = createBottomTabNavigator();
-const RootStack = createNativeStackNavigator();
+const ProfileStack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
 const TaskStack = createNativeStackNavigator();
 const LeaderboardStack = createNativeStackNavigator();
 const LandingStack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
 
 function HomeStackScreen() {
   return (
@@ -81,14 +82,15 @@ function LeaderboardStackScreen() {
 }
 
 function ProfileStackScreen({ setUser }) {
-  const ProfileStack = createNativeStackNavigator();
   return (
-    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+    <ProfileStack.Navigator
+      screenOptions={{ headerShown: false, animation: "slide_from_left" }}
+    >
       <ProfileStack.Screen name="ProfileDrawer">
         {() => <ProfileScreen setUser={setUser} />}
       </ProfileStack.Screen>
       <ProfileStack.Screen name="AvatarCreation" component={AvatarCreation} />
-      <ProfileStack.Screen name="Password" component={PasswordScreen} />
+      <ProfileStack.Screen name="ProfileScreen" component={ProfileScreen} />
     </ProfileStack.Navigator>
   );
 }
@@ -245,47 +247,49 @@ export default function App() {
   return (
     <NavigationContainer>
       
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <AppStack.Navigator screenOptions={{ headerShown: false }}>
         {user && user.roomieGroup ? (
-          <RootStack.Screen name="Main">
+          <AppStack.Screen 
+          name="Main"
+          options={{ animation: "slide_from_left" }}>
             {() => <MainTabs user={user} setUser={setUser} />} 
-          </RootStack.Screen>
+          </AppStack.Screen>
         ) : (
           <>
-            <RootStack.Screen
+            <AppStack.Screen
               name="Landing"
               component={LandingScreenWrapper}
               options={{
                 animation: "slide_from_left",
               }}
             />
-            <RootStack.Screen name="Signup">
+            <AppStack.Screen name="Signup">
               {() => <SignUpScreen setUser={setUser} />}
-            </RootStack.Screen>
-            <RootStack.Screen
+            </AppStack.Screen>
+            <AppStack.Screen
               name="Group"
               options={{ animation: "slide_from_left" }}
             >
               {() => <GroupScreen setUser={setUser} />}
-            </RootStack.Screen>
-            <RootStack.Screen name="Login">
+            </AppStack.Screen>
+            <AppStack.Screen name="Login">
               {() => <LoginScreen setUser={setUser} />}
-            </RootStack.Screen>
+            </AppStack.Screen>
           </>
         )}
-        <RootStack.Screen
+        <AppStack.Screen
           name="AvatarCreation"
           component={AvatarCreationWrapper}
         />
-        <RootStack.Screen
+        <AppStack.Screen
           name="ProfileScreen"
           component={ProfileScreenWrapper}
         />
-        <RootStack.Screen
+        <AppStack.Screen
           name="EditProfile"
           component={EditProfile}
         />
-      </RootStack.Navigator>
+      </AppStack.Navigator>
     </NavigationContainer>
   );
 }

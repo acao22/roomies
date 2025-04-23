@@ -152,11 +152,11 @@ export default function EditProfile() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 items-center justify-center bg-[#FEF9E5]"
       >
-        <Pressable onPress={() => navigation.navigate("ProfileScreen")}>
-          <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
-            &lt; profile
-          </Text>
-        </Pressable>
+      <Pressable onPress={() => navigation.replace("Main")}>
+        <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
+          &lt; profile
+        </Text>
+      </Pressable>
 
         <Pressable
           onPress={() => navigation.navigate("AvatarCreation")}
