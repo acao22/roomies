@@ -43,10 +43,10 @@ export const getAllTasks = async (req, res) => {
 export const addTask = async (req, res) => {
     // the body should have the required fields: 
     console.log("works");
-    const {title, selectedIcon, date, time, members, recurrence, description, createdAt, createdBy, updatedAt, groupId, selectedPoints} = req.body;
+    const {title, icon, date, time, members, recurrence, description, createdAt, createdBy, updatedAt, groupId, selectedPoints} = req.body;
     const taskData = {
         title,
-        icon: selectedIcon,
+        icon,
         status: "open",
         date,
         time,
