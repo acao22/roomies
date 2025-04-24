@@ -25,6 +25,12 @@
       "eas": {
         "projectId": "21ef61e9-9616-406e-a914-95025415e27b"
       }
+    },
+    "ios": {
+      "bundleIdentifier": "com.nanyucao.roomies",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     }
   }
 }

@@ -7,17 +7,14 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  FlatList,
 } from "react-native";
 import { CommonActions, useNavigation } from "@react-navigation/native";
 import face1 from "../assets/face1.png";
-import home from "../assets/HomeSample.png";
 import { Ionicons } from "@expo/vector-icons";
-import history from "../assets/history.png";
 import CustomModal from "./AddGroupModal";
-import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI } from "../api/users.api.js";
-
-import { logoutUser } from "../api/users.api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI, addPointsToUser } from "../api/users.api.js";
+import { updateCurrentUser } from "firebase/auth";
 
 const ProfileScreen = ({ setUser }) => {
   const navigation = useNavigation();
@@ -25,13 +22,41 @@ const ProfileScreen = ({ setUser }) => {
   const [userData, setUserData] = useState(null);
   const [userGroup, setUserGroup] = useState(null);
   const [avatarUri, setAvatarUri] = useState(null);
+  const [roomies, setRoomies] = useState([]);
+  const avatarSrc = (r) =>
+    r.avatar && r.avatar.trim().length ? { uri: r.avatar } : face1;
+  
+
+  useEffect(() => {
+    if (!userGroup?.members || !userData?.uid) return;
+  
+    (async () => {
+      try {
+        const withAvatars = await Promise.all(
+          userGroup.members
+            .filter(m => m.uid !== userData.uid)               // skip yourself
+            .map(async (m) => {
+              try {
+                const { uri } = await fetchAvatar(m.uid);
+                return { ...m, avatar: uri };
+              } catch {
+                return { ...m, avatar: null };
+              }
+            })
+        );
+        setRoomies(withAvatars);
+      } catch (err) {
+        console.error('Could not load roommates', err);
+      }
+    })();
+  }, [userGroup, userData]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const { uid } = await verifyUserSession();
         const { firstName, lastName } = await getUserInfo();
-        setUserData({ firstName: firstName, lastName: lastName, uid: uid});
+        setUserData({ firstName: firstName, lastName: lastName, uid: uid, totalPoints: 0});
 
         const { id, groupName, members } = await getUserGroup();
         setUserGroup({ id, groupName: groupName, members: members });
@@ -57,22 +82,9 @@ const ProfileScreen = ({ setUser }) => {
     loadAvatar();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser(setUser);
-      Alert.alert("Logged Out", "You have been successfully logged out.");
-
-      const token = await AsyncStorage.getItem("idToken");
-      console.log("Token after logout:", token);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      Alert.alert("Error", "Failed to log out. Try again.");
-    }
-  };
-
   // user leaves group
   const handleLeaveGroup = async () => {
-    if (!userData || !userGroup) {
+    if (!userData?.uid || !userGroup?.id) {
       Alert.alert("Error", "No group to leave.");
       return;
     }
@@ -80,16 +92,29 @@ const ProfileScreen = ({ setUser }) => {
     const userId = userData.uid;
     const groupId = userGroup.id;
 
-    if (!groupId) {
-      Alert.alert("Error", "Group id not found.");
-      return;
-    }
-
     try {
       await leaveGroupAPI(userId, groupId);
+      const { totalPoints } = await getUserInfo();
+      await addPointsToUser(userId, -totalPoints);
 
-      setUser(prev => ({ ...prev, roomieGroup: null, members: [] }));
+      setUser(prev => ({ 
+        ...prev, 
+        roomieGroup: null, 
+        members: [], 
+        totalPoints: 0,
+      }));
+
       Alert.alert("Left Group", "You have succesfully left the group");
+
+      // grab the root (RootStack) navigator by calling getParent() twice:
+      setTimeout(() => {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Group' }],
+          })
+        );
+      }, 0);
 
     } catch (error) {
       console.error("Leave group failed:", error);
@@ -109,13 +134,8 @@ const ProfileScreen = ({ setUser }) => {
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
       <ScrollView>
-        <TouchableOpacity onPress={() => {
-            console.log("going to prev edit profile screen");
-              navigation.navigate("EditProfile", {
-              origin: "ProfileScreen",
-            });
-          }}
-        className="absolute top-0 left-0 right-0 bg-custom-yellow h-72 rounded-b-3xl z-0 items-center">
+        <View
+          className="absolute top-0 left-0 right-0 h-72 rounded-b-3xl z-0 items-center">
           <View className="items-center pt-10">
             <View className="relative">
               <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
@@ -131,122 +151,94 @@ const ProfileScreen = ({ setUser }) => {
                   className="w-32 h-32"
                 />
               </View>
-
-              {/* pencil edit icon w/ absolute overlate */}
-              <TouchableOpacity
-                onPress={() => {
-                  console.log("edit profile picture / go to AvatarCreation");
-                  navigation.navigate("AvatarCreation", {
-                    origin: "ProfileScreen",
-                  });
-                }}
-                className="absolute bottom-2 right-2 w-8 h-8 rounded-full items-center justify-center"
-              >
-                <Ionicons name="pencil" size={16} color="#FFFFFF" />
-              </TouchableOpacity>
             </View>
           </View>
-          <Text className="font-spaceGrotesk text-white mt-6 text-4xl font-bold">
+          <Text className="font-spaceGrotesk text-custom-blue-200 mt-6 text-4xl font-bold">
             {" "}
             {userData
               ? `${userData.firstName} ${userData.lastName}`
               : "first last"}
           </Text>
-          <Text className="font-spaceGrotesk text-custom-blue-100 ml-10">
-            87 pts
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => {
+            console.log("going to prev edit profile screen");
+              navigation.navigate("EditProfile", {
+              origin: "ProfileScreen",
+            });
+          }}>
+            <Text className="font-spaceGrotesk underline text-custom-blue-200 text-xl mt-3">edit profile</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* roomies list */}
 
         <View className="mt-4 pt-72 px-6">
-          <Text className="p-4 text-l text-custom-blue-200 mb-2 font-spaceGrotesk ">
-            Day 365 of rooming
-          </Text>
-          <View className="flex-row flex-1 justify-between items-center">
-            <Text className="pl-4 text-2xl font-bold text-custom-blue-200 mb-2 font-spaceGrotesk ">
-              My homes
-            </Text>
-            <TouchableOpacity onPress={() => setModalVisible(true)}>
-              <Text className="right-0 text-custom-blue-100 font-spaceGrotesk pr-4">
-                Edit
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View className="bg-custom-blue-100 rounded-xl p-6 w-full items-center justify-center">
-            <Image source={home} className="w-50 h-50" />
-            <Text className="font-bold font-spaceGrotesk text-custom-black text-xl mt-3">
+          
+          <View className="bg-custom-yellow rounded-3xl p-6 w-full items-center justify-center">
+            <Text className="font-bold font-spaceGrotesk text-custom-blue-200 text-3xl">
               {userGroup ? `${userGroup.groupName}` : "you loner roomie"}
             </Text>
-          </View>
-          {/* might beed later so I just commented out 
-        {/*
-        <ScrollView className="bg-gray-100 rounded-xl">
-          {roomies.map((roomie) => (
-            <View
-              key={roomie.id}
-              className="flex-row items-center px-4 py-3 border-b border-gray-200"
-            >
-              {/* colored circle for each roomie 
-              <View
-                className={`w-12 h-12 rounded-full mr-3 items-center justify-center ${roomie.bgClass}`}
-              >
-                <Ionicons name="person" size={24} color="white" />
-              </View>
-              <Text className="text-xl text-gray-800">{roomie.name}</Text>
-            </View>
-          ))}
-        </ScrollView>
 
-        /*}
+          {/* roommates block  ---------------------------------------------------*/}
+          {roomies.length > 0 && (
+            <View className="mt-6 w-full">
+              {roomies.length <= 3 ? (
+                /* 1 – 3 members: lay them out with flex‑row, no scrolling */
+                <View
+                  className="flex-row items-center"
+                  style={{
+                    /* one member ‑‑> centred, two ‑‑> space‑evenly, three ‑‑> space‑between */
+                    justifyContent:
+                      roomies.length === 1 ? "center" :
+                      roomies.length === 2 ? "space-evenly" :
+                      "space-between",
+                  }}
+                >
+                  {roomies.map((item) => (
+                    <View key={item.uid} className="items-center">
+                      <Image
+                        source={avatarSrc(item)}
+                        className="w-16 h-16 rounded-full"
+                      />
+                      <Text className="mt-1 text-custom-blue-200 font-spaceGrotesk">
+                        {item.firstName}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                /* 4 + members: keep the sideways scroll you already had */
+                <FlatList
+                  data={roomies}
+                  horizontal
+                  keyExtractor={(item) => item.uid}
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                    <View className="items-center mr-4">
+                      <Image
+                        source={avatarSrc(item)}
+                        className="w-16 h-16 rounded-full"
+                      />
+                      <Text className="mt-1 text-custom-blue-200 font-spaceGrotesk">
+                        {item.firstName}
+                      </Text>
+                    </View>
+                  )}
+                />
+              )}
+            </View>
+          )}
+
+
+            
+            <TouchableOpacity onPress={handleLeaveGroup}>
+              <Text className="font-spaceGrotesk text-custom-blue-200 text-xl underline left-32">
+                leave group
+              </Text>
+            </TouchableOpacity>
+          </View>
 
         {/* leave btn */}
-          <Text className="p-4 text-2xl font-bold text-custom-blue-200 mb-2 mt-10 font-spaceGrotesk">
-            Settings
-          </Text>
           <View className="mb-6">
-            <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
-              <Text className="text-white font-bold font-spaceGrotesk text-2xl">
-                Notifications
-              </Text>
-              <Ionicons name="notifications" size={32} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center"
-              onPress={() => navigation.navigate("EditProfile")}
-            >
-              <Text className="text-white font-bold font-spaceGrotesk text-2xl">
-                Password
-              </Text>
-              <Ionicons name="pencil" size={32} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
-              <Text className="text-white font-bold font-spaceGrotesk text-2xl">
-                Display
-              </Text>
-              <Ionicons name="moon" size={32} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity className="bg-[#F5A58C] rounded-xl p-8 w-full justify-between mb-6 flex-row items-center">
-              <Text className="text-white font-bold font-spaceGrotesk text-2xl">
-                Archived
-              </Text>
-              <Image
-                source={history}
-                className="w-10 h-10"
-                style={{ tintColor: "white" }}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={handleLogout}>
-              <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">
-                Logout
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLeaveGroup}>
-              <Text className="font-spaceGrotesk text-custom-blue-100 text-xl">
-                Leave group
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>

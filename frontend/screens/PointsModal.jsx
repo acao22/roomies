@@ -18,7 +18,7 @@ const PointsModal = ({ visible, onCancel, taskName, totalPoints, taskPoints, ava
           <View style={styles.overlay}>
             <View className="bg-custom-yellow" style={styles.modalView}>
               <View className=" p-8 bg-custom-tan rounded-full items-center mb-4" style={{ width: 160, height: 160}}>
-                <Text style={styles.extraLargeText} className="font-spaceGrotesk font-bold text-custom-blue-100">+{taskPoints}</Text>
+                <Text style={styles.extraLargeText} className="font-spaceGrotesk font-bold text-custom-blue-100 mt-5">+{taskPoints}</Text>
                 <Text className="font-spaceGrotesk text-custom-blue-100 text-3xl font-bold">points</Text>
               </View>
               <Text className="font-spaceGrotesk text-custom-blue-100 font-bold text-3xl w-40 mt-6"> {taskName} complete!</Text>

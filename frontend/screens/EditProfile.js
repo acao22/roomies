@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import face1 from "../assets/face1.png";
-import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI } from "../api/users.api.js";
+import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI, logoutUser } from "../api/users.api.js";
 import { useEffect } from "react";
 import {
   EmailAuthProvider,
@@ -24,7 +24,9 @@ import {
   updatePassword,
 } from "firebase/auth";
 
-export default function EditProfile() {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export default function EditProfile({ setUser }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -39,48 +41,40 @@ export default function EditProfile() {
   const [userGroup, setUserGroup] = useState(null);
   const auth = getAuth();
   const user = auth.currentUser;
-  const [showPopup, setShowPopup] = useState(false);
 
-  // user leaves group
-  const handleLeaveGroup = async () => {
-    if (!userData || !userGroup) {
-      Alert.alert("Error", "No group to leave.");
-      return;
-    }
+    useEffect(() => {
+      if (!user?.uid) return;
+      (async () => {
+        try {
+          const { uid } = await verifyUserSession();
+          const uri = await fetchAvatar(uid);
+          setAvatarUri(uri.uri);
+        } catch (error) {
+          console.error("Error fetching avatar in EditProfile:", error);
+        }
+      })();
+    }, [user]);
 
-    const userId = userData.uid;
-    const groupId = userGroup.id;
-
-    if (!groupId) {
-      Alert.alert("Error", "Group id not found.");
-      return;
-    }
-
+    const handleLogout = async () => {
     try {
-      await leaveGroupAPI(userId, groupId);
+      await logoutUser(setUser);
+      Alert.alert("Logged Out", "You have been successfully logged out.");
+      const token = await AsyncStorage.getItem("idToken");
+      console.log("Token after logout:", token);
 
-      setUser(prev => ({ ...prev, roomieGroup: null, members: [] }));
-      Alert.alert("Left Group", "You have succesfully left the group");
-
+      setTimeout(() => {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Landing' }],
+          })
+        );
+      }, 0);
     } catch (error) {
-      console.error("Leave group failed:", error);
-      Alert.alert("Error", "Failed to leave group. Try again");
+      console.error("Logout failed:", error);
+      Alert.alert("Error", "Failed to log out. Try again.");
     }
   };
-
-  const handleModalCancel = () => {
-    setModalVisible(false);
-  };
-
-  const handleModalSubmit = () => {
-    // Optionally, add logifc to save profile changes here
-    setModalVisible(false);
-  };
-
-  if (!user || !user.email) {
-    Alert.alert("Error", "Unable to get current user email.");
-    return;
-  }
 
   const handlePasswordChange = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -152,11 +146,13 @@ export default function EditProfile() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 items-center justify-center bg-[#FEF9E5]"
       >
-      <Pressable onPress={() => navigation.replace("Main")}>
-        <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
-          &lt; profile
-        </Text>
-      </Pressable>
+
+        <Pressable onPress={() => navigation.navigate("Main", { screen: "ProfileDrawer" })}>
+          <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
+            &lt; profile
+          </Text>
+        </Pressable>
+
 
         <Pressable
           onPress={() => navigation.navigate("AvatarCreation")}
@@ -270,39 +266,12 @@ export default function EditProfile() {
         </View>
 
         {/* Leave Room Section */}
-        <TouchableOpacity 
-          onPress={() => setShowPopup(true)}
-          className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center"
-        >
-          <Text className="text-xl font-semibold text-[#FEF9E5]">
-            leave my room
-          </Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout} className="w-48 h-12 rounded-3xl bg-[#FF3D00] items-center justify-center">
+            <Text className="text-xl font-semibold text-[#FEF9E5]">
+              logout
+            </Text>
 
-        <Modal isVisible={showPopup} onBackdropPress={() => setShowPopup(false)}>
-          <View className="bg-custom-blue-200 h-64 p-6 rounded-2xl">
-            <Text className="text-3xl font-semibold text-[#FEF9E5]">confirm</Text>
-            <Text className="mb-4 text-xl text-[#FEF9E5] pt-4">Are you are you want to leave your room?</Text>
-          
-            <View className="flex-row items-center pt-4 justify-end">
-              <TouchableOpacity
-                onPress={() => setShowPopup(false)}
-                className="px-6 py-2 bg-white rounded-full m-4"
-              >
-                <Text className="text-custom-blue-200 text-xl font-semibold">no</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                console.log("left group");
-                handleLeaveGroup();
-               }}
-                className="px-6 py-2 bg-red-500 rounded-full"
-              >
-                <Text className="text-white text-xl font-semibold">yes</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        </TouchableOpacity>
 
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>

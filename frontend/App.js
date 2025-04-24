@@ -46,6 +46,7 @@ if (
 }
 
 const Tab = createBottomTabNavigator();
+const RootStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const HomeStack = createNativeStackNavigator();
 const TaskStack = createNativeStackNavigator();
@@ -117,9 +118,9 @@ function MainTabs({ user, setUser }) {
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#9CABD8",
+          backgroundColor: "#495BA2",
           position: "absolute",
-          height: 51,
+          height: 60,
           paddingBottom: 5,
         },
         tabBarItemStyle: {
@@ -128,37 +129,22 @@ function MainTabs({ user, setUser }) {
           justifyContent: "center",
           width: 65,
         },
-        tabBarButton: (props) => {
-          const isSelected = props.accessibilityState?.selected;
-          return (
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                width: 65, // Keep width the same for all tabs
-              }}
-            >
-              <TouchableOpacity
-                {...props}
-                style={{
-                  alignItems: "center",
-                  justifyContent: "top",
-                  width: 65, // Ensure active and inactive states have the same width
-                  height: isSelected ? 95 : 51, // Change height only for pop effect
-                  backgroundColor: isSelected ? "#788ABF" : "transparent",
-                  borderRadius: 14,
-                  top: isSelected ? -10 : 0, // Moves up when active
-                  paddingTop: 8,
-                }}
-              />
-            </View>
-          );
-        },
+        tabBarButton: (props) => (
+          <TouchableOpacity
+            {...props}
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 8,
+            }}
+          />
+        ),
       })}
     >
-      <Tab.Screen name="HomePage" component={HomeStackScreen} />
+      {/* <Tab.Screen name="HomePage" component={HomeStackScreen} /> */}
       <Tab.Screen name="TaskPage">
-        {() => <TaskScreen user={user} setUser={setUser}/>}
+        {() => <TaskScreen user={user} setUser={setUser} />}
       </Tab.Screen>
       <Tab.Screen name="LeaderboardPage" component={LeaderboardStackScreen} />
       <Tab.Screen name="ProfilePage">
@@ -179,7 +165,6 @@ function AvatarCreationWrapper() {
 function ProfileScreenWrapper() {
   return <ProfileScreen />;
 }
-
 
 function SignupScreenWrapper({ navigation }) {
   return (
@@ -246,32 +231,34 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      
-      <AppStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {user && user.roomieGroup ? (
-          <AppStack.Screen 
-          name="Main"
-          options={{ animation: "slide_from_left" }}>
+          <RootStack.Screen 
+            name="Main"
+            options={{ animation: "slide_from_left" }}
+          >
+
             {() => <MainTabs user={user} setUser={setUser} />} 
-          </AppStack.Screen>
+          </RootStack.Screen>
         ) : (
           <>
-            <AppStack.Screen
+            <RootStack.Screen
               name="Landing"
               component={LandingScreenWrapper}
               options={{
                 animation: "slide_from_left",
               }}
             />
-            <AppStack.Screen name="Signup">
+            <RootStack.Screen name="Signup">
               {() => <SignUpScreen setUser={setUser} />}
-            </AppStack.Screen>
-            <AppStack.Screen
+            </RootStack.Screen>
+            
+            <RootStack.Screen
               name="Group"
               options={{ animation: "slide_from_left" }}
             >
               {() => <GroupScreen setUser={setUser} />}
-            </AppStack.Screen>
+            </RootStack.Screen>
             <AppStack.Screen name="Login">
               {() => <LoginScreen setUser={setUser} />}
             </AppStack.Screen>
@@ -285,11 +272,10 @@ export default function App() {
           name="ProfileScreen"
           component={ProfileScreenWrapper}
         />
-        <AppStack.Screen
-          name="EditProfile"
-          component={EditProfile}
-        />
-      </AppStack.Navigator>
+        <RootStack.Screen name="EditProfile">
+          {() => <EditProfile setUser={setUser} />}
+        </RootStack.Screen>
+      </RootStack.Navigator>
     </NavigationContainer>
   );
 }

@@ -11,16 +11,17 @@ import {
 } from "react-native";
 import { CalendarList } from "react-native-calendars";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { updateTask } from "../api/tasks.api";
-import { format } from "date-fns";
+import { format, startOfWeek, addDays } from "date-fns";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
+import { getUserGroup } from "../api/users.api.js";
 
 const userAvatars = {
   Luna: require("../images/avatar1.png"),
@@ -70,22 +71,85 @@ const formatDueDate = (dateVal) => {
 export default function CalendarScreen() {
   const [tasks, setTasks] = useState([]);
   const [visibleMonth, setVisibleMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState("");
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  // default selected to today
+  const [selectedDate, setSelectedDate] = useState(todayStr);
   const [expanded, setExpanded] = useState(true);
   const calendarHeight = useSharedValue(370);
-  const todayStr = new Date().toISOString().split("T")[0];
+
+  const scrollViewRef = useRef(null);
+  const [positions, setPositions] = useState({});
 
   useEffect(() => {
-    const q = query(collection(db, "task"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const taskList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTasks(taskList);
-    });
-    return () => unsubscribe();
+    let unsubscribe;
+  
+    async function fetchGroupTasks() {
+      try {
+        // 1) figure out which group the current user is in
+        const { id: groupId } = await getUserGroup();
+  
+        // 2) only subscribe to the tasks whose groupId matches
+        const q = query(
+          collection(db, "task"),
+          where("groupId", "==", groupId)
+        );
+  
+        unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const taskList = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setTasks(taskList);
+        });
+      } catch (err) {
+        console.error("Failed to load group tasks in calendar:", err);
+      }
+    }
+  
+    fetchGroupTasks();
+  
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
+
+  // record layout positions
+  const onSectionLayout = (date) => (e) => {
+    const { y } = e.nativeEvent.layout;
+    setPositions((prev) => ({ ...prev, [date]: y }));
+  };
+
+  // scroll to selected date section
+  useEffect(() => {
+    if (!scrollViewRef.current || !positions) return;
+  
+    const taskDates = Object.keys(positions)
+    if (taskDates.length === 0) return;
+  
+    let targetDate = selectedDate;
+  
+    if (positions[targetDate] === undefined) {
+      const clicked = new Date(selectedDate).getTime();
+      let best = taskDates[0];
+      let bestDiff = Math.abs(new Date(best).getTime() - clicked);
+  
+      for (const d of taskDates) {
+        const diff = Math.abs(new Date(d).getTime() - clicked);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          best = d;
+        }
+      }
+  
+      targetDate = best;
+    }
+  
+    scrollViewRef.current.scrollTo({
+      y: positions[targetDate],
+      animated: true,
+    });
+  }, [selectedDate, positions]);
 
   const tasksByDate = {};
   tasks.forEach((task) => {
@@ -94,14 +158,15 @@ export default function CalendarScreen() {
     tasksByDate[dateKey].push(task);
   });
 
-  const today = new Date();
-  const weekRange = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - 3 + i);
-    return d.toISOString().split("T")[0];
-  });
+  // compute current week (Sunday-Saturday)
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+  const weekRange = Array.from({ length: 7 }).map((_, i) =>
+    addDays(weekStart, i).toISOString().split("T")[0]
+  );
 
-  const displayedDates = expanded ? Object.keys(tasksByDate).sort() : weekRange;
+  const displayedDates = expanded
+    ? Object.keys(tasksByDate).sort()
+    : weekRange;
 
   const toggleCalendar = () => {
     setExpanded((prev) => {
@@ -177,13 +242,11 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
       {/* header */}
-      <View className="flex-row justify-between items-center px-4 pt-4 pb-1">
+      <View className="flex-row justify-between items-center px-4 pb-6 text-custom-blue-200">
         <TouchableOpacity onPress={() => scrollMonth(-1)}>
           <Ionicons name="chevron-back" size={28} color="#495BA2" />
         </TouchableOpacity>
-        <Text className="text-3xl font-bold text-custom-blue-200">
-          {formattedMonth}
-        </Text>
+        <Text className="text-3xl font-bold text-custom-blue-200">{formattedMonth}</Text>
         <TouchableOpacity onPress={() => scrollMonth(1)}>
           <Ionicons name="chevron-forward" size={28} color="#495BA2" />
         </TouchableOpacity>
@@ -191,14 +254,13 @@ export default function CalendarScreen() {
 
       {/* calendar container */}
       <View
-        className="bg-custom-yellow mt-1 rounded-3xl"
+        className="bg-custom-yellow rounded-3xl" style={{width: 500, right: 50}}
         {...panResponder.panHandlers}
       >
+        <View className={`left-5 ${expanded ? 'top-4' : 'top-1'}`}>
+
+        
         <Animated.View style={calendarStyle}>
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{ backgroundColor: "white" }}
-          >
             <CalendarList
               current={visibleMonth.toISOString().split("T")[0]}
               onDayPress={(day) => setSelectedDate(day.dateString)}
@@ -208,7 +270,7 @@ export default function CalendarScreen() {
               horizontal
               pagingEnabled
               scrollEnabled={false}
-              hideExtraDays
+              hideExtraDays={false}
               markedDates={{
                 [selectedDate]: {
                   selected: true,
@@ -224,12 +286,20 @@ export default function CalendarScreen() {
                 todayTextColor: "#495BA2",
                 selectedDayBackgroundColor: "#495BA2",
                 textMonthFontSize: 0,
+                textDayFontSize: 14,
+                textDayHeaderFontSize: 15,
                 textDayFontWeight: "500",
               }}
-              style={{ height: "100%" }}
+              style={{ width: "81%",
+                       height: "90%",
+                       paddingBottom: "",
+                       right: "",
+                backgroundColor: "white",
+                borderRadius: 16,
+                overflow: "hidden",}}
             />
-          </View>
         </Animated.View>
+        </View>
       </View>
 
       {/* collapse/expand toggle */}
@@ -245,7 +315,8 @@ export default function CalendarScreen() {
 
       {/* animated task timeline */}
       <ScrollView
-        className="px-4 mt-3"
+        ref={scrollViewRef}
+        className={`px-4 ${expanded ? 'mt-3' : 'mt-1'}`}
         contentContainerStyle={{ paddingBottom: 80 }}
         showsVerticalScrollIndicator={false}
       >
@@ -256,9 +327,13 @@ export default function CalendarScreen() {
           const tasksForDate = tasksByDate[date] || [];
 
           return (
-            <View key={date} className="mb-4 flex-row items-start">
+            <View
+              key={date}
+              onLayout={onSectionLayout(date)}
+              className="mb-3 flex-row items-start"
+            >
               {/* left date */}
-              <View style={{ width: 60, alignItems: "center" }}>
+              <View style={{ width: 40, alignItems: "center" }}>
                 <Text className="text-2xl font-bold text-custom-blue-200 leading-none">
                   {dayNum}
                 </Text>
@@ -289,7 +364,7 @@ export default function CalendarScreen() {
                       >
                         <TouchableOpacity
                           onPress={() => toggleTaskCompletion(task.id)}
-                          className={`flex-row items-center ${background} rounded-xl p-4 mb-3`}
+                          className={`${background} rounded-3xl p-4 mb-3 flex-row items-center`}
                         >
                           <Ionicons
                             name={isCompleted ? "checkbox" : "square-outline"}
