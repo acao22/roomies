@@ -122,9 +122,33 @@ export default function CalendarScreen() {
 
   // scroll to selected date section
   useEffect(() => {
-    if (scrollViewRef.current && positions[selectedDate] !== undefined) {
-      scrollViewRef.current.scrollTo({ y: positions[selectedDate], animated: true });
+    if (!scrollViewRef.current || !positions) return;
+  
+    const taskDates = Object.keys(positions)
+    if (taskDates.length === 0) return;
+  
+    let targetDate = selectedDate;
+  
+    if (positions[targetDate] === undefined) {
+      const clicked = new Date(selectedDate).getTime();
+      let best = taskDates[0];
+      let bestDiff = Math.abs(new Date(best).getTime() - clicked);
+  
+      for (const d of taskDates) {
+        const diff = Math.abs(new Date(d).getTime() - clicked);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          best = d;
+        }
+      }
+  
+      targetDate = best;
     }
+  
+    scrollViewRef.current.scrollTo({
+      y: positions[targetDate],
+      animated: true,
+    });
   }, [selectedDate, positions]);
 
   const tasksByDate = {};
@@ -298,7 +322,7 @@ export default function CalendarScreen() {
             <View
               key={date}
               onLayout={onSectionLayout(date)}
-              className="mb-4 flex-row items-start"
+              className="mb-3 flex-row items-start"
             >
               {/* left date */}
               <View style={{ width: 60, alignItems: "center" }}>
