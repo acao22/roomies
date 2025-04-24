@@ -248,6 +248,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 <TouchableOpacity
                 onPress={() => {
                   setSelectedIcon(item.id);
+                  setTitle(item.name);
                   const now = new Date();
                   const future = new Date(
                     now.getFullYear(),
