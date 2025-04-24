@@ -9,11 +9,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Platform } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { addTask } from "../api/tasks.api.js";
 import face1 from "../assets/face1.png";
+import { Calendar } from 'react-native-calendars';
+import { Picker } from "@react-native-picker/picker";
 
 import { getUserGroup, fetchAvatar } from "../api/users.api.js";
 
@@ -56,29 +59,77 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   const [showRecurrenceDropdown, setShowRecurrenceDropdown] = useState(false);
   const [description, setDescription] = useState("");
   const [selectedPoints, setSelectedPoints] = useState(1);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const future = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds()
+    );
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  });  
+  const [showCalendar, setShowCalendar] = useState(false);
+  const modalBaseStyle = {
+    marginTop: 10,
+    position: "absolute",
+    top: "100%",
+    left: "50%",
+    transform: [{ translateX: -0.5 * 330 }],
+    width: 330,
+    backgroundColor: "#FEF9E5",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    zIndex: 9999,
+    borderWidth: 2,
+    borderColor: "#788ABF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    alignItems: "center",
+  };
+  
+  
+  
+  
+  
 
   useFocusEffect(
     React.useCallback(() => {
+      const now = new Date();
+      setDate(now);
+      setTime(now);
+      setSelectedDate(now.toISOString().split("T")[0]);
+  
       const fetchGroupAndAvatars = async () => {
         try {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const day = String(now.getDate()).padStart(2, "0");
+          setSelectedDate(`${year}-${month}-${day}`);
           const groupData = await getUserGroup();
           if (groupData && groupData.members) {
-            // For each member, fetch the avatar using their uid.
             const membersWithAvatars = await Promise.all(
               groupData.members.map(async (member) => {
                 try {
-                  // Pass the uid as an argument to fetchAvatar
                   const avatarData = await fetchAvatar(member.uid);
-                  return { ...member,
-                    name: member.firstName || member.username || "unkown",
+                  return {
+                    ...member,
+                    name: member.firstName || member.username || "unknown",
                     avatar: avatarData.uri,
-                    selected: false };
+                    selected: false,
+                  };
                 } catch (err) {
-                  console.error(
-                    `Error fetching avatar for ${member.uid}:`,
-                    err
-                  );
-                  // Use a default avatar if fetching fails
+                  console.error(`Error fetching avatar for ${member.uid}:`, err);
                   return { ...member, avatar: null };
                 }
               })
@@ -89,10 +140,11 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
           console.error("Failed to fetch group data", err);
         }
       };
-
+  
       fetchGroupAndAvatars();
     }, [])
   );
+  
 
   const getAvatarSource = (member) =>
     member.avatar ? { uri: member.avatar } : face1;
@@ -141,7 +193,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
         padding: 8,
         borderRadius: 8,
         backgroundColor: selectedPoints === item ? "#788ABF" : "#F5A58C",
-        width: 52,
+        width: 50,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -194,20 +246,32 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               className="max-h-[200px] my-4"
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  onPress={() => {
-                    setSelectedIcon(item.id);
-                    const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
-                    setDate(future);
-                    setTime(future);
-                    setRecurrence("Does not repeat");
-                    setSelectedPoints(5);
-                    setMembers((prev) =>
-                      prev.map((member) => ({
-                        ...member,
-                        selected: member.uid.trim() === user.uid.trim(),
-                      }))
-                    );
-                  }}
+                onPress={() => {
+                  setSelectedIcon(item.id);
+                  const now = new Date();
+                  const future = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate() + 1,
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds()
+                  );
+                  setDate(future);
+                  setTime(future);
+                  const year = future.getFullYear();
+                  const month = String(future.getMonth() + 1).padStart(2, "0");
+                  const day = String(future.getDate()).padStart(2, "0");
+                  setSelectedDate(`${year}-${month}-${day}`);
+                  setRecurrence("Does not repeat");
+                  setSelectedPoints(5);
+                  setMembers((prev) =>
+                    prev.map((member) => ({
+                      ...member,
+                      selected: member.uid.trim() === user.uid.trim(),
+                    }))
+                  );
+                }}                                     
                   className={`m-1 p-4 rounded-full ${
                     selectedIcon === item.id
                       ? "border-2 border-blue-500"
@@ -232,58 +296,151 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
             />
 
             {/* DATE & TIME PICKERS */}
-            <Animatable.View
-              animation={"slideInRight"}
-              duration={300}
-              className="flex-row items-center justify-between mt-12 my-4"
-            >
-              <Ionicons name="time-outline" size={30} color="#788ABF" />
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                className="p-3 rounded-xl bg-gray-200 m-2 shadow-sm"
-              >
-                <Text className="text-lg font-spaceGrotesk text-custom-blue-200 font-semibold">
-                  {date.toDateString()}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setShowTimePicker(true)}
-                className="p-3 rounded-xl bg-gray-200 shadow-sm"
-              >
-                <Text className="text-lg font-spaceGrotesk text-custom-blue-200 font-semibold">
-                  {time.getHours()}:
-                  {time.getMinutes().toString().padStart(2, "0")} pm
-                </Text>
-              </TouchableOpacity>
-            </Animatable.View>
+            <View className="flex-row items-center space-x-2 mt-2">
 
-            {showDatePicker && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display="default"
-                onChange={(_, selectedDate) => {
-                  setShowDatePicker(false);
-                  if (selectedDate) setDate(selectedDate);
+            {/* Clock Icon */}
+            <Ionicons name="time-outline" size={30} color="black" className="ml-2" />
+
+            <View className="relative mx-6">
+            {/* Date Button */}
+            <TouchableOpacity
+            onPress={() => {
+              setShowCalendar(!showCalendar);
+              setShowTimePicker(false);
+              setShowTimePicker(false);
+            }}
+            className="px-4 py-3 rounded-xl bg-[#D9D9D9]"
+          >
+            <Text className="text-[#495BA2] text-base font-spaceGrotesk">
+              {(() => {
+                const [year, month, day] = selectedDate.split("-").map(Number);
+                const localDate = new Date(year, month - 1, day); // month is 0-indexed
+                return localDate.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                });
+              })()}
+            </Text>
+          </TouchableOpacity>
+
+          </View>
+
+            {/* Calendar Dropdown */}
+            {showCalendar && (
+            <View style={modalBaseStyle}>
+              <Calendar
+                onDayPress={(day) => {
+                  setSelectedDate(day.dateString);
+                }}
+                markedDates={{
+                  [selectedDate]: {
+                    selected: true,
+                    selectedColor: "#AABBEF",
+                  },
+                }}
+                theme={{
+                  backgroundColor: "#FEF9E5",
+                  calendarBackground: "#FEF9E5",
+                  dayTextColor: "#495BA2",
+                  monthTextColor: "#495BA2",
+                  arrowColor: "#788ABF",
+                  todayTextColor: "#F5A58C",
+                  selectedDayBackgroundColor: "#AABBEF",
+                  selectedDayTextColor: "#fff",
+                  textDisabledColor: "#ccc",
+                }}
+                style={{
+                  width: 300,
+                  paddingHorizontal: 0,
                 }}
               />
-            )}
+              <TouchableOpacity
+                onPress={() => setShowCalendar(false)}
+                style={{
+                  marginTop: 12,
+                  backgroundColor: "#788ABF",
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                  width: 50,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    fontFamily: "SpaceGrotesk",
+                  }}
+                >
+                  Done
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-            {showTimePicker && (
+
+            {/* Time Button */}
+            <View className="">
+
+            <TouchableOpacity
+              onPress={() => {
+                setShowTimePicker(!showTimePicker);
+                setShowCalendar(false);
+              }}
+              className="bg-[#D9D9D9] px-4 py-3 rounded-xl"
+            >
+              <Text className="text-[#495BA2] text-base font-spaceGrotesk">
+                {time.toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </TouchableOpacity>
+
+          </View>
+
+          {showTimePicker && Platform.OS === "ios" && (
+            <View style={modalBaseStyle}>
               <DateTimePicker
                 value={time}
                 mode="time"
-                display="default"
-                onChange={(_, selectedTime) => {
-                  setShowTimePicker(false);
+                display="spinner"
+                onChange={(event, selectedTime) => {
                   if (selectedTime) setTime(selectedTime);
                 }}
+                style={{ width: "100%" }}
+                textColor="#495BA2" // soft blue text
               />
-            )}
+              <TouchableOpacity
+                onPress={() => setShowTimePicker(false)}
+                style={{
+                  marginTop: 12,
+                  backgroundColor: "#788ABF", // same blue as elsewhere
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                  width: 50,
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fff",
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    fontFamily: "SpaceGrotesk",
+                  }}
+                >
+                  Done
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-            <Text className="text-xl font-bold my-2 font-spaceGrotesk">
-              Who:
-            </Text>
+          </View>
+
+
+            <Text className="text-xl mt-4 font-bold my-2 font-spaceGrotesk">Who:</Text>
+
 
             {/* need to add this wrapper for flatlist & fading edges */}
             <View className="relative w-full">
@@ -332,13 +489,12 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 )}
               />
 
-
               {/* left fading edge */}
               <View className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none">
                 <LinearGradient
                   colors={["#FEF9E5", "rgba(254, 249, 229, 0)"]}
                   start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
+                  end={{ x: 0.75, y: 0.5 }}
                   style={{ width: "100%", height: "100%" }}
                 />
               </View>
@@ -348,7 +504,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 <LinearGradient
                   colors={["rgba(254, 249, 229, 0)", "#FEF9E5"]}
                   start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
+                  end={{ x: 0.75, y: 0.5 }}
                   style={{ width: "100%", height: "100%" }}
                 />
               </View>
@@ -397,20 +553,19 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               add points: {selectedPoints} pts
             </Text>
 
-            <FlatList
-              data={pointOptions}
-              horizontal
-              keyExtractor={(item) => item.toString()}
-              renderItem={renderPointOption}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 10,
-                alignItems: "center",
-              }}
-              style={{
-                marginTop: 10,
-              }}
-            />
+            <View style={{ alignItems: "center", marginTop: 10 }}>
+  <FlatList
+    data={pointOptions}
+    horizontal
+    keyExtractor={(item) => item.toString()}
+    renderItem={renderPointOption}
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={{
+      justifyContent: "center",
+    }}
+  />
+</View>
+
 
             {/* TASK DESCRIPTION */}
             <Text className="text-xl font-bold my-2 font-spaceGrotesk">

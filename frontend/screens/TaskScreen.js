@@ -438,6 +438,11 @@ export default function TaskScreen({ user }) {
                 .join(" & ")}
             </Text>
           )}
+          {item.description && (
+            <Text className={`text-xs font-spaceGrotesk ${textColor} mt-1`}>
+            {item.description}
+            </Text>
+          )}
         </View>
 
         {/* Avatars */}
