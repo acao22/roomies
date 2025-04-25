@@ -13,8 +13,9 @@ import {
   Platform,
   Pressable,
 } from "react-native";
+import Modal from "react-native-modal";
 import face1 from "../assets/face1.png";
-import { fetchAvatar, verifyUserSession, logoutUser } from "../api/users.api";
+import { getUserInfo, getUserGroup, fetchAvatar, verifyUserSession, leaveGroupAPI, logoutUser } from "../api/users.api.js";
 import { useEffect } from "react";
 import {
   EmailAuthProvider,
@@ -35,6 +36,9 @@ export default function EditProfile({ setUser }) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const navigation = useNavigation();
   const [avatarUri, setAvatarUri] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [userGroup, setUserGroup] = useState(null);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -102,6 +106,26 @@ export default function EditProfile({ setUser }) {
     }
   };
 
+  //fetching user data
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { uid } = await verifyUserSession();
+        const { firstName, lastName } = await getUserInfo();
+        setUserData({ firstName: firstName, lastName: lastName, uid: uid});
+
+        const { id, groupName, members } = await getUserGroup();
+        setUserGroup({ id, groupName: groupName, members: members });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  //fetching avatar 
+  
   useEffect(() => {
     const loadAvatar = async () => {
       try {
@@ -122,11 +146,13 @@ export default function EditProfile({ setUser }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 items-center justify-center bg-[#FEF9E5]"
       >
+
         <Pressable onPress={() => navigation.navigate("Main", { screen: "ProfileDrawer" })}>
           <Text className="ml-[-160] self-start text-2xl mb-12 font-bold text-[#495BA2]">
             &lt; profile
           </Text>
         </Pressable>
+
 
         <Pressable
           onPress={() => navigation.navigate("AvatarCreation")}
@@ -246,6 +272,7 @@ export default function EditProfile({ setUser }) {
             </Text>
 
         </TouchableOpacity>
+
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

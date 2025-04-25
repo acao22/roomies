@@ -122,9 +122,33 @@ export default function CalendarScreen() {
 
   // scroll to selected date section
   useEffect(() => {
-    if (scrollViewRef.current && positions[selectedDate] !== undefined) {
-      scrollViewRef.current.scrollTo({ y: positions[selectedDate], animated: true });
+    if (!scrollViewRef.current || !positions) return;
+  
+    const taskDates = Object.keys(positions)
+    if (taskDates.length === 0) return;
+  
+    let targetDate = selectedDate;
+  
+    if (positions[targetDate] === undefined) {
+      const clicked = new Date(selectedDate).getTime();
+      let best = taskDates[0];
+      let bestDiff = Math.abs(new Date(best).getTime() - clicked);
+  
+      for (const d of taskDates) {
+        const diff = Math.abs(new Date(d).getTime() - clicked);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          best = d;
+        }
+      }
+  
+      targetDate = best;
     }
+  
+    scrollViewRef.current.scrollTo({
+      y: positions[targetDate],
+      animated: true,
+    });
   }, [selectedDate, positions]);
 
   const tasksByDate = {};
@@ -218,7 +242,7 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView className="flex-1 bg-custom-tan">
       {/* header */}
-      <View className="flex-row justify-between items-center px-4 pt-4 pb-1 text-custom-blue-200">
+      <View className="flex-row justify-between items-center px-4 pb-6 text-custom-blue-200">
         <TouchableOpacity onPress={() => scrollMonth(-1)}>
           <Ionicons name="chevron-back" size={28} color="#495BA2" />
         </TouchableOpacity>
@@ -230,9 +254,12 @@ export default function CalendarScreen() {
 
       {/* calendar container */}
       <View
-        className="bg-custom-yellow mt-1 rounded-3xl"
+        className="bg-custom-yellow rounded-3xl" style={{width: 500, right: 50}}
         {...panResponder.panHandlers}
       >
+        <View className={`left-5 ${expanded ? 'top-4' : 'top-1'}`}>
+
+        
         <Animated.View style={calendarStyle}>
             <CalendarList
               current={visibleMonth.toISOString().split("T")[0]}
@@ -259,15 +286,20 @@ export default function CalendarScreen() {
                 todayTextColor: "#495BA2",
                 selectedDayBackgroundColor: "#495BA2",
                 textMonthFontSize: 0,
+                textDayFontSize: 14,
+                textDayHeaderFontSize: 15,
                 textDayFontWeight: "500",
               }}
-              style={{ width: "100%",
-                       height: "100%",
+              style={{ width: "81%",
+                       height: "90%",
+                       paddingBottom: "",
+                       right: "",
                 backgroundColor: "white",
                 borderRadius: 16,
                 overflow: "hidden",}}
             />
         </Animated.View>
+        </View>
       </View>
 
       {/* collapse/expand toggle */}
@@ -298,10 +330,10 @@ export default function CalendarScreen() {
             <View
               key={date}
               onLayout={onSectionLayout(date)}
-              className="mb-4 flex-row items-start"
+              className="mb-3 flex-row items-start"
             >
               {/* left date */}
-              <View style={{ width: 60, alignItems: "center" }}>
+              <View style={{ width: 40, alignItems: "center" }}>
                 <Text className="text-2xl font-bold text-custom-blue-200 leading-none">
                   {dayNum}
                 </Text>
@@ -332,7 +364,7 @@ export default function CalendarScreen() {
                       >
                         <TouchableOpacity
                           onPress={() => toggleTaskCompletion(task.id)}
-                          className={`${background} rounded-xl p-4 mb-3 flex-row items-center`}
+                          className={`${background} rounded-3xl p-4 mb-3 flex-row items-center`}
                         >
                           <Ionicons
                             name={isCompleted ? "checkbox" : "square-outline"}

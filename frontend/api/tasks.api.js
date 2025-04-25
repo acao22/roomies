@@ -41,7 +41,8 @@ export const addTask = async (title, selectedIcon, date, time, members, recurren
       });
       console.log(title, selectedIcon, date, time, members, recurrence, description, groupId);
   } catch (error) {
-      console.error(error);
+    console.error("SERVER-ERROR:", error.response?.data || error.message);
+    throw error;
       
   }
 };

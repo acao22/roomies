@@ -231,7 +231,7 @@ const ProfileScreen = ({ setUser }) => {
 
             
             <TouchableOpacity onPress={handleLeaveGroup}>
-              <Text className="font-spaceGrotesk text-custom-blue-100 text-xl underline left-32">
+              <Text className="font-spaceGrotesk text-custom-blue-200 text-xl underline left-32">
                 leave group
               </Text>
             </TouchableOpacity>

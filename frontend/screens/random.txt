@@ -1,0 +1,158 @@
+// App.js (refactored with AppStack for left-slide animation)
+
+import React, { useEffect, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
+import { Platform, UIManager, TouchableOpacity, View, ActivityIndicator, Text } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFonts } from "expo-font";
+import "./global.css";
+
+// Screens
+import HomeScreen from "./screens/HomeScreen";
+import TaskScreen from "./screens/TaskScreen";
+import LeaderboardScreen from "./screens/LeaderboardScreen";
+import SettingsScreen from "./screens/SettingsScreen";
+import ProfileScreen from "./screens/ProfileScreen";
+import LandingScreen from "./screens/LandingScreen";
+import SignUpScreen from "./screens/SignUpScreen";
+import LoginScreen from "./screens/LoginScreen";
+import GroupScreen from "./screens/GroupScreen";
+import AvatarCreation from "./screens/AvatarCreation";
+import EditProfile from "./screens/EditProfile";
+import PasswordScreen from "./screens/PasswordScreen";
+
+import { verifyUserSession } from "./api/users.api.js";
+
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const AppStack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+const ProfileStack = createNativeStackNavigator();
+
+function ProfileStackScreen({ setUser }) {
+  return (
+    <ProfileStack.Navigator
+      screenOptions={{ headerShown: false, animation: "slide_from_left" }}
+    >
+      <ProfileStack.Screen name="ProfileDrawer">
+        {() => <ProfileScreen setUser={setUser} />}
+      </ProfileStack.Screen>
+      <ProfileStack.Screen name="AvatarCreation" component={AvatarCreation} />
+      <ProfileStack.Screen name="ProfileScreen" component={ProfileScreen} />
+    </ProfileStack.Navigator>
+  );
+}
+
+function MainTabs({ user, setUser }) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let iconName;
+          if (route.name === "TaskPage") iconName = "checkmark-done";
+          else if (route.name === "LeaderboardPage") iconName = "trophy";
+          else if (route.name === "ProfilePage") iconName = "person";
+
+          return <Ionicons name={iconName} size={size + 4} color="#ffffff" />;
+        },
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: "#495BA2",
+          position: "absolute",
+          height: 60,
+          paddingBottom: 5,
+        },
+      })}
+    >
+      <Tab.Screen name="TaskPage">
+        {() => <TaskScreen user={user} setUser={setUser} />}
+      </Tab.Screen>
+      <Tab.Screen name="LeaderboardPage" component={LeaderboardScreen} />
+      <Tab.Screen name="ProfilePage">
+        {() => <ProfileStackScreen setUser={setUser} />}
+      </Tab.Screen>
+    </Tab.Navigator>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [fontsLoaded] = useFonts({
+    SpaceGrotesk: require("./fonts/SpaceGrotesk.ttf"),
+  });
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const session = await verifyUserSession();
+        if (session?.uid && session?.roomieGroup) {
+          setUser(session);
+        } else {
+          await AsyncStorage.removeItem("idToken");
+          setUser(null);
+        }
+      } catch (err) {
+        setUser(null);
+      }
+      setLoading(false);
+    };
+    checkSession();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#788ABF" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <AppStack.Navigator screenOptions={{ headerShown: false }}>
+        {user && user.roomieGroup ? (
+          <AppStack.Screen
+            name="MainTabs"
+            options={{ animation: "slide_from_left" }}
+          >
+            {() => <MainTabs user={user} setUser={setUser} />}
+          </AppStack.Screen>
+        ) : (
+          <>
+            <AppStack.Screen
+              name="Landing"
+              component={LandingScreen}
+              options={{ animation: "slide_from_left" }}
+            />
+            <AppStack.Screen
+              name="Signup"
+              options={{ animation: "slide_from_left" }}
+            >
+              {() => <SignUpScreen setUser={setUser} />}
+            </AppStack.Screen>
+            <AppStack.Screen
+              name="Group"
+              options={{ animation: "slide_from_left" }}
+            >
+              {() => <GroupScreen setUser={setUser} />}
+            </AppStack.Screen>
+            <AppStack.Screen name="Login">
+              {() => <LoginScreen setUser={setUser} />}
+            </AppStack.Screen>
+          </>
+        )}
+        <AppStack.Screen name="EditProfile">
+          {() => <EditProfile setUser={setUser} />}
+        </AppStack.Screen>
+        <AppStack.Screen name="Password" component={PasswordScreen} />
+      </AppStack.Navigator>
+    </NavigationContainer>
+  );
+}

@@ -6,7 +6,7 @@ import AddTaskScreen from "./AddTaskScreen";
 import Animated from "react-native-reanimated";
 import * as Animatable from "react-native-animatable";
 import CustomModal from "./CustomModal";
-import { getAllTasks, updateTask, deleteTask } from "../api/tasks.api.js";
+import { getAllTasks, updateTask, deleteTask, addTask } from "../api/tasks.api.js";
 import { verifyUserSession } from "../api/users.api.js";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { db } from "../firebaseConfig.js";
@@ -29,12 +29,9 @@ const userAvatars = {
 };
 
 const computeDueDate = (task) => {
-  if (task.date && task.time) {
-    // Combine ISO date and time (e.g., "2025-03-23" and "15:52:26")
-    return new Date(`${task.date}T${task.time}`);
-  }
-  // Fallback: try to use task.dueDate
-  return new Date(task.dueDate);
+  if (task.date && task.time)   return new Date(`${task.date}T${task.time}`);
+  if (task.date)                return new Date(task.date);   // fallback
+  return new Date(task.dueDate);                               // legacy / null
 };
 
 // Helper function to format a due date (from a string like "2025-03-12")
@@ -252,69 +249,74 @@ export default function TaskScreen({ user }) {
     fetchUsers();
   }, []);
 
+  /** Return an ISO date string shifted by the task’s recurrence */
+  const getNextOccurrence = (isoDate, recurrence) => {
+    const d = new Date(isoDate);              // yyyy-mm-dd
+    switch (recurrence) {
+      case "Weekly":     d.setDate(d.getDate() + 7);  break;
+      case "Bi-weekly":  d.setDate(d.getDate() + 14); break;
+      case "Monthly":    d.setMonth(d.getMonth() + 1);break;
+      default:           return null;                 // “Does not repeat”
+    }
+    return d.toISOString().split("T")[0];     // keep just yyyy-mm-dd
+  };
+
+
   // Toggle task completion status and open modal if marking as completed
   const toggleTaskCompletion = async (taskId) => {
-    const { uid, email, message } = await verifyUserSession();
-    const originalTask = tasks.find((t) => t.id === taskId);
-    const originalCompletedBy = originalTask.completedBy;
+    const { uid } = await verifyUserSession();
+    const task    = tasks.find(t => t.id === taskId);
+    if (!task) return;
 
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        const newStatus = task.status === "completed" ? "open" : "completed";
-        const updatedTask = {
-          ...task,
-          status: newStatus,
-          completedAt: newStatus === "completed" ? new Date() : null,
-          completedBy: newStatus === "completed" ? uid : null,
-          updatedAt: new Date(),
-        };
-        return updatedTask;
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
+    // 1️⃣ if the user pressed ✓ (=> completed)
+    if (task.status === "open") {
+      const completedStamp = new Date();
 
-    // Find the updated task
-    const taskToUpdate = updatedTasks.find((task) => task.id === taskId);
-    try {
-      // Update the task in firebase
+      // (a) mark THIS doc as completed
       await updateTask(taskId, {
-        status: taskToUpdate.status,
-        completedAt: taskToUpdate.completedAt,
-        updatedAt: taskToUpdate.updatedAt,
-        completedBy: taskToUpdate.completedBy,
+        status      : "completed",
+        completedAt : completedStamp,
+        completedBy : uid,
+        updatedAt   : completedStamp,
       });
-    } catch (error) {
-      console.error("Error updating task in firebase:", error);
-    }
 
-    // Open modal if marking as completed
-    const points = taskToUpdate.selectedPoints || 0;
-    if (taskToUpdate.status === "completed") {
-      console.log(
-        "Task selectedPoints:",
-        taskToUpdate.selectedPoints,
-        "Converted to number:",
-        points
-      );
+      // (b) 🔁 if it repeats, spawn a new “next” task
+      const nextDate = getNextOccurrence(task.date, task.recurrence);
+      if (nextDate) {
+        await addTask(
+          task.title,
+          task.icon,
+          nextDate,                   // new date
+          task.time,                  // keep same time
+          task.members,
+          task.recurrence,            // keep recurrence
+          task.description,
+          task.groupId,
+          task.selectedPoints
+        );
+      }
 
-      setTaskPoints(points);
-      setSelectedTaskId(taskId);
-      setCompletedTaskName(taskToUpdate.title);
+      // add points, show modal, etc …
+      await addPointsToUser(uid, task.selectedPoints || 0);
+      setCompletedTaskName(task.title);
+      setTaskPoints(task.selectedPoints || 0);
       setModalVisible(true);
+      setTimeout(() => setModalVisible(false), 1000);
 
-      await addPointsToUser(user.uid, points);
-
-      setTimeout(() => {
-        setModalVisible(false);
-        setSelectedTaskId(null);
-      }, 1000);
+    // 2️⃣ if the user unchecked ✓ (=> reopen)
     } else {
-      if (originalCompletedBy) {
-        await addPointsToUser(originalCompletedBy, -points);
+      await updateTask(taskId, {
+        status      : "open",
+        completedAt : null,
+        completedBy : null,
+        updatedAt   : new Date(),
+      });
+      if (task.completedBy) {                  // rollback points
+        await addPointsToUser(task.completedBy, -(task.selectedPoints || 0));
       }
     }
   };
+
   // Modal handlers
   const handleModalCancel = () => {
     if (selectedTaskId) {
@@ -343,9 +345,9 @@ export default function TaskScreen({ user }) {
         const aIs = isAssigned(a), bIs = isAssigned(b);
         if (aIs !== bIs) return aIs ? -1 : 1;
       } else {
-        const dateA = new Date(a.dueDate);
-        const dateB = new Date(b.dueDate);
-        return dateA - dateB;
+        const dateA = computeDueDate(a);
+        const dateB = computeDueDate(b);
+        return dateA - dateB; 
       }
     });
 
@@ -577,11 +579,11 @@ export default function TaskScreen({ user }) {
         className={`flex-1 items-center border-t-8 ${
           activeTab === "tasks"
             ? "border-custom-blue-200"
-            : "border-custom-pink-200"
+            : "border-custom-blue-200"
         } z-10 bg-custom-tan`}
       >
         <View
-          className={`w-[92%] flex-1 top-5 ${
+          className={`w-[92%] flex-1 mt-5 ${
             activeTab === "tasks"
               ? "border-custom-pink-200"
               : activeTab === "calendar"
@@ -649,7 +651,12 @@ export default function TaskScreen({ user }) {
                         />
 
                         <TouchableOpacity
-                          onPress={() => setNotificationsVisible(true)}
+                          onPress={() => {
+                            if (completedTasks.length > 0) {
+                              setNotificationsVisible(true);
+                            }
+                          }}
+                          disabled={completedTasks.length === 0}
                         >
                           <Ionicons
                             name="notifications"
@@ -680,11 +687,14 @@ export default function TaskScreen({ user }) {
           </View>
         </View>
       </Animated.View>
-      <View className="absolute bottom-20 right-4 z-40">
-        <TouchableOpacity onPress={() => setActiveTab("addTask")}>
-          <Ionicons name="add-circle" size={80} color="#495BA2" zIndex="9999" />
-        </TouchableOpacity>
+      {activeTab !== "addTask" && (
+        <View className="absolute bottom-20 right-4 z-40">
+          <TouchableOpacity onPress={() => setActiveTab("addTask")}>
+            <Ionicons name="add-circle" size={80} color="#495BA2" zIndex="9999" />
+          </TouchableOpacity>
+        </View>
+      )}
+
       </View>
-    </View>
   );
 }
