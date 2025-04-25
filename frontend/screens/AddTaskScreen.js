@@ -13,38 +13,33 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Platform } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { addTask } from "../api/tasks.api.js";
 import face1 from "../assets/face1.png";
+import { Calendar } from 'react-native-calendars';
+import { Picker } from "@react-native-picker/picker";
 
 import { getUserGroup, fetchAvatar } from "../api/users.api.js";
-// hardcoded stuff for now
-const userAvatars = {
-  Luna: require("../images/avatar1.png"),
-  Andrew: require("../images/avatar2.png"),
-  Angie: require("../images/avatar3.png"),
-  Default: require("../images/avatar4.png"),
-};
+
+
+
+import TrashIcon from "../images/trash-icon.png";
+import DishesIcon from "../images/dishes-icon.png";
+import VacuumIcon from "../images/vacuum-icon.png";
+import CleanIcon from "../images/clean-icon.png";
+import ToiletIcon from "../images/toilet-paper-icon.png";
+import SoapIcon from "../images/soap-icon.png";
 
 const taskIcons = [
-  { id: 1, name: "trash", icon: "trash-outline" },
-  { id: 2, name: "dishes", icon: "fast-food-outline" },
-  { id: 3, name: "vacuum", icon: "home-outline" },
-  { id: 4, name: "clean", icon: "water-outline" },
-  { id: 5, name: "restock", icon: "cart-outline" },
-];
-
-const groupMembers = [
-  { id: 1, name: "Andrew", selected: false },
-  { id: 2, name: "Christian", selected: false },
-  { id: 3, name: "Luna", selected: false },
-  { id: 4, name: "Angie", selected: false },
-  { id: 5, name: "Kat", selected: false },
-  { id: 6, name: "Nat", selected: false },
-  { id: 7, name: "Hemo", selected: false },
-  { id: 8, name: "Meow", selected: false },
+  { id: 1, name: "trash", icon: TrashIcon },
+  { id: 2, name: "dishes", icon: DishesIcon },
+  { id: 3, name: "vacuum", icon: VacuumIcon },
+  { id: 4, name: "clean", icon: CleanIcon },
+  { id: 5, name: "restock", icon: ToiletIcon },
+  { id: 6, name: "soap", icon: SoapIcon },
 ];
 
 const recurrenceOptions = [
@@ -69,26 +64,77 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   const [showRecurrenceDropdown, setShowRecurrenceDropdown] = useState(false);
   const [description, setDescription] = useState("");
   const [selectedPoints, setSelectedPoints] = useState(1);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const future = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds()
+    );
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  });  
+  const [showCalendar, setShowCalendar] = useState(false);
+  const modalBaseStyle = {
+    marginTop: 10,
+    position: "absolute",
+    top: "100%",
+    left: "50%",
+    transform: [{ translateX: -0.5 * 330 }],
+    width: 330,
+    backgroundColor: "#FEF9E5",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    zIndex: 9999,
+    borderWidth: 2,
+    borderColor: "#788ABF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    alignItems: "center",
+  };
+  
+  
+  
+  
+  
 
   useFocusEffect(
     React.useCallback(() => {
+      const now = new Date();
+      setDate(now);
+      setTime(now);
+      setSelectedDate(now.toISOString().split("T")[0]);
+  
       const fetchGroupAndAvatars = async () => {
         try {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const day = String(now.getDate()).padStart(2, "0");
+          setSelectedDate(`${year}-${month}-${day}`);
           const groupData = await getUserGroup();
           if (groupData && groupData.members) {
-            // For each member, fetch the avatar using their uid.
             const membersWithAvatars = await Promise.all(
               groupData.members.map(async (member) => {
                 try {
-                  // Pass the uid as an argument to fetchAvatar
                   const avatarData = await fetchAvatar(member.uid);
-                  return { ...member, avatar: avatarData.uri };
+                  return {
+                    ...member,
+                    name: member.firstName || member.username || "unknown",
+                    avatar: avatarData.uri,
+                    selected: false,
+                  };
                 } catch (err) {
-                  console.error(
-                    `Error fetching avatar for ${member.uid}:`,
-                    err
-                  );
-                  // Use a default avatar if fetching fails
+                  console.error(`Error fetching avatar for ${member.uid}:`, err);
                   return { ...member, avatar: null };
                 }
               })
@@ -99,10 +145,11 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
           console.error("Failed to fetch group data", err);
         }
       };
-
+  
       fetchGroupAndAvatars();
     }, [])
   );
+  
 
   const getAvatarSource = (member) =>
     member.avatar ? { uri: member.avatar } : face1;
@@ -151,7 +198,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
         padding: 8,
         borderRadius: 8,
         backgroundColor: selectedPoints === item ? "#788ABF" : "#F5A58C",
-        width: 52,
+        width: 50,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -209,17 +256,52 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 numColumns={3}
                 nestedScrollEnabled={true}
                 keyExtractor={(item) => item.id.toString()}
-                className="max-h-[160px] my-4"
+                className="max-h-[200px] my-4"
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    onPress={() => setSelectedIcon(item.id)}
+                  onPress={() => {
+                  setSelectedIcon(item.id);
+                  setTitle(item.name);
+                  const now = new Date();
+                  const future = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate() + 1,
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds()
+                  );
+                  setDate(future);
+                  setTime(future);
+                  const year = future.getFullYear();
+                  const month = String(future.getMonth() + 1).padStart(2, "0");
+                  const day = String(future.getDate()).padStart(2, "0");
+                  setSelectedDate(`${year}-${month}-${day}`);
+                  setRecurrence("Does not repeat");
+                  setSelectedPoints(5);
+                  setMembers((prev) =>
+                    prev.map((member) => ({
+                      ...member,
+                      selected: member.uid.trim() === user.uid.trim(),
+                    }))
+                  );
+                }}                                     
                     className={`m-1 p-4 rounded-full ${
                       selectedIcon === item.id
                         ? "border-2 border-blue-500"
                         : "border-[#F5D2C8]"
                     } bg-[#F5D2C8] bg-opacity-50 w-24 h-24 flex items-center justify-center`}
                   >
-                    <Ionicons name={item.icon} size={30} color="#788ABF" />
+                    <Image
+                    source={item.icon}
+                    style={{
+                      width:
+                        item.name === "vacuum" || item.name === "soap" ? 56 : 63,
+                      height:
+                        item.name === "vacuum" || item.name === "soap" ? 35 : 39,
+                      resizeMode: "contain",
+                    }}
+                  />
                     <Text className="text-center text-sm text-custom-blue-200 mt-1 font-spaceGrotesk">
                       {item.name}
                     </Text>
@@ -387,20 +469,19 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 add points: {selectedPoints} pts
               </Text>
 
-              <FlatList
-                data={pointOptions}
-                horizontal
-                keyExtractor={(item) => item.toString()}
-                renderItem={renderPointOption}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  paddingHorizontal: 10,
-                  alignItems: "center",
-                }}
-                style={{
-                  marginTop: 10,
-                }}
-              />
+            <View style={{ alignItems: "center", marginTop: 10 }}>
+  <FlatList
+    data={pointOptions}
+    horizontal
+    keyExtractor={(item) => item.toString()}
+    renderItem={renderPointOption}
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={{
+      justifyContent: "center",
+    }}
+  />
+</View>
+
 
               {/* TASK DESCRIPTION */}
               <Text className="text-xl font-bold my-2 font-spaceGrotesk">
