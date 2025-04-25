@@ -577,8 +577,8 @@ export default function TaskScreen({ user }) {
       {/* DARK BLUE border */}
       <Animated.View
         className={`flex-1 items-center border-t-8 ${
-          activeTab === "tasks"
-            ? "border-custom-blue-200"
+          activeTab === "calendar"
+            ? "border-custom-pink-200"
             : "border-custom-blue-200"
         } z-10 bg-custom-tan`}
       >
