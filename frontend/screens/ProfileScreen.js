@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   FlatList,
+  Pressable,
 } from "react-native";
 import { CommonActions, useNavigation } from "@react-navigation/native";
 import face1 from "../assets/face1.png";
@@ -159,14 +160,14 @@ const ProfileScreen = ({ setUser }) => {
               ? `${userData.firstName} ${userData.lastName}`
               : "first last"}
           </Text>
-          <TouchableOpacity onPress={() => {
+          <Pressable onPress={() => {
             console.log("going to prev edit profile screen");
               navigation.navigate("EditProfile", {
               origin: "ProfileScreen",
             });
           }}>
             <Text className="font-spaceGrotesk underline text-custom-blue-200 text-xl mt-3">edit profile</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {/* roomies list */}
