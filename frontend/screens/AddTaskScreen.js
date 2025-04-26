@@ -335,6 +335,9 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                   <Calendar
                     onDayPress={(day) => {
                       setSelectedDate(day.dateString);
+                      const [y,m,d] = day.dateString.split("-").map(Number);
+                      setDate(new Date(y, m-1, d));
+                      setShowCalendar(false);
                     }}
                     markedDates={{
                       [selectedDate]: {
