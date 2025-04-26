@@ -72,8 +72,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
     marginTop: 10,
     position: "absolute",
     top: "100%",
-    left: "50%",
-    transform: [{ translateX: -0.5 * 330 }],
+    left: "-5%",
     width: 330,
     backgroundColor: "#FEF9E5",
     borderRadius: 16,
@@ -88,6 +87,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
     shadowRadius: 4,
     elevation: 5,
     alignItems: "center",
+    overflow: "visible",
   };
 
   useFocusEffect(
@@ -303,7 +303,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                 className="ml-2"
               />
 
-              <View className="relative mx-6">
+              <View className="relative mx-6 z-50">
                 {/* Date Button */}
                 <TouchableOpacity
                   onPress={() => {
@@ -331,6 +331,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
 
               {/* Calendar Dropdown */}
               {showCalendar && (
+                
                 <View style={modalBaseStyle}>
                   <Calendar
                     onDayPress={(day) => {
@@ -557,7 +558,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               add points: {selectedPoints} pts
             </Text>
 
-            <View style={{ alignItems: "center", marginTop: 10 }}>
+            <View style={{ alignItems: "center", marginTop: 10, overflow: "visible" }}>
               <FlatList
                 data={pointOptions}
                 horizontal

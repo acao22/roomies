@@ -136,7 +136,7 @@ const ProfileScreen = ({ setUser }) => {
     <SafeAreaView className="flex-1 bg-custom-tan">
       <ScrollView>
         <View
-          className="absolute top-0 left-0 right-0 h-72 rounded-b-3xl z-0 items-center">
+          className="absolute top-0 left-0 right-0 h-72 rounded-b-3xl z-10 items-center">
           <View className="items-center pt-10">
             <View className="relative">
               <View className="w-32 h-32 rounded-full bg-custom-tan items-center justify-center">
@@ -160,14 +160,14 @@ const ProfileScreen = ({ setUser }) => {
               ? `${userData.firstName} ${userData.lastName}`
               : "first last"}
           </Text>
-          <Pressable onPress={() => {
+          <TouchableOpacity onPress={() => {
             console.log("going to prev edit profile screen");
               navigation.navigate("EditProfile", {
               origin: "ProfileScreen",
             });
           }}>
             <Text className="font-spaceGrotesk underline text-custom-blue-200 text-xl mt-3">edit profile</Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         {/* roomies list */}
