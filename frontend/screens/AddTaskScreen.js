@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -46,12 +47,38 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [timeAnchor, setTimeAnchor] = useState({ x: 0, y: 0, height: 0 });
+  const timeBtnRef = useRef(null);
+
   const [time, setTime] = useState(new Date());
   const [members, setMembers] = useState([]);
   const [recurrence, setRecurrence] = useState(recurrenceOptions[0]);
   const [showRecurrenceDropdown, setShowRecurrenceDropdown] = useState(false);
   const [description, setDescription] = useState("");
   const [selectedPoints, setSelectedPoints] = useState(1);
+  const [anchor, setAnchor] = useState({ x: 0, y: 0, height: 0 });
+  const dateBtnRef = useRef(null);
+
+
+  function openCalendar() {
+    if (!dateBtnRef.current) return
+    dateBtnRef.current.measureInWindow((x, y, height) => {
+      setAnchor({ x, y, height })
+      setShowCalendar(true)
+    })
+  }
+
+  function openTimePicker() {
+    if (!timeBtnRef.current) return;
+    timeBtnRef.current.measureInWindow((x, y, height) => {
+      setTimeAnchor({ x, y, height });
+      setShowTimePicker(true);
+    });
+  }
+  
+
+  
+  
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
     const future = new Date(
@@ -69,10 +96,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
   });
   const [showCalendar, setShowCalendar] = useState(false);
   const modalBaseStyle = {
-    marginTop: 10,
     position: "absolute",
-    top: "100%",
-    left: "-3%",
     width: 316,
     backgroundColor: "#FEF9E5",
     borderRadius: 16,
@@ -306,9 +330,9 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               <View className="relative mx-6 z-50">
                 {/* Date Button */}
                 <TouchableOpacity
+                  ref={dateBtnRef}
                   onPress={() => {
-                    setShowCalendar(!showCalendar);
-                    setShowTimePicker(false);
+                    openCalendar();
                     setShowTimePicker(false);
                   }}
                   className="px-4 py-3 rounded-xl bg-[#D9D9D9]"
@@ -331,14 +355,28 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
 
               {/* Calendar Dropdown */}
               {showCalendar && (
-                
-                <View style={modalBaseStyle}>
+                <Modal
+                visible={showCalendar}
+                transparent
+                animationType="fade"
+              >
+                <TouchableOpacity
+                  style={{ flex:1, backgroundColor:"rgba(0,0,0,0.3)" }}
+                  activeOpacity={1}
+                  onPress={() => setShowCalendar(false)}
+                >
+                <View style={[modalBaseStyle, {top: anchor.y + 50,
+                  left: anchor.x - 67
+                }, ]}>
                   <Calendar
                     onDayPress={(day) => {
-                      setSelectedDate(day.dateString);
-                      const [y,m,d] = day.dateString.split("-").map(Number);
-                      setDate(new Date(y, m-1, d));
-                      setShowCalendar(false);
+
+                        setSelectedDate(day.dateString);
+                        const [y,m,d] = day.dateString.split("-").map(Number);
+                        setDate(new Date(y, m-1, d));
+                        setShowCalendar(false);
+
+                    
                     }}
                     markedDates={{
                       [selectedDate]: {
@@ -384,13 +422,16 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                     </Text>
                   </TouchableOpacity>
                 </View>
+                </TouchableOpacity>
+                </Modal>
               )}
 
               {/* Time Button */}
               <View className="">
                 <TouchableOpacity
+                  ref={timeBtnRef}
                   onPress={() => {
-                    setShowTimePicker(!showTimePicker);
+                    openTimePicker();
                     setShowCalendar(false);
                   }}
                   className="bg-[#D9D9D9] px-4 py-3 rounded-xl"
@@ -405,7 +446,14 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
               </View>
 
               {showTimePicker && Platform.OS === "ios" && (
-                <View style={modalBaseStyle}>
+              <Modal visible={showTimePicker} transparent animationType="fade">
+                <TouchableOpacity
+                  style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)" }}
+                  activeOpacity={1}
+                  onPress={() => setShowTimePicker(false)}
+                />
+
+                <View style={[modalBaseStyle, {top: timeAnchor.y + 50, left: timeAnchor.x - 200}]}>
                   <DateTimePicker
                     value={time}
                     mode="time"
@@ -438,6 +486,7 @@ const AddTaskScreen = ({ setActiveTab, user }) => {
                     </Text>
                   </TouchableOpacity>
                 </View>
+                </Modal>
               )}
             </View>
 
